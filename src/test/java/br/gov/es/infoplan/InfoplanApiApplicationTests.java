@@ -1,4 +1,4 @@
-package br.gov.es.infoplan.infoplanapi;
+package br.gov.es.infoplan;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

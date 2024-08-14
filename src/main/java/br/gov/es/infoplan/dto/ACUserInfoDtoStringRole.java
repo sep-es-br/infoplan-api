@@ -1,4 +1,4 @@
-package br.gov.es.siscap.dto;
+package br.gov.es.infoplan.dto;
 
 public record ACUserInfoDtoStringRole(
         String apelido,

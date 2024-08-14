@@ -1,4 +1,4 @@
-package br.gov.es.siscap.config.security;
+package br.gov.es.infoplan.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,18 +11,12 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static br.gov.es.siscap.enums.Permissoes.*;
-import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    public static final String PATH_PESSOAS = "/pessoas/**";
-    private static final String PATH_PROJETO = "/projetos/**";
-    public static final String PATH_ORGANIZACOES = "/organizacoes/**";
 
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final SecurityFilter securityFilter;
@@ -34,21 +28,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(authConfig -> {
-
-                    authConfig.requestMatchers(POST, PATH_PROJETO).hasAnyAuthority(ADMIN_AUTH.name(), PROJETO_CADASTRAR.name());
-                    authConfig.requestMatchers(PUT, PATH_PROJETO).hasAnyAuthority(ADMIN_AUTH.name(), PROJETO_ATUALIZAR.name());
-                    authConfig.requestMatchers(DELETE, PATH_PROJETO).hasAnyAuthority(ADMIN_AUTH.name(), PROJETO_APAGAR.name());
-
-                    authConfig.requestMatchers(GET, "/pessoas/meu-perfil").permitAll();
-                    authConfig.requestMatchers(PUT, "/pessoas/meu-perfil/*").permitAll();
-                    authConfig.requestMatchers(POST, PATH_PESSOAS).hasAnyAuthority(ADMIN_AUTH.name(), PESSOA_CADASTRAR.name());
-                    authConfig.requestMatchers(PUT, PATH_PESSOAS).hasAnyAuthority(ADMIN_AUTH.name(), PESSOA_ATUALIZAR.name());
-                    authConfig.requestMatchers(DELETE, PATH_PESSOAS).hasAnyAuthority(ADMIN_AUTH.name(), PESSOA_APAGAR.name());
-
-                    authConfig.requestMatchers(POST, PATH_ORGANIZACOES).hasAnyAuthority(ADMIN_AUTH.name(), ORGANIZACAO_CADASTRAR.name());
-                    authConfig.requestMatchers(PUT, PATH_ORGANIZACOES).hasAnyAuthority(ADMIN_AUTH.name(), ORGANIZACAO_ATUALIZAR.name());
-                    authConfig.requestMatchers(DELETE, PATH_ORGANIZACOES).hasAnyAuthority(ADMIN_AUTH.name(), ORGANIZACAO_APAGAR.name());
-
                     authConfig.requestMatchers(HttpMethod.GET,
                             "/swagger-ui.html",
                             "/swagger-ui/*",
@@ -67,5 +46,4 @@ public class SecurityConfig {
                 .exceptionHandling(exHandler -> exHandler.accessDeniedHandler(customAccessDeniedHandler))
                 .build();
     }
-
 }
