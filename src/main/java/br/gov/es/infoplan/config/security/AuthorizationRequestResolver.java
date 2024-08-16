@@ -26,7 +26,8 @@ public class AuthorizationRequestResolver implements OAuth2AuthorizationRequestR
     @Override
     public OAuth2AuthorizationRequest resolve(final HttpServletRequest request) {
         final OAuth2AuthorizationRequest req = this.delegatedRequestResolver.resolve(request);
-        return this.customizeRequest(req);
+        final OAuth2AuthorizationRequest customReq = this.customizeRequest(req);
+        return customReq;
     }
 
     @Override
