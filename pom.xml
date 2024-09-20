@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>br.gov.es.infoplan</groupId>
-    <artifactId>infoplan-api</artifactId>
+    <artifactId>infoplan</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>infoplan-api</name>
+    <name>infoplan</name>
     <description>infoplan-api</description>
     <url/>
     <licenses>
