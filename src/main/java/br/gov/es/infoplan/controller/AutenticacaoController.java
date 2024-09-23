@@ -13,7 +13,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Base64;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "${frontend.host}")
 @RestController
 @RequestMapping("/signin")
 @RequiredArgsConstructor
