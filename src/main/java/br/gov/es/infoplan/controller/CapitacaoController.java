@@ -1,19 +1,13 @@
 package br.gov.es.infoplan.controller;
 
 import br.gov.es.infoplan.dto.NomeValorObject;
-import br.gov.es.infoplan.dto.UsuarioDto;
-import br.gov.es.infoplan.service.AutenticacaoService;
-import br.gov.es.infoplan.service.PentahoBIService;
-import jakarta.servlet.http.HttpServletRequest;
+import br.gov.es.infoplan.service.CapitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
-
-import java.util.Base64;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,28 +26,28 @@ public class CapitacaoController {
     private final int SECRETARIA = 5;
     
 
-    private final PentahoBIService pentahoBIService;
+    private final CapitationService service;
 
     @Value("${frontend.host}")
     private String frontHost;
 
     @GetMapping("/programAmmount")
     public Double getProgramAmmount() {
-        return pentahoBIService.getProgramTotal();
+        return service.getProgramTotal();
     }
 
     @GetMapping("/projectAmmount")
     public Double getProjectAmmount() {
-        return pentahoBIService.getProjectTotal();
+        return service.getProjectTotal();
     }
 
     @GetMapping("/valores-estimado")
     public List<NomeValorObject> getEstimatedValues(@RequestParam String tipo) {
         switch (tipo) {
             case "microregion":
-                return pentahoBIService.getValoresPentahoAPI(MICROREGIAO); 
+                return service.getValoresPorTipo(MICROREGIAO); 
             case "city":
-                return pentahoBIService.getValoresPentahoAPI(CIDADES);
+                return service.getValoresPorTipo(CIDADES);
         
             default:
                 return List.of();
@@ -65,9 +59,9 @@ public class CapitacaoController {
     public List<NomeValorObject> getValuesBy(@RequestParam String tipo) {
         switch (tipo) {
             case "project":
-                return pentahoBIService.getValoresPentahoAPI(PROJETO); 
+                return service.getValoresPorTipo(PROJETO); 
             case "program":
-                return pentahoBIService.getValoresPentahoAPI(PROGRAMAS);
+                return service.getValoresPorTipo(PROGRAMAS);
         
             default:
                 return List.of();
@@ -77,7 +71,7 @@ public class CapitacaoController {
 
     @GetMapping("/valores-estimado-secretaria")
     public List<NomeValorObject> getEstimatedValuesSecretary() {
-        return pentahoBIService.getValoresPentahoAPI(SECRETARIA);
+        return service.getValoresPorTipo(SECRETARIA);
         
     }
     

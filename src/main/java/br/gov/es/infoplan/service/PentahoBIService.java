@@ -1,15 +1,12 @@
 package br.gov.es.infoplan.service;
 
-import br.gov.es.infoplan.dto.NomeValorObject;
-import br.gov.es.infoplan.dto.NomeValorObjectArray;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,36 +17,18 @@ import java.nio.charset.Charset;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class PentahoBIService {
+public abstract class PentahoBIService {
+    private final Logger LOGGER = LogManager.getLogger(PentahoBIService.class);
     
     private static final String CHARSET = "UTF-8";
 
     @Value("${pentahoBI.baseURL}")
     private String baseURL;
-
-    @Value("${pentahoBI.path}")
-    private String path;
-
-    @Value("${pentahoBI.targetDashAll}")
-    private String targetDashAll;
-
-    @Value("${pentahoBI.targetDashProgram}")
-    private String targetDashProgram;
-
-    @Value("${pentahoBI.targetDashProject}")
-    private String targetDashProject;
-
-    @Value("${pentahoBI.valueSet}")
-    private String valueSet;
-
-    @Value("${pentahoBI.programTotal}")
-    private String programTotal;
-
-    @Value("${pentahoBI.projectTotal}")
-    private String projectTotal;
 
     @Value("${pentahoBI.userId}")
     private String userId;
@@ -57,65 +36,28 @@ public class PentahoBIService {
     @Value("${pentahoBI.password}")
     private String password;
 
-    public List<NomeValorObject> getValoresPentahoAPI(int tipo) {
-        String uri = baseURL + '?' + path + targetDashAll + "&dataAccessId=" + valueSet + tipo;
 
-        List<NomeValorObject> result = new ArrayList<NomeValorObject>();
+    protected String buildEndpointUri(String path, String target, String dataAccessId, Map<String, String> params) {
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(this.baseURL);
 
-        try {
-            NomeValorObjectArray lista = new ObjectMapper().readValue(doRequest(uri), NomeValorObjectArray.class);
+        HashMap<String, String> allParams = new HashMap<>();
+        allParams.put("path", path + target);
+        allParams.put("dataAccessId", dataAccessId);
+        if(params != null) allParams.putAll(params);
 
-            result = lista.list();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }   
+        List<String> paramPairs = allParams.entrySet().stream()
+                                    .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                    .toList();
+        
+        strBuilder.append(String.join("&", paramPairs));
 
-        return result;
+        return strBuilder.toString();
     }
 
-    public double getProgramTotal() {
+    protected abstract String buildEndpointUri(String target, String dataAccess, Map<String, String> params);
 
-        double value = -1d;
-
-        try {
-            String response = doRequest(baseURL + '?' + path + targetDashProgram + "&dataAccessId=" + programTotal);
-
-            JsonNode root = new ObjectMapper().readTree(response);
-
-            ArrayNode rsNode = (ArrayNode) root.get("resultset");
-
-            value = ((ArrayNode) rsNode.get(0)).get(0).asDouble();
-            
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        } 
-
-        return value;
-    }
-
-    public double getProjectTotal() {
-
-        double value = -1d;
-
-        try {
-            String response = doRequest(baseURL + '?' + path + targetDashProject + "&dataAccessId=" + projectTotal);
-
-            JsonNode root = new ObjectMapper().readTree(response);
-
-            ArrayNode rsNode = (ArrayNode) root.get("resultset");
-
-            value = ((ArrayNode) rsNode.get(0)).get(0).asDouble();
-            
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        } 
-
-        return value;
-    }
-
-    private String doRequest(String uri) throws Exception{
+    protected String doRequest(String uri) throws Exception{
         
         String notEncoded = userId + ":" + password;
         String encodedAuth = "Basic " + Base64.getEncoder().encodeToString(notEncoded.getBytes());
@@ -131,35 +73,34 @@ public class PentahoBIService {
         return restTemplate.exchange(RequestEntity.get(new URI(uri)).headers(headers).build(), String.class).getBody();
     }
 
-    /* public String gerarToken(ACUserInfoDto userInfo) {
+    protected List<Map<String, JsonNode>> extractDataFromResponse(String json) {
+        ArrayList<Map<String, JsonNode>> lista = new ArrayList<>();
+
         try {
-            Algorithm algoritmo = Algorithm.HMAC256(secret);
-            return JWT.create()
-                    .withIssuer(ISSUER)
-                    .withSubject(userInfo.sub())
-                    .withClaim("roles", new ArrayList<>(userInfo.role()))
-                    .withExpiresAt(getDataExpiracao())
-                    .sign(algoritmo);
-        } catch (JWTCreationException exception) {
-            throw new InfoplanServiceException(List.of("Erro ao gerar o token", exception.getMessage()));
+            JsonNode root = new ObjectMapper().readTree(json);
+
+            ArrayNode metadata = (ArrayNode) root.get("metadata");
+            ArrayList<String> labels = new ArrayList<>();
+            
+            metadata.forEach(node -> {
+                labels.add(node.get("colName").asText());
+            });
+
+            ArrayNode resultset = (ArrayNode) root.get("resultset");
+
+            resultset.forEach(node -> {
+                ArrayNode datas = (ArrayNode) node;
+                HashMap<String, JsonNode> map = new HashMap<>();
+                for(int i = 0; i < datas.size(); i++) {
+                    map.put(labels.get(i), datas.get(i));
+                }
+                lista.add(map);
+            });
+
+        } catch(Exception e) {
+            LOGGER.error(e);
         }
+        return lista;
     }
 
-    public String validarToken(String token) {
-        Algorithm algoritmo = Algorithm.HMAC256(secret);
-        return JWT.require(algoritmo)
-                .withIssuer(ISSUER)
-                .build()
-                .verify(token)
-                .getSubject();
-    }
-
-    private Instant getDataExpiracao() {
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
-    }
-
-    public List<String> getRoleFromToken(String token) {
-        DecodedJWT decodedJWT = JWT.decode(token);
-        return decodedJWT.getClaim("roles").asList(String.class);
-    } */
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +25,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import com.auth0.jwt.JWT;
@@ -34,6 +37,9 @@ import com.auth0.jwt.JWT;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
+    
+    @Value("${permissao.capitacao}")
+    private String permissaoCapitacao;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -47,8 +53,20 @@ public class SecurityFilter extends OncePerRequestFilter {
             try {
                 String subject = tokenService.validarToken(token);
 
-                List<String> roles = tokenService.getRoleFromToken(token); 
+                List<String> roles = tokenService.getRoleFromToken(token);
 
+                HashMap<String, String> moduloPermissao = new HashMap<>();
+                moduloPermissao.put("/capitation", permissaoCapitacao);
+
+                for(Map.Entry<String,String> entry : moduloPermissao.entrySet()){
+                    if(request.getRequestURI().contains(entry.getKey()) && 
+                        !checarPermissao(entry.getValue(), roles)){
+                        enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey() + "). Acesso negado. "), response);
+                        return;
+                    }
+                } 
+
+                
                 if (!roles.contains("GESTOR_GLOBAL")) {
                     enviarMensagemErro(
                             List.of("Role inválida. Acesso negado."), response);
@@ -73,6 +91,13 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean checarPermissao(String permissoes, List<String> roles) {
+        for(String permissao : permissoes.split(",")) {
+            if(roles.contains(permissao.trim())) return true;
+        }
+        return false;
     }
 
    private String recuperarToken(HttpServletRequest request) {
