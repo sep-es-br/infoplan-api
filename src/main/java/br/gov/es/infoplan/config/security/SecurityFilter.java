@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import com.auth0.jwt.JWT;
 
 @Component
@@ -38,8 +38,27 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     
-    @Value("${permissao.capitacao}")
-    private String permissaoCapitacao;
+    @Value("${papel.geral}")
+    private String papelGeral;
+    
+    @Value("${papel.capitacao}")
+    private String papelCapitacao;
+    
+    @Value("${papel.indicadores}")
+    private String papelIndicadores;
+    
+    @Value("${papel.indicadoresAdmin}")
+    private String papelIndicadoresAdmin;
+    
+    @Value("${papel.sigefes}")
+    private String papelSigefes;
+    
+    @Value("${papel.projEstrategico}")
+    private String papelProjEstrategico;
+    
+    @Value("${papel.gestaoFiscal}")
+    private String papelGestaoFiscal;
+    
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -56,22 +75,16 @@ public class SecurityFilter extends OncePerRequestFilter {
                 List<String> roles = tokenService.getRoleFromToken(token);
 
                 HashMap<String, String> moduloPermissao = new HashMap<>();
-                moduloPermissao.put("/capitation", permissaoCapitacao);
+                moduloPermissao.put("/capitation", papelCapitacao);
 
                 for(Map.Entry<String,String> entry : moduloPermissao.entrySet()){
                     if(request.getRequestURI().contains(entry.getKey()) && 
+                        !checarPermissao(papelGeral, roles) &&
                         !checarPermissao(entry.getValue(), roles)){
-                        enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey() + "). Acesso negado. "), response);
+                        enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey() + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
                         return;
                     }
                 } 
-
-                
-                if (!roles.contains("GESTOR_GLOBAL")) {
-                    enviarMensagemErro(
-                            List.of("Role inválida. Acesso negado."), response);
-                    return;
-                }
 
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roles);
 
@@ -85,7 +98,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 erros.add("Por favor, faça o login novamente.");
                 if (LocalDateTime.now().isAfter((ChronoLocalDateTime<?>) expiresAt))
                     erros.add("Token expirado em " + expiresAt);
-                enviarMensagemErro(erros, response);
+                enviarMensagemErro(erros, response, HttpStatus.FORBIDDEN);
                 return;
             }
         }
@@ -105,11 +118,11 @@ public class SecurityFilter extends OncePerRequestFilter {
        if (authHeader == null) return null;
        return authHeader.replace("Bearer ", "");
    }
-
-   private void enviarMensagemErro(List<String> erros, HttpServletResponse response) throws IOException {
-       String mensagem = ToStringBuilder.reflectionToString(new MensagemErroRest(UNAUTHORIZED, "Token Inválido", erros), ToStringStyle.JSON_STYLE);
-       response.setHeader("Content-Type", "application/json");
-       response.setStatus(UNAUTHORIZED.value());
-       response.getWriter().write(mensagem);
-   }
+   
+   private void enviarMensagemErro(List<String> erros, HttpServletResponse response, HttpStatus status) throws IOException {
+    String mensagem = ToStringBuilder.reflectionToString(new MensagemErroRest(status, "Token Inválido", erros), ToStringStyle.JSON_STYLE);
+    response.setHeader("Content-Type", "application/json");
+    response.setStatus(status.value());
+    response.getWriter().write(mensagem);
+}
 }

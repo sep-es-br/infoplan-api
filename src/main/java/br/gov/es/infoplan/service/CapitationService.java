@@ -2,15 +2,22 @@ package br.gov.es.infoplan.service;
 
 import br.gov.es.infoplan.dto.NomeValorObject;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 @Service
 public class CapitationService extends PentahoBIService {
+    
+    private final Logger LOGGER = LogManager.getLogger(PentahoBIService.class);
 
     @Value("${pentahoBI.capitation.path}")
     private String CaptationPath;
@@ -32,6 +39,8 @@ public class CapitationService extends PentahoBIService {
 
     @Value("${pentahoBI.capitation.dataAccessId.projectTotal}")
     private String dataAccessIdProjectTotal;
+
+    
 
     public List<NomeValorObject> getValoresPorTipo(int tipo) {
         HashMap<String, String> params = new HashMap<>();
@@ -98,9 +107,42 @@ public class CapitationService extends PentahoBIService {
         return value;
     }
 
+    protected List<Map<String, JsonNode>> filterResult(List<Map<String, JsonNode>> datas, Map<String, String> filters){
+        List<Map<String, JsonNode>> result = new ArrayList<>(datas);
+
+        for(Map.Entry<String, String> filter : filters.entrySet()){
+            result = result.stream().filter(register -> register.get(filter.getKey()).asText().equals(filter.getValue().toString())).toList();
+        }
+
+        return result;
+    }
+
     @Override
     protected String buildEndpointUri(String target, String dataAccess, Map<String, String> params) {
         return super.buildEndpointUri(this.CaptationPath, target, dataAccess, params);
+    }
+
+    public List<Map<String, String>> consultarTodosValores(int ano, Map<String, String> filtro) {
+        
+        HashMap<String, String> params = new HashMap<>();
+        params.put("ano", String.valueOf(ano));
+        try {
+            List<Map<String, JsonNode>> resultset = extractDataFromResponse(doRequest(buildEndpointUri(targetDashAll, dataAccessIdDashDatas, params)));
+
+            resultset = filterResult(resultset, filtro);
+
+            return resultset.stream().map(registro -> {
+                
+                Map<String, String> retorno = new HashMap<>();
+                for(Entry<String, JsonNode> entry : registro.entrySet()) {
+                    retorno.put(entry.getKey(), entry.getValue().asText(""));
+                }
+                return retorno;
+            }).toList();
+        } catch (Exception e) {
+            this.LOGGER.error(e);
+            return List.of(new HashMap<String, String>());
+        }
     }
 
 }
