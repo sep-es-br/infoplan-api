@@ -1,7 +1,12 @@
 package br.gov.es.infoplan.service;
 
 import br.gov.es.infoplan.dto.NomeValorObject;
+import br.gov.es.infoplan.dto.capitacao.AllCapitacaoRow;
+import br.gov.es.infoplan.dto.capitacao.CapitacaoFilter;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,10 +14,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Service
 public class CapitationService extends PentahoBIService {
@@ -31,6 +38,9 @@ public class CapitationService extends PentahoBIService {
     @Value("${pentahoBI.capitation.target.dashProjects}")
     private String targetDashProject;
 
+    @Value("${pentahoBI.capitation.target.dashTotos}")
+    private String targetDashTodos;
+
     @Value("${pentahoBI.capitation.dataAccessId.dashDatas}")
     private String dataAccessIdDashDatas;
 
@@ -40,46 +50,192 @@ public class CapitationService extends PentahoBIService {
     @Value("${pentahoBI.capitation.dataAccessId.projectTotal}")
     private String dataAccessIdProjectTotal;
 
-    
+    private final int mockAno = 2024;
 
-    public List<NomeValorObject> getValoresPorTipo(int tipo) {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("parampTipo", String.valueOf(tipo));
-        
-        String uri = buildEndpointUri(targetDashAll, dataAccessIdDashDatas, params);
+    public List<NomeValorObject> getAllBySecretaria(CapitacaoFilter filtro){
 
-        List<NomeValorObject> result = new ArrayList<NomeValorObject>();
+        ArrayList<NomeValorObject> retorno = new ArrayList<>();
 
         try {
-            
-            String response = doRequest(uri);
-            
-            List<Map<String, JsonNode>> mappedResponse = extractDataFromResponse(response);
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
 
-            mappedResponse.forEach(register -> {
-                String name = register.get("nome").asText("");
-                Double value = register.get("valor").asDouble(0);
-                result.add(new NomeValorObject(name, value));
+            allDatas.forEach(data -> {
+                
+                List<NomeValorObject> savedSecretaria = retorno.stream().filter(r -> r.getId() == data.getIdSecretaria()).toList();
+                if(savedSecretaria.size() > 0) {
+                    savedSecretaria.get(0).addAmmount(data.getValor());
+                } else {
+                    NomeValorObject novoItem = new NomeValorObject(
+                        data.getIdSecretaria(),
+                        data.getSecretaria(),
+                        data.getValor()
+                    );
+
+                    retorno.add(novoItem);
+                }
+
+
             });
-            
+
+            retorno.sort(byValue());
+
         } catch (Exception e) {
             e.printStackTrace();
-        }   
-
-        return result;
+        }
+        
+        return retorno;
     }
 
-    public double getProgramTotal() {
+    public List<NomeValorObject> getAllByProjeto(CapitacaoFilter filtro){
+
+        ArrayList<NomeValorObject> retorno = new ArrayList<>();
+
+        try {
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
+
+            allDatas.forEach(data -> {
+                
+                List<NomeValorObject> savedSecretaria = retorno.stream().filter(r -> r.getId() == data.getIdProjeto()).toList();
+                if(savedSecretaria.size() > 0) {
+                    savedSecretaria.get(0).addAmmount(data.getValor());
+                } else {
+                    NomeValorObject novoItem = new NomeValorObject(
+                        data.getIdProjeto(),
+                        data.getProjeto(),
+                        data.getValor()
+                    );
+
+                    retorno.add(novoItem);
+                }
+
+
+            });
+
+            retorno.sort(byValue());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return retorno;
+    }
+
+    public List<NomeValorObject> getAllByPrograma(CapitacaoFilter filtro){
+
+        ArrayList<NomeValorObject> retorno = new ArrayList<>();
+
+        try {
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
+
+            allDatas.forEach(data -> {
+                
+                List<NomeValorObject> savedSecretaria = retorno.stream().filter(r -> r.getId() == data.getIdPrograma()).toList();
+                if(savedSecretaria.size() > 0) {
+                    savedSecretaria.get(0).addAmmount(data.getValor());
+                } else {
+                    NomeValorObject novoItem = new NomeValorObject(
+                        data.getIdPrograma(),
+                        data.getPrograma(),
+                        data.getValor()
+                    );
+
+                    retorno.add(novoItem);
+                }
+
+
+            });
+
+            retorno.sort(byValue());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return retorno;
+    }
+
+    public List<NomeValorObject> getAllByMicroregiao(String filtroJson){
+
+        ArrayList<NomeValorObject> retorno = new ArrayList<>();
+
+        
+
+        try {
+            CapitacaoFilter filtro = new ObjectMapper().readValue(filtroJson, CapitacaoFilter.class);
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
+
+            allDatas.forEach(data -> {
+                
+                List<NomeValorObject> savedSecretaria = retorno.stream().filter(r -> r.getId() == data.getIdMicrorregiao()).toList();
+                if(savedSecretaria.size() > 0) {
+                    savedSecretaria.get(0).addAmmount(data.getValor());
+                } else {
+                    NomeValorObject novoItem = new NomeValorObject(
+                        data.getIdMicrorregiao(),
+                        data.getMicrorregiao(),
+                        data.getValor()
+                    );
+
+                    retorno.add(novoItem);
+                }
+
+            });
+
+            retorno.sort(byValue());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return retorno;
+    }
+
+    public List<NomeValorObject> getAllByCidade(String filtroJson){
+
+        ArrayList<NomeValorObject> retorno = new ArrayList<>();
+
+        try {
+            CapitacaoFilter filtro = new ObjectMapper().readValue(filtroJson, CapitacaoFilter.class);
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
+
+            allDatas.forEach(data -> {
+                
+                List<NomeValorObject> savedSecretaria = retorno.stream().filter(r -> r.getId() == data.getIdCidade()).toList();
+                if(savedSecretaria.size() > 0) {
+                    savedSecretaria.get(0).addAmmount(data.getValor());
+                } else {
+                    NomeValorObject novoItem = new NomeValorObject(
+                        data.getIdCidade(),
+                        data.getCidade(),
+                        data.getValor()
+                    );
+
+                    retorno.add(novoItem);
+                }
+
+            });
+
+            retorno.sort(byValue());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return retorno;
+    }
+
+    public double getProgramTotal(CapitacaoFilter filter) {
 
         double value = -1d;
 
         try {
-            String response = doRequest(buildEndpointUri(targetDashProgram, dataAccessIdProgramTotal, null));
 
-            List<Map<String, JsonNode>> mappedResponse = extractDataFromResponse(response);
-
-            value = mappedResponse.get(0).get("valor").asDouble(0);
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filter);
             
+            value = 0d;
+            for(int i = 0; i < allDatas.size(); i++) {
+                value += allDatas.get(i).getValor();
+            }
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,26 +244,31 @@ public class CapitationService extends PentahoBIService {
         return value;
     }
 
-    public double getProjectTotal() {
+    public double getProjectTotal(CapitacaoFilter filter) {
 
         double value = -1d;
 
+     
         try {
-            String response = doRequest(buildEndpointUri(targetDashProject, dataAccessIdProjectTotal, null));
 
-            List<Map<String, JsonNode>> mappedResponse = extractDataFromResponse(response);
-
-            value = mappedResponse.get(0).get("valor").asDouble(0) ;
+            List<AllCapitacaoRow> allDatas = consultarTodosValores(filter);
             
+            value = 0d;
+            for(int i = 0; i < allDatas.size(); i++) {
+                value += allDatas.get(i).getValor();
+            }
             
         } catch (Exception e) {
             e.printStackTrace();
         } 
+
 
         return value;
     }
 
     protected List<Map<String, JsonNode>> filterResult(List<Map<String, JsonNode>> datas, Map<String, String> filters){
+        if(filters == null) return datas;
+        
         List<Map<String, JsonNode>> result = new ArrayList<>(datas);
 
         for(Map.Entry<String, String> filter : filters.entrySet()){
@@ -122,27 +283,47 @@ public class CapitationService extends PentahoBIService {
         return super.buildEndpointUri(this.CaptationPath, target, dataAccess, params);
     }
 
-    public List<Map<String, String>> consultarTodosValores(int ano, Map<String, String> filtro) {
+    public List<AllCapitacaoRow> consultarTodosValores(CapitacaoFilter filter) {
         
+        ArrayList<AllCapitacaoRow> retorno = new ArrayList<>();
+
         HashMap<String, String> params = new HashMap<>();
-        params.put("ano", String.valueOf(ano));
+        params.put("parampAno", "2024"); //filter.getAno());
         try {
-            List<Map<String, JsonNode>> resultset = extractDataFromResponse(doRequest(buildEndpointUri(targetDashAll, dataAccessIdDashDatas, params)));
+            List<Map<String, JsonNode>> resultset = extractDataFromResponse(doRequest(buildEndpointUri(targetDashTodos, dataAccessIdDashDatas, params)));
 
-            resultset = filterResult(resultset, filtro);
+            for(Map<String, JsonNode> rs : resultset) {
 
-            return resultset.stream().map(registro -> {
-                
-                Map<String, String> retorno = new HashMap<>();
-                for(Entry<String, JsonNode> entry : registro.entrySet()) {
-                    retorno.put(entry.getKey(), entry.getValue().asText(""));
-                }
-                return retorno;
-            }).toList();
+                AllCapitacaoRow acr = new AllCapitacaoRow();
+                acr.setAno(rs.get("ano").asText(""));
+                acr.setIdPrograma(rs.get("id_programa").asInt(0));
+                acr.setPrograma(rs.get("programa").asText(""));
+                acr.setIdProjeto(rs.get("id_projeto").asInt(0));
+                acr.setProjeto(rs.get("projeto").asText(""));
+                acr.setIdMicrorregiao(rs.get("id_microrregiao").asInt(0));
+                acr.setMicrorregiao(rs.get("microrregiao").asText(""));
+                acr.setIdCidade(rs.get("id_cidade").asInt(0));
+                acr.setCidade(rs.get("cidade").asText(""));
+                acr.setIdSecretaria(rs.get("id_secretaria").asInt(0));
+                acr.setSecretaria(rs.get("secretaria").asText(""));
+                acr.setValor(rs.get("valor").asDouble(0));
+
+                retorno.add(acr);
+            };
+
+            return retorno/* .stream().filter(rs -> {
+                return
+                    ( filter.getIdMicrorregiao() == -1 || filter.getIdMicrorregiao() == rs.getIdMicrorregiao() );
+            }).toList() */;
+
         } catch (Exception e) {
             this.LOGGER.error(e);
-            return List.of(new HashMap<String, String>());
+            return List.of();
         }
+    }
+
+    private Comparator<NomeValorObject> byValue(){
+        return (r1, r2) ->  (int)(r2.getAmmount()*100) - (int)(r1.getAmmount()*100);
     }
 
 }
