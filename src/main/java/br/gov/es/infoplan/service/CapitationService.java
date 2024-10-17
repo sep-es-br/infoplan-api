@@ -52,11 +52,12 @@ public class CapitationService extends PentahoBIService {
 
     private final int mockAno = 2024;
 
-    public List<NomeValorObject> getAllBySecretaria(CapitacaoFilter filtro){
+    public List<NomeValorObject> getAllBySecretaria(String filtroJson){
 
         ArrayList<NomeValorObject> retorno = new ArrayList<>();
 
         try {
+            CapitacaoFilter filtro = new ObjectMapper().readValue(filtroJson, CapitacaoFilter.class);
             List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
 
             allDatas.forEach(data -> {
@@ -86,11 +87,12 @@ public class CapitationService extends PentahoBIService {
         return retorno;
     }
 
-    public List<NomeValorObject> getAllByProjeto(CapitacaoFilter filtro){
+    public List<NomeValorObject> getAllByProjeto(String filtroJson){
 
         ArrayList<NomeValorObject> retorno = new ArrayList<>();
 
         try {
+            CapitacaoFilter filtro = new ObjectMapper().readValue(filtroJson, CapitacaoFilter.class);
             List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
 
             allDatas.forEach(data -> {
@@ -120,11 +122,12 @@ public class CapitationService extends PentahoBIService {
         return retorno;
     }
 
-    public List<NomeValorObject> getAllByPrograma(CapitacaoFilter filtro){
+    public List<NomeValorObject> getAllByPrograma(String filtroJson){
 
         ArrayList<NomeValorObject> retorno = new ArrayList<>();
 
         try {
+            CapitacaoFilter filtro = new ObjectMapper().readValue(filtroJson, CapitacaoFilter.class);
             List<AllCapitacaoRow> allDatas = consultarTodosValores(filtro);
 
             allDatas.forEach(data -> {
@@ -224,12 +227,13 @@ public class CapitationService extends PentahoBIService {
         return retorno;
     }
 
-    public double getProgramTotal(CapitacaoFilter filter) {
+    public double getProgramTotal(String filterJson) {
 
         double value = -1d;
 
         try {
 
+            CapitacaoFilter filter = new ObjectMapper().readValue(filterJson, CapitacaoFilter.class);
             List<AllCapitacaoRow> allDatas = consultarTodosValores(filter);
             
             value = 0d;
@@ -244,13 +248,13 @@ public class CapitationService extends PentahoBIService {
         return value;
     }
 
-    public double getProjectTotal(CapitacaoFilter filter) {
+    public double getProjectTotal(String filterJson) {
 
         double value = -1d;
 
      
         try {
-
+            CapitacaoFilter filter = new ObjectMapper().readValue(filterJson, CapitacaoFilter.class);
             List<AllCapitacaoRow> allDatas = consultarTodosValores(filter);
             
             value = 0d;
@@ -311,10 +315,14 @@ public class CapitationService extends PentahoBIService {
                 retorno.add(acr);
             };
 
-            return retorno/* .stream().filter(rs -> {
+            return retorno.stream().filter(rs -> {
                 return
-                    ( filter.getIdMicrorregiao() == -1 || filter.getIdMicrorregiao() == rs.getIdMicrorregiao() );
-            }).toList() */;
+                    ( filter.getIdMicrorregiao() == -1 || filter.getIdMicrorregiao() == rs.getIdMicrorregiao() )
+                &&  ( filter.getIdCidade() == -1 || filter.getIdCidade() == rs.getIdCidade() )
+                &&  ( filter.getIdPrograma() == -1 || filter.getIdPrograma() == rs.getIdPrograma() )
+                &&  ( filter.getIdProjeto() == -1 || filter.getIdProjeto() == rs.getIdProjeto() )
+                &&  ( filter.getIdSecretaria() == -1 || filter.getIdSecretaria() == rs.getIdSecretaria() );
+            }).toList();
 
         } catch (Exception e) {
             this.LOGGER.error(e);

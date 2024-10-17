@@ -27,17 +27,15 @@ public class CapitacaoController {
     private String frontHost;
 
     @GetMapping("/programAmmount")
-    public Double getProgramAmmount() {
-    // public Double getProgramAmmount(@RequestParam CapitacaoFilter filter) {
+    public Double getProgramAmmount(@RequestParam String filterJson) {
         
-        return service.getProgramTotal(null);
+        return service.getProgramTotal(filterJson);
     }
 
     @GetMapping("/projectAmmount")
-    public Double getProjectAmmount() {
-    // public Double getProjectAmmount(@RequestParam CapitacaoFilter filter) {
+    public Double getProjectAmmount(@RequestParam String filterJson) {
         
-        return service.getProjectTotal(null);
+        return service.getProjectTotal(filterJson);
     }
 
     @GetMapping("/valores-estimado")
@@ -56,13 +54,12 @@ public class CapitacaoController {
     }
 
     @GetMapping("/valores-por")
-    public List<NomeValorObject> getValuesBy(@RequestParam String tipo) {
-    //public List<NomeValorObject> getValuesBy(@RequestParam String tipo, @RequestParam CapitacaoFilter filter) {
+    public List<NomeValorObject> getValuesBy(@RequestParam String tipo, @RequestParam String filterJson) {
         switch (tipo) {
             case "project":
-                return service.getAllByProjeto(null); 
+                return service.getAllByProjeto(filterJson); 
             case "program":
-                return service.getAllByPrograma(null);
+                return service.getAllByPrograma(filterJson);
         
             default:
                 return List.of();
@@ -71,9 +68,8 @@ public class CapitacaoController {
     }
 
     @GetMapping("/valores-estimado-secretaria")
-    public List<NomeValorObject> getEstimatedValuesSecretary() {
-    //public List<NomeValorObject> getEstimatedValuesSecretary(@RequestParam CapitacaoFilter filter) {
-        return service.getAllBySecretaria(null);
+    public List<NomeValorObject> getEstimatedValuesSecretary(@RequestParam String filterJson) {
+        return service.getAllBySecretaria(filterJson);
         
     }
     
