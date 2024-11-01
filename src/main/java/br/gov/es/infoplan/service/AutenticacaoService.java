@@ -28,7 +28,7 @@ public class AutenticacaoService {
     public UsuarioDto autenticar(String accessToken) {
         logger.info("Autenticar usuário Infoplan.");
         ACUserInfoDto userInfo = getUserInfo(accessToken);
-        String token = tokenService.gerarToken();
+        String token = tokenService.gerarToken(userInfo);
 
         return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role());
     }
