@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilterValuesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectIdAndNameDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
 import br.gov.es.infoplan.service.StrategicProjectsService;
 import lombok.RequiredArgsConstructor;
 
@@ -51,5 +53,9 @@ public class StrategicProjectsController {
         return strategicProjectDto;
     }
 
-    
+    @GetMapping("/totais")
+    public StrategicProjectTotaisDto getTotals(@RequestParam String filterJson) {
+
+        return service.consultTotals(filterJson);
+    }
 }

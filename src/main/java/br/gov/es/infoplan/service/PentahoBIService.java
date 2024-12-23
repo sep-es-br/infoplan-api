@@ -37,11 +37,11 @@ public abstract class PentahoBIService {
     private String password;
 
 
-    protected String buildEndpointUri(String path, String target, String dataAccessId, Map<String, String> params) {
+    protected String buildEndpointUri(String path, String target, String dataAccessId, Map<String, Object> params) {
         StringBuilder strBuilder = new StringBuilder();
         strBuilder.append(this.baseURL);
 
-        HashMap<String, String> allParams = new HashMap<>();
+        HashMap<String, Object> allParams = new HashMap<>();
         allParams.put("path", path + target);
         allParams.put("dataAccessId", dataAccessId);
         if(params != null) allParams.putAll(params);
@@ -55,7 +55,7 @@ public abstract class PentahoBIService {
         return strBuilder.toString();
     }
 
-    protected abstract String buildEndpointUri(String target, String dataAccess, Map<String, String> params);
+    protected abstract String buildEndpointUri(String target, String dataAccess, Map<String, Object> params);
 
     protected String doRequest(String uri) throws Exception{
         

@@ -3,8 +3,10 @@ package br.gov.es.infoplan.service;
 import br.gov.es.infoplan.dto.NomeValorObject;
 import br.gov.es.infoplan.dto.capitacao.AllCapitacaoRow;
 import br.gov.es.infoplan.dto.capitacao.CapitacaoFilter;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilterValuesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectIdAndNameDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +59,9 @@ public class StrategicProjectsService extends PentahoBIService {
     
     @Value("${pentahoBI.pmo.target.localidade}")
     private String targetLocalidade;
+
+    @Value("${pentahoBI.pmo.target.totais}")
+    private String targetTotais;
     
     @Value("${pentahoBI.pmo.dataAccessId.area}")
     private String dataAccessIdArea;
@@ -76,7 +81,12 @@ public class StrategicProjectsService extends PentahoBIService {
     @Value("${pentahoBI.pmo.dataAccessId.localidade}")
     private String dataAccessIdLocalidade;
 
-    private <T> List<T> consult(String target, String dataAccessId, Map<String, String> params, Function<Map<String, JsonNode>, T> mapper) {
+    @Value("${pentahoBI.pmo.dataAccessId.totais}")
+    private String dataAccessIdTotais;
+
+
+
+    private <T> List<T> consult(String target, String dataAccessId, Map<String, Object> params, Function<Map<String, JsonNode>, T> mapper) {
         List<T> retorno = new ArrayList<>();
         try {
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(doRequest(buildEndpointUri(target, dataAccessId, params)));
@@ -93,7 +103,7 @@ public class StrategicProjectsService extends PentahoBIService {
 
 
     @Override
-    protected String buildEndpointUri(String target, String dataAccess, Map<String, String> params) {
+    protected String buildEndpointUri(String target, String dataAccess, Map<String, Object> params) {
         return super.buildEndpointUri(pmoPath, target, dataAccess, params);
     }
 
@@ -108,6 +118,34 @@ public class StrategicProjectsService extends PentahoBIService {
         dto.setLocalidades(consultLocalidade());
         
         return dto;
+    }
+
+    public StrategicProjectTotaisDto consultTotals(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectTotaisDto> consulta = consultTotals(
+                filter.getPortfolioId(),
+                filter.getAreaId(),
+                filter.getProgramaId(),
+                filter.getProgramaTId(),
+                filter.getProjetoId(),
+                filter.getEntregaId(),
+                filter.getOrgaoId(),
+                filter.getLocalidadeId(),
+                filter.getDataInicio(),
+                filter.getDataFim()
+            );
+
+            return consulta.isEmpty() ? new StrategicProjectTotaisDto() : consulta.get(0);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new StrategicProjectTotaisDto();
+        } 
+
+
     }
 
     public StrategicProjectFilterValuesDto consultProgramsProjectsDeliveries(String areaId) {
@@ -140,27 +178,27 @@ public class StrategicProjectsService extends PentahoBIService {
 
 
     public List<StrategicProjectIdAndNameDto> consultArea() {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parampCodPortfolio", portfolioId );
         return consult(targetArea, dataAccessIdArea, params, rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
     }
 
     public List<StrategicProjectIdAndNameDto> consultProgramaOriginal(String areaId) {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parampCodPortfolio", portfolioId);
         params.put("parampCodArea", areaId);
         return consult(targetProgramaOriginal, dataAccessIdPrograma, params, rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
     }
 
     public List<StrategicProjectIdAndNameDto> consultProgramaTransversal(String areaId) {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parampCodPortfolio", portfolioId);
         params.put("parampCodArea", areaId);
         return consult(targetProgramaTransversal, dataAccessIdPrograma, params, rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
     }
 
     public List<StrategicProjectIdAndNameDto> consultProjeto(String areaId, String programaId) {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parampCodPortfolio", portfolioId);
         params.put("parampCodArea", areaId);
         params.put("parampCodPrograma", programaId);
@@ -168,7 +206,7 @@ public class StrategicProjectsService extends PentahoBIService {
     }
 
     public List<StrategicProjectIdAndNameDto> consultEntrega(String areaId, String programaId, String projetoId) {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parampCodPortfolio", portfolioId);
         params.put("parampCodArea", areaId);
         params.put("parampCodPrograma", programaId);
@@ -177,13 +215,36 @@ public class StrategicProjectsService extends PentahoBIService {
     }
 
     public List<StrategicProjectIdAndNameDto> consultOrgao() {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         return consult(targetOrgao, dataAccessIdOrgao, params, rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
     }
 
     public List<StrategicProjectIdAndNameDto> consultLocalidade() {
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         return consult(targetLocalidade, dataAccessIdLocalidade, params, rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
     }
+    
+    public List<StrategicProjectTotaisDto> consultTotals(int portfolioId, int areaId, int programaId, int programaTId, int projetoId, 
+                                                            int entregaId, int orgaoId, int localidadeId, int dataInicio, int dataFim){
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("paramportfolio", portfolioId);
+        params.put("paramarea", areaId);
+        params.put("paramprograma", programaId);
+        params.put("paramprogramat", programaTId);
+        params.put("paramprojeto", projetoId);
+        params.put("paramentrega", entregaId);
+        params.put("paramorgao", orgaoId);
+        params.put("paramlocalidade", localidadeId);
+        params.put("paramde", dataInicio);
+        params.put("paramate", dataFim);
+
+        return consult(targetTotais, dataAccessIdTotais, params, rs -> new StrategicProjectTotaisDto(
+            rs.get("totalPrevisto").floatValue(), 
+            rs.get("totalRealizado").floatValue(), 
+            rs.get("totalEntregasPE").asInt(), 
+            rs.get("qdeProjetos").asInt(), 
+            rs.get("qdeProgramas").asInt()));
+    }
+    
 
 }
