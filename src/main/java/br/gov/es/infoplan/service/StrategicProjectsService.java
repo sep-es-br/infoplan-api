@@ -6,6 +6,10 @@ import br.gov.es.infoplan.dto.capitacao.CapitacaoFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilterValuesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectIdAndNameDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,6 +40,8 @@ public class StrategicProjectsService extends PentahoBIService {
     @Value("${portfolioId}")
     private String portfolioId;
 
+    //TARGETS
+
     @Value("${pentahoBI.pmo.path}")
     private String pmoPath;
     
@@ -62,6 +68,27 @@ public class StrategicProjectsService extends PentahoBIService {
 
     @Value("${pentahoBI.pmo.target.totais}")
     private String targetTotais;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByStatus}")
+    private String targetDeliveriesByStatus;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByPerformace}")
+    private String targetDeliveriesByPerformace;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByType}")
+    private String targetDeliveriesByType;
+
+    @Value("${pentahoBI.pmo.target.projectByStatus}")
+    private String targetProjectByStatus;
+
+    @Value("${pentahoBI.pmo.target.criticalMilestonesForPerformace}")
+    private String targetCriticalMilestonesForPerformace;
+
+    @Value("${pentahoBI.pmo.target.risksByClassification}")
+    private String targetRisksByClassification;
+
+
+    //DATA ACCESSID
     
     @Value("${pentahoBI.pmo.dataAccessId.area}")
     private String dataAccessIdArea;
@@ -84,6 +111,23 @@ public class StrategicProjectsService extends PentahoBIService {
     @Value("${pentahoBI.pmo.dataAccessId.totais}")
     private String dataAccessIdTotais;
 
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByStatus}")
+    private String dataAccessIdDeliveriesByStatus;
+
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByPerformace}")
+    private String dataAccessIdDeliveriesByPerformace;
+
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByType}")
+    private String dataAccessIdDeliveriesByType;
+
+    @Value("${pentahoBI.pmo.dataAccessId.projectByStatus}")
+    private String dataAccessIdProjectByStatus;
+
+    @Value("${pentahoBI.pmo.dataAccessId.criticalMilestonesForPerformace}")
+    private String dataAccessIdCriticalMilestonesForPerformace;
+
+    @Value("${pentahoBI.pmo.dataAccessId.risksByClassification}")
+    private String dataAccessIdRisksByClassification;
 
 
     private <T> List<T> consult(String target, String dataAccessId, Map<String, Object> params, Function<Map<String, JsonNode>, T> mapper) {
@@ -107,7 +151,7 @@ public class StrategicProjectsService extends PentahoBIService {
         return super.buildEndpointUri(pmoPath, target, dataAccess, params);
     }
 
-    public StrategicProjectFilterValuesDto consultAll() {
+    public StrategicProjectFilterValuesDto getAllFilter() {
         StrategicProjectFilterValuesDto dto = new StrategicProjectFilterValuesDto();        
         dto.setArea(consultArea());
         dto.setProgramasOriginal(consultProgramaOriginal(TODOS));
@@ -120,23 +164,12 @@ public class StrategicProjectsService extends PentahoBIService {
         return dto;
     }
 
-    public StrategicProjectTotaisDto consultTotals(String filterJson){
+    public StrategicProjectTotaisDto getTotals(String filterJson){
 
         try {
             StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
 
-            List<StrategicProjectTotaisDto> consulta = consultTotals(
-                filter.getPortfolioId(),
-                filter.getAreaId(),
-                filter.getProgramaId(),
-                filter.getProgramaTId(),
-                filter.getProjetoId(),
-                filter.getEntregaId(),
-                filter.getOrgaoId(),
-                filter.getLocalidadeId(),
-                filter.getDataInicio(),
-                filter.getDataFim()
-            );
+            List<StrategicProjectTotaisDto> consulta = consultTotals(filter);
 
             return consulta.isEmpty() ? new StrategicProjectTotaisDto() : consulta.get(0);
 
@@ -145,10 +178,113 @@ public class StrategicProjectsService extends PentahoBIService {
             return new StrategicProjectTotaisDto();
         } 
 
+    }
+
+    public List<StrategicProjectDeliveriesDto> getDeliveriesByStatus(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectDeliveriesDto> consulta = consultDeliveryByStatus(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesDto>();
+        } 
+
 
     }
 
-    public StrategicProjectFilterValuesDto consultProgramsProjectsDeliveries(String areaId) {
+    public List<StrategicProjectDeliveriesDto> getDeliveriesByPerformace(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectDeliveriesDto> consulta = consultDeliveriesByPerformace(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesDto>();
+        } 
+
+
+    }
+
+    public List<StrategicProjectDeliveriesDto> getDeliveriesByType(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectDeliveriesDto> consulta = consultDeliveriesByType(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesDto>();
+        } 
+
+
+    }
+
+    public List<StrategicProjectByStatusDto> getProjectByStatus(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectByStatusDto> consulta = consultProjectByStatus(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectByStatusDto>();
+        } 
+
+
+    }
+
+    public List<StrategicProjectMilestonesByPerformaceDto> getCriticalMilestonesForPerformace(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectMilestonesByPerformaceDto> consulta = consultCriticalMilestonesForPerformace(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectMilestonesByPerformaceDto>();
+        } 
+
+
+    }
+
+    public List<StrategicProjectRisksByClassificationDto> getRisksByClassification(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectRisksByClassificationDto> consulta = consultRisksByClassification(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectRisksByClassificationDto>();
+        } 
+
+
+    }
+
+    
+
+    public StrategicProjectFilterValuesDto getProgramsProjectsDeliveries(String areaId) {
 
         StrategicProjectFilterValuesDto dto = new StrategicProjectFilterValuesDto();        
         dto.setProgramasOriginal(consultProgramaOriginal(areaId));
@@ -158,7 +294,7 @@ public class StrategicProjectsService extends PentahoBIService {
         return dto;
     }
 
-    public StrategicProjectFilterValuesDto consultProjectsDeliveries(String areaId, String programId) {
+    public StrategicProjectFilterValuesDto getProjectsDeliveries(String areaId, String programId) {
 
         StrategicProjectFilterValuesDto dto = new StrategicProjectFilterValuesDto();        
         dto.setProjetos(consultProjeto(areaId, programId));
@@ -167,7 +303,7 @@ public class StrategicProjectsService extends PentahoBIService {
         return dto;
     }
 
-    public StrategicProjectFilterValuesDto consultDeliveries(String areaId, String programId, String projectId) {
+    public StrategicProjectFilterValuesDto getDeliveries(String areaId, String programId, String projectId) {
 
         StrategicProjectFilterValuesDto dto = new StrategicProjectFilterValuesDto();        
         dto.setEntregas(consultEntrega(areaId, programId, projectId));
@@ -224,19 +360,9 @@ public class StrategicProjectsService extends PentahoBIService {
         return consult(targetLocalidade, dataAccessIdLocalidade, params, rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
     }
     
-    public List<StrategicProjectTotaisDto> consultTotals(int portfolioId, int areaId, int programaId, int programaTId, int projetoId, 
-                                                            int entregaId, int orgaoId, int localidadeId, int dataInicio, int dataFim){
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("paramportfolio", portfolioId);
-        params.put("paramarea", areaId);
-        params.put("paramprograma", programaId);
-        params.put("paramprogramat", programaTId);
-        params.put("paramprojeto", projetoId);
-        params.put("paramentrega", entregaId);
-        params.put("paramorgao", orgaoId);
-        params.put("paramlocalidade", localidadeId);
-        params.put("paramde", dataInicio);
-        params.put("paramate", dataFim);
+    public List<StrategicProjectTotaisDto> consultTotals(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
 
         return consult(targetTotais, dataAccessIdTotais, params, rs -> new StrategicProjectTotaisDto(
             rs.get("totalPrevisto").floatValue(), 
@@ -245,6 +371,157 @@ public class StrategicProjectsService extends PentahoBIService {
             rs.get("qdeProjetos").asInt(), 
             rs.get("qdeProgramas").asInt()));
     }
-    
 
+    public List<StrategicProjectDeliveriesDto> consultDeliveryByStatus(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+
+        return consult(targetDeliveriesByStatus, dataAccessIdDeliveriesByStatus, params, rs -> new StrategicProjectDeliveriesDto(
+            rs.get("portfolioId").asInt(), 
+            rs.get("nome_portfolio").asText(), 
+            rs.get("areaId").asInt(), 
+            rs.get("nome_area").asText(), 
+            rs.get("programaId").asInt(), 
+            rs.get("nome_programa").asText(), 
+            rs.get("projetoId").asInt(), 
+            rs.get("nome_projeto").asText(), 
+            rs.get("orgaoId").asInt(), 
+            rs.get("nome_orgao").asText(), 
+            rs.get("entregaId").asInt(), 
+            rs.get("nome_entrega").asText(),
+            rs.get("statusId").asInt(), 
+            rs.get("nome_status").asText(),
+            rs.get("contagemPE").asInt(),
+            rs.get("cor_status").asText()
+        ));
+    }
+
+    public List<StrategicProjectDeliveriesDto> consultDeliveriesByPerformace(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+
+        return consult(targetDeliveriesByPerformace, dataAccessIdDeliveriesByPerformace, params, rs -> new StrategicProjectDeliveriesDto(
+            rs.get("portfolioId").asInt(), 
+            rs.get("nome_portfolio").asText(), 
+            rs.get("areaId").asInt(), 
+            rs.get("nome_area").asText(), 
+            rs.get("programaId").asInt(), 
+            rs.get("nome_programa").asText(), 
+            rs.get("projetoId").asInt(), 
+            rs.get("nome_projeto").asText(), 
+            rs.get("orgaoId").asInt(), 
+            rs.get("nome_orgao").asText(), 
+            rs.get("entregaId").asInt(), 
+            rs.get("nome_entrega").asText(),
+            rs.get("statusId").asInt(), 
+            rs.get("nome_status").asText(),
+            rs.get("contagemPE").asInt(),
+            rs.get("cor_status").asText()
+        ));
+    }
+
+    public List<StrategicProjectDeliveriesDto> consultDeliveriesByType(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+
+        return consult(targetDeliveriesByType, dataAccessIdDeliveriesByType, params, rs -> new StrategicProjectDeliveriesDto(
+            rs.get("portfolioId").asInt(), 
+            rs.get("nome_portfolio").asText(), 
+            rs.get("areaId").asInt(), 
+            rs.get("nome_area").asText(), 
+            rs.get("programaId").asInt(), 
+            rs.get("nome_programa").asText(), 
+            rs.get("projetoId").asInt(), 
+            rs.get("nome_projeto").asText(), 
+            rs.get("orgaoId").asInt(), 
+            rs.get("nome_orgao").asText(), 
+            rs.get("entregaId").asInt(), 
+            rs.get("nome_entrega").asText(),
+            rs.get("statusId").asInt(),
+            rs.get("nome_status").asText(),
+            rs.get("contagemPE").asInt()
+        ));
+    }
+
+    public List<StrategicProjectByStatusDto> consultProjectByStatus(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+
+        return consult(targetProjectByStatus, dataAccessIdProjectByStatus, params, rs -> new StrategicProjectByStatusDto(
+            rs.get("portfolioId").asInt(), 
+            rs.get("nome_portfolio").asText(), 
+            rs.get("areaId").asInt(), 
+            rs.get("nome_area").asText(), 
+            rs.get("programaId").asInt(), 
+            rs.get("nome_programa").asText(), 
+            rs.get("projetoId").asInt(), 
+            rs.get("nome_projeto").asText(), 
+            rs.get("orgaoId").asInt(), 
+            rs.get("nome_orgao").asText(), 
+            rs.get("statusId").asInt(), 
+            rs.get("nome_status").asText(),
+            rs.get("cor_status").asText()
+        ));
+    }
+
+    public List<StrategicProjectMilestonesByPerformaceDto> consultCriticalMilestonesForPerformace(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+
+        return consult(targetCriticalMilestonesForPerformace, dataAccessIdCriticalMilestonesForPerformace, params, rs -> new StrategicProjectMilestonesByPerformaceDto(
+            rs.get("portfolioId").asInt(), 
+            rs.get("nome_portfolio").asText(), 
+            rs.get("areaId").asInt(), 
+            rs.get("nome_area").asText(), 
+            rs.get("programaId").asInt(), 
+            rs.get("nome_programa").asText(), 
+            rs.get("projetoId").asInt(), 
+            rs.get("nome_projeto").asText(), 
+            rs.get("orgaoId").asInt(), 
+            rs.get("nome_orgao").asText(), 
+            rs.get("mcId").asInt(), 
+            rs.get("nome_marcocritico").asText(),
+            rs.get("statusId").asInt(), 
+            rs.get("nome_status").asText(),
+            rs.get("cor_status").asText()
+        ));
+
+    }
+
+    public List<StrategicProjectRisksByClassificationDto> consultRisksByClassification(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetRisksByClassification, dataAccessIdRisksByClassification, params, rs -> new StrategicProjectRisksByClassificationDto(
+                rs.get("portfolioId").asInt(), 
+                rs.get("nome_portfolio").asText(), 
+                rs.get("areaId").asInt(), 
+                rs.get("nome_area").asText(), 
+                rs.get("programaId").asInt(), 
+                rs.get("nome_programa").asText(), 
+                rs.get("projetoId").asInt(), 
+                rs.get("nome_projeto").asText(), 
+                rs.get("riscoId").asInt(), 
+                rs.get("risco_nome").asText(),
+                rs.get("risco_descricao").asText(), 
+                rs.get("importanciaId").asInt(), 
+                rs.get("risco_importancia").asText(), 
+                rs.get("cor_importancia").asText()
+        ));
+    }
+
+    public static Map<String, Object> createFilterParams(StrategicProjectFilter filter) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("paramportfolio", filter.getPortfolioId());
+        params.put("paramarea", filter.getAreaId());
+        params.put("paramprograma", filter.getProgramaId());
+        params.put("paramprogramat", filter.getProgramaTId());
+        params.put("paramprojeto", filter.getProjetoId());
+        params.put("paramentrega", filter.getEntregaId());
+        params.put("paramorgao", filter.getOrgaoId());
+        params.put("paramlocalidade", filter.getLocalidadeId());
+        params.put("paramde", filter.getDataInicio());
+        params.put("paramate", filter.getDataFim());
+        return params;
+    }
 }
