@@ -6,7 +6,10 @@ import br.gov.es.infoplan.dto.capitacao.CapitacaoFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilterValuesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectIdAndNameDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectInvestmentSelectedDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectAccumulatedInvestmentDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesDto;
@@ -87,6 +90,37 @@ public class StrategicProjectsService extends PentahoBIService {
     @Value("${pentahoBI.pmo.target.risksByClassification}")
     private String targetRisksByClassification;
 
+    @Value("${pentahoBI.pmo.target.accumulatedInvestment}")
+    private String targetAccumulatedInvestment;
+
+    @Value("${pentahoBI.pmo.target.investmentByArea}")
+    private String targetInvestmentByArea;
+
+    @Value("${pentahoBI.pmo.target.investmentByDelivery}")
+    private String targetInvestmentByDelivery;
+
+    @Value("${pentahoBI.pmo.target.investmentByProgram}")
+    private String targetInvestmentByProgram;
+
+    @Value("${pentahoBI.pmo.target.investmentByProgramAt}")
+    private String targetInvestmentByProgramAt;
+
+    @Value("${pentahoBI.pmo.target.investmentByProject}")
+    private String targetInvestmentByProject;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByArea}")
+    private String targetDeliveriesByArea;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByProgram}")
+    private String targetDeliveriesByProgram;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByProgramAt}")
+    private String targetDeliveriesByProgramAt;
+
+    @Value("${pentahoBI.pmo.target.deliveriesByProject}")
+    private String targetDeliveriesByProject;
+
+
 
     //DATA ACCESSID
     
@@ -128,6 +162,36 @@ public class StrategicProjectsService extends PentahoBIService {
 
     @Value("${pentahoBI.pmo.dataAccessId.risksByClassification}")
     private String dataAccessIdRisksByClassification;
+
+    @Value("${pentahoBI.pmo.dataAccessId.accumulatedInvestment}")
+    private String dataAccessIdAccumulatedInvestment;
+
+    @Value("${pentahoBI.pmo.dataAccessId.investmentByArea}")
+    private String dataAccessIdInvestmentByArea;
+
+    @Value("${pentahoBI.pmo.dataAccessId.investmentByDelivery}")
+    private String dataAccessIdInvestmentByDelivery;
+
+    @Value("${pentahoBI.pmo.dataAccessId.investmentByProgram}")
+    private String dataAccessIdInvestmentByProgram;
+
+    @Value("${pentahoBI.pmo.dataAccessId.investmentByProgramAt}")
+    private String dataAccessIdInvestmentByProgramAt;
+
+    @Value("${pentahoBI.pmo.dataAccessId.investmentByProject}")
+    private String dataAccessIdInvestmentByProject;
+
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByArea}")
+    private String dataAccessIdDeliveriesByArea;
+
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProgram}")
+    private String dataAccessIdDeliveriesByProgram;
+
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProgramAt}")
+    private String dataAccessIdDeliveriesByProgramAt;
+
+    @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProject}")
+    private String dataAccessIdDeliveriesByProject;
 
 
     private <T> List<T> consult(String target, String dataAccessId, Map<String, Object> params, Function<Map<String, JsonNode>, T> mapper) {
@@ -282,7 +346,159 @@ public class StrategicProjectsService extends PentahoBIService {
 
     }
 
+    public List<StrategicProjectAccumulatedInvestmentDto> getAccumulatedInvestment(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectAccumulatedInvestmentDto> consulta = consultAccumulatedInvestment(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectAccumulatedInvestmentDto>();
+        } 
+
+
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByArea(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectInvestmentSelectedDto> consulta = consultInvestmentByArea(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectInvestmentSelectedDto>();
+        } 
+
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByDelivery(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectInvestmentSelectedDto> consulta = consultInvestmentByDelivery(filter);
+
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectInvestmentSelectedDto>();
+        } 
+
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProgram(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectInvestmentSelectedDto> consulta = consultInvestmentByProgram(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectInvestmentSelectedDto>();
+        } 
+
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProgramAt(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectInvestmentSelectedDto> consulta = consultInvestmentByProgramAt(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectInvestmentSelectedDto>();
+        } 
+
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProject(String filterJson){
+
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+
+            List<StrategicProjectInvestmentSelectedDto> consulta = consultInvestmentByProject(filter);
+
+            return consulta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectInvestmentSelectedDto>();
+        } 
+
+    }
+
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByArea(String filterJson) {
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
     
+            List<StrategicProjectDeliveriesBySelectedDto> consulta = consultDeliveriesByArea(filter);
+    
+            return consulta;
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesBySelectedDto>();
+        }
+    }
+
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProgram(String filterJson) {
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+    
+            List<StrategicProjectDeliveriesBySelectedDto> consulta = consultDeliveriesByProgram(filter);
+    
+            return consulta;
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesBySelectedDto>();
+        }
+    }
+
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProgramAt(String filterJson) {
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+    
+            List<StrategicProjectDeliveriesBySelectedDto> consulta = consultDeliveriesByProgramAt(filter);
+    
+            return consulta;
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesBySelectedDto>();
+        }
+    }
+
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProject(String filterJson) {
+        try {
+            StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+    
+            List<StrategicProjectDeliveriesBySelectedDto> consulta = consultDeliveriesByProject(filter);
+    
+            return consulta;
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<StrategicProjectDeliveriesBySelectedDto>();
+        }
+    }
 
     public StrategicProjectFilterValuesDto getProgramsProjectsDeliveries(String areaId) {
 
@@ -509,6 +725,123 @@ public class StrategicProjectsService extends PentahoBIService {
                 rs.get("cor_importancia").asText()
         ));
     }
+
+    public List<StrategicProjectAccumulatedInvestmentDto> consultAccumulatedInvestment(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetAccumulatedInvestment, dataAccessIdAccumulatedInvestment, params, rs -> new StrategicProjectAccumulatedInvestmentDto(
+                rs.get("anoMes").asInt(), 
+                rs.get("custoPrevisto").floatValue(), 
+                rs.get("custoPrevistoAcumulado").floatValue(), 
+                rs.get("custoRealizado").floatValue(), 
+                rs.get("custoRealizadoAcumulado").floatValue()
+        ));
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByArea(StrategicProjectFilter filter){
+
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetInvestmentByArea, dataAccessIdInvestmentByArea, params, rs -> new StrategicProjectInvestmentSelectedDto(
+                rs.get("areaId").asInt(), 
+                rs.get("nome_area").asText(), 
+                rs.get("custoPrevisto").floatValue(), 
+                rs.get("custoRealizado").floatValue()
+        ));
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByDelivery(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetInvestmentByDelivery, dataAccessIdInvestmentByDelivery, params, rs -> new StrategicProjectInvestmentSelectedDto(
+                rs.get("entregaId").asInt(),
+                rs.get("nome_entrega").asText(),
+                rs.get("custoPrevisto").floatValue(),
+                rs.get("custoRealizado").floatValue()
+        ));
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProgram(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetInvestmentByProgram, dataAccessIdInvestmentByProgram, params, rs -> new StrategicProjectInvestmentSelectedDto(
+                rs.get("programaId").asInt(),
+                rs.get("nome_programa").asText(),
+                rs.get("custoPrevisto").floatValue(),
+                rs.get("custoRealizado").floatValue()
+        ));
+    }
+
+    public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProgramAt(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetInvestmentByProgramAt, dataAccessIdInvestmentByProgramAt, params, rs -> new StrategicProjectInvestmentSelectedDto(
+                rs.get("programaTransversalId").asInt(),
+                rs.get("nome_programa_transversal").asText(),
+                rs.get("custoPrevisto").floatValue(),
+                rs.get("custoRealizado").floatValue()
+        ));
+    }
+    
+    public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProject(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetInvestmentByProject, dataAccessIdInvestmentByProject, params, rs -> new StrategicProjectInvestmentSelectedDto(
+                rs.get("projetoId").asInt(),
+                rs.get("nome_projeto").asText(),
+                rs.get("custoPrevisto").floatValue(),
+                rs.get("custoRealizado").floatValue()
+        ));
+    }
+
+    public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByArea(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetDeliveriesByArea, dataAccessIdDeliveriesByArea, params, rs -> new StrategicProjectDeliveriesBySelectedDto(
+                rs.get("areaId").asInt(),
+                rs.get("nome_area").asText(),
+                rs.get("execucao").asInt(),
+                rs.get("concluida").asInt()
+        ));
+    }
+
+    public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByProgram(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetDeliveriesByProgram, dataAccessIdDeliveriesByProgram, params, rs -> new StrategicProjectDeliveriesBySelectedDto(
+                rs.get("programaId").asInt(),
+                rs.get("nome_programa").asText(),
+                rs.get("execucao").asInt(),
+                rs.get("concluida").asInt()
+        ));
+    }
+    
+    public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByProgramAt(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetDeliveriesByProgramAt, dataAccessIdDeliveriesByProgramAt, params, rs -> new StrategicProjectDeliveriesBySelectedDto(
+                rs.get("programaTransId").asInt(),
+                rs.get("nome_programaTrans").asText(),
+                rs.get("execucao").asInt(),
+                rs.get("concluida").asInt()
+        ));
+    }
+    
+    public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByProject(StrategicProjectFilter filter) {
+        Map<String, Object> params = createFilterParams(filter);
+    
+        return consult(targetDeliveriesByProject, dataAccessIdDeliveriesByProject, params, rs -> new StrategicProjectDeliveriesBySelectedDto(
+                rs.get("projetoId").asInt(),
+                rs.get("nome_projeto").asText(),
+                rs.get("execucao").asInt(),
+                rs.get("concluida").asInt()
+        ));
+    }
+
+    
+    
+    
 
     public static Map<String, Object> createFilterParams(StrategicProjectFilter filter) {
         Map<String, Object> params = new HashMap<>();
