@@ -12,8 +12,11 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
+
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +27,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+// import java.sql.Date;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -120,6 +125,9 @@ public class StrategicProjectsService extends PentahoBIService {
     @Value("${pentahoBI.pmo.target.deliveriesByProject}")
     private String targetDeliveriesByProject;
 
+    @Value("${pentahoBI.pmo.target.timestamp}")
+    private String targetTimestamp;
+
 
 
     //DATA ACCESSID
@@ -193,6 +201,10 @@ public class StrategicProjectsService extends PentahoBIService {
     @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProject}")
     private String dataAccessIdDeliveriesByProject;
 
+    @Value("${pentahoBI.pmo.dataAccessId.timestamp}")
+    private String dataAccessIdTimestamp;
+
+
 
     private <T> List<T> consult(String target, String dataAccessId, Map<String, Object> params, Function<Map<String, JsonNode>, T> mapper) {
         List<T> retorno = new ArrayList<>();
@@ -226,6 +238,18 @@ public class StrategicProjectsService extends PentahoBIService {
         dto.setLocalidades(consultLocalidade());
         
         return dto;
+    }
+
+    public StrategicProjectTimestampDto getTimestamp(){
+        try {
+
+            List<StrategicProjectTimestampDto> consulta = consultTimestamp();
+
+            return consulta.isEmpty() ? new StrategicProjectTimestampDto() : consulta.get(0);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new StrategicProjectTimestampDto();
+        } 
     }
 
     public StrategicProjectTotaisDto getTotals(String filterJson){
@@ -839,7 +863,13 @@ public class StrategicProjectsService extends PentahoBIService {
         ));
     }
 
-    
+    public List<StrategicProjectTimestampDto> consultTimestamp() {
+        HashMap<String, Object> params = new HashMap<>();
+        
+        return consult(targetTimestamp, dataAccessIdTimestamp, params, rs -> new StrategicProjectTimestampDto( 
+                rs.get("timestamp").asText()
+        ));
+    }
     
     
 

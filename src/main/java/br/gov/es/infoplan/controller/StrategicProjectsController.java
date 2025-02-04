@@ -20,6 +20,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
 import br.gov.es.infoplan.service.StrategicProjectsService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,13 @@ public class StrategicProjectsController {
 
     @Value("${frontend.host}")
     private String frontHost;
+
+
+    @GetMapping("/timestamp")
+    public StrategicProjectTimestampDto getTimestamp() {
+        StrategicProjectTimestampDto strategicProjectDto = service.getTimestamp();
+        return strategicProjectDto;
+    }
 
     @GetMapping("/all")
     public StrategicProjectFilterValuesDto getAll() {
