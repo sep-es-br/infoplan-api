@@ -4,13 +4,13 @@ public class StrategicProjectInvestmentSelectedDto {
 
     private int id;
     private String nome;
-    private float custoPrevisto;
-    private float custoRealizado;
+    private double custoPrevisto;
+    private double custoRealizado;
 
     public StrategicProjectInvestmentSelectedDto() {
     }
 
-    public StrategicProjectInvestmentSelectedDto(int id, String nome, float custoPrevisto, float custoRealizado) {
+    public StrategicProjectInvestmentSelectedDto(int id, String nome, double custoPrevisto, double custoRealizado) {
         this.id = id;
         this.nome = nome;
         this.custoPrevisto = custoPrevisto;
@@ -28,16 +28,16 @@ public class StrategicProjectInvestmentSelectedDto {
     public void setNome(String nome) {
         this.nome = nome;
     }
-    public float getCustoPrevisto() {
+    public double getCustoPrevisto() {
         return custoPrevisto;
     }
-    public void setCustoPrevisto(float custoPrevisto) {
+    public void setCustoPrevisto(double custoPrevisto) {
         this.custoPrevisto = custoPrevisto;
     }
-    public float getCustoRealizado() {
+    public double getCustoRealizado() {
         return custoRealizado;
     }
-    public void setCustoRealizado(float custoRealizado) {
+    public void setCustoRealizado(double custoRealizado) {
         this.custoRealizado = custoRealizado;
     }
     

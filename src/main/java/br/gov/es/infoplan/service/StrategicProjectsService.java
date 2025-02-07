@@ -605,8 +605,8 @@ public class StrategicProjectsService extends PentahoBIService {
         Map<String, Object> params = createFilterParams(filter);
 
         return consult(targetTotais, dataAccessIdTotais, params, rs -> new StrategicProjectTotaisDto(
-            rs.get("totalPrevisto").floatValue(), 
-            rs.get("totalRealizado").floatValue(), 
+            rs.get("totalPrevisto").doubleValue(), 
+            rs.get("totalRealizado").doubleValue(), 
             rs.get("totalEntregasPE").asInt(), 
             rs.get("qdeProjetos").asInt(), 
             rs.get("qdeProgramas").asInt()));
@@ -756,10 +756,10 @@ public class StrategicProjectsService extends PentahoBIService {
     
         return consult(targetAccumulatedInvestment, dataAccessIdAccumulatedInvestment, params, rs -> new StrategicProjectAccumulatedInvestmentDto(
                 rs.get("anoMes").asInt(), 
-                rs.get("custoPrevisto").floatValue(), 
-                rs.get("custoPrevistoAcumulado").floatValue(), 
-                rs.get("custoRealizado").floatValue(), 
-                rs.get("custoRealizadoAcumulado").floatValue()
+                rs.get("custoPrevisto").doubleValue(), 
+                rs.get("custoPrevistoAcumulado").doubleValue(), 
+                rs.get("custoRealizado").doubleValue(), 
+                rs.get("custoRealizadoAcumulado").doubleValue()
         ));
     }
 
@@ -770,8 +770,8 @@ public class StrategicProjectsService extends PentahoBIService {
         return consult(targetInvestmentByArea, dataAccessIdInvestmentByArea, params, rs -> new StrategicProjectInvestmentSelectedDto(
                 rs.get("areaId").asInt(), 
                 rs.get("nome_area").asText(), 
-                rs.get("custoPrevisto").floatValue(), 
-                rs.get("custoRealizado").floatValue()
+                rs.get("custoPrevisto").doubleValue(), 
+                rs.get("custoRealizado").doubleValue()
         ));
     }
 
@@ -781,8 +781,8 @@ public class StrategicProjectsService extends PentahoBIService {
         return consult(targetInvestmentByDelivery, dataAccessIdInvestmentByDelivery, params, rs -> new StrategicProjectInvestmentSelectedDto(
                 rs.get("entregaId").asInt(),
                 rs.get("nome_entrega").asText(),
-                rs.get("custoPrevisto").floatValue(),
-                rs.get("custoRealizado").floatValue()
+                rs.get("custoPrevisto").doubleValue(),
+                rs.get("custoRealizado").doubleValue()
         ));
     }
 
@@ -792,8 +792,8 @@ public class StrategicProjectsService extends PentahoBIService {
         return consult(targetInvestmentByProgram, dataAccessIdInvestmentByProgram, params, rs -> new StrategicProjectInvestmentSelectedDto(
                 rs.get("programaId").asInt(),
                 rs.get("nome_programa").asText(),
-                rs.get("custoPrevisto").floatValue(),
-                rs.get("custoRealizado").floatValue()
+                rs.get("custoPrevisto").doubleValue(),
+                rs.get("custoRealizado").doubleValue()
         ));
     }
 
@@ -803,8 +803,8 @@ public class StrategicProjectsService extends PentahoBIService {
         return consult(targetInvestmentByProgramAt, dataAccessIdInvestmentByProgramAt, params, rs -> new StrategicProjectInvestmentSelectedDto(
                 rs.get("programaTransversalId").asInt(),
                 rs.get("nome_programa_transversal").asText(),
-                rs.get("custoPrevisto").floatValue(),
-                rs.get("custoRealizado").floatValue()
+                rs.get("custoPrevisto").doubleValue(),
+                rs.get("custoRealizado").doubleValue()
         ));
     }
     
@@ -814,8 +814,8 @@ public class StrategicProjectsService extends PentahoBIService {
         return consult(targetInvestmentByProject, dataAccessIdInvestmentByProject, params, rs -> new StrategicProjectInvestmentSelectedDto(
                 rs.get("projetoId").asInt(),
                 rs.get("nome_projeto").asText(),
-                rs.get("custoPrevisto").floatValue(),
-                rs.get("custoRealizado").floatValue()
+                rs.get("custoPrevisto").doubleValue(),
+                rs.get("custoRealizado").doubleValue()
         ));
     }
 

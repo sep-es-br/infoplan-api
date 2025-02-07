@@ -2,15 +2,15 @@ package br.gov.es.infoplan.dto.strategicProject;
 
 public class StrategicProjectTotaisDto {
     
-    private float totalPrevisto;
-    private float totalRealizado;
+    private double totalPrevisto;
+    private double totalRealizado;
     private int totalEntregasPE;
     private int qdeProjetos;
     private int qdeProgramas;
 
     
 
-    public StrategicProjectTotaisDto(float totalPrevisto, float totalRealizado, int totalEntregasPE, int qdeProjetos,
+    public StrategicProjectTotaisDto(double totalPrevisto, double totalRealizado, int totalEntregasPE, int qdeProjetos,
             int qdeProgramas) {
         this.totalPrevisto = totalPrevisto;
         this.totalRealizado = totalRealizado;
@@ -22,16 +22,16 @@ public class StrategicProjectTotaisDto {
     public StrategicProjectTotaisDto() {
     }
 
-    public float getTotalPrevisto() {
+    public double getTotalPrevisto() {
         return totalPrevisto;
     }
-    public void setTotalPrevisto(float totalPrevisto) {
+    public void setTotalPrevisto(double totalPrevisto) {
         this.totalPrevisto = totalPrevisto;
     }
-    public float getTotalRealizado() {
+    public double getTotalRealizado() {
         return totalRealizado;
     }
-    public void setTotalRealizado(float totalRealizado) {
+    public void setTotalRealizado(double totalRealizado) {
         this.totalRealizado = totalRealizado;
     }
     public int getTotalEntregasPE() {
