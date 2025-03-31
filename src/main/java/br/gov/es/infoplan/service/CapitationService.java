@@ -283,7 +283,7 @@ public class CapitationService extends PentahoBIService {
     }
 
     @Override
-    protected String buildEndpointUri(String target, String dataAccess, Map<String, String> params) {
+    protected String buildEndpointUri(String target, String dataAccess, Map<String, Object> params) {
         return super.buildEndpointUri(this.CaptationPath, target, dataAccess, params);
     }
 
@@ -291,7 +291,7 @@ public class CapitationService extends PentahoBIService {
         
         ArrayList<AllCapitacaoRow> retorno = new ArrayList<>();
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("parampAno", "2024"); //filter.getAno());
         try {
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(doRequest(buildEndpointUri(targetDashTodos, dataAccessIdDashDatas, params)));
