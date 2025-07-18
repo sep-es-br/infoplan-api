@@ -492,24 +492,42 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectIdAndNameDto> consultArea() {
     HashMap<String, Object> params = new HashMap<>();
     params.put("parampCodPortfolio", portfolioId);
-    return consult(targetArea, dataAccessIdArea, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+    return consult(
+        targetArea,
+        dataAccessIdArea,
+        params,
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("nome_completo").asText()));
   }
 
   public List<StrategicProjectIdAndNameDto> consultProgramaOriginal(String areaId) {
     HashMap<String, Object> params = new HashMap<>();
     params.put("parampCodPortfolio", portfolioId);
     params.put("parampCodArea", areaId);
-    return consult(targetProgramaOriginal, dataAccessIdPrograma, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+    return consult(
+        targetProgramaOriginal,
+        dataAccessIdPrograma,
+        params,
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("nome_completo").asText()));
   }
 
   public List<StrategicProjectIdAndNameDto> consultProgramaTransversal(String areaId) {
     HashMap<String, Object> params = new HashMap<>();
     params.put("parampCodPortfolio", portfolioId);
     params.put("parampCodArea", areaId);
-    return consult(targetProgramaTransversal, dataAccessIdPrograma, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+    return consult(
+        targetProgramaTransversal,
+        dataAccessIdPrograma,
+        params,
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("nome_completo").asText()));
   }
 
   public List<StrategicProjectIdAndNameDto> consultProjeto(String areaId, String programaId) {
@@ -517,8 +535,14 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("parampCodPortfolio", portfolioId);
     params.put("parampCodArea", areaId);
     params.put("parampCodPrograma", programaId);
-    return consult(targetProjeto, dataAccessIdProjeto, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+    return consult(
+        targetProjeto,
+        dataAccessIdProjeto,
+        params,
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("nome_completo").asText()));
   }
 
   public List<StrategicProjectIdAndNameDto> consultEntrega(String areaId, String programaId, String projetoId) {
@@ -527,14 +551,26 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("parampCodArea", areaId);
     params.put("parampCodPrograma", programaId);
     params.put("parampCodProjeto", projetoId);
-    return consult(targetEntrega, dataAccessIdEntrega, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+    return consult(
+        targetEntrega,
+        dataAccessIdEntrega,
+        params,
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("nome_completo").asText()));
   }
 
   public List<StrategicProjectIdAndNameDto> consultOrgao() {
     HashMap<String, Object> params = new HashMap<>();
-    return consult(targetOrgao, dataAccessIdOrgao, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+    return consult(
+        targetOrgao,
+        dataAccessIdOrgao,
+        params,
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("nome_completo").asText()));
   }
 
   public List<StrategicProjectIdAndNameDto> consultLocalidade() {
