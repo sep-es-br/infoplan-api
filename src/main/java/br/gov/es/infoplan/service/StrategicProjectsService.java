@@ -576,7 +576,11 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectIdAndNameDto> consultLocalidade() {
     HashMap<String, Object> params = new HashMap<>();
     return consult(targetLocalidade, dataAccessIdLocalidade, params,
-        rs -> new StrategicProjectIdAndNameDto(rs.get("id").asInt(), rs.get("nome").asText()));
+        rs -> new StrategicProjectIdAndNameDto(
+            rs.get("id").asInt(),
+            rs.get("nome").asText(),
+            rs.get("tipo").asText(),
+            rs.get("microrregiaoId").asInt()));
   }
 
   public List<StrategicProjectTotaisDto> consultTotals(StrategicProjectFilter filter) {
