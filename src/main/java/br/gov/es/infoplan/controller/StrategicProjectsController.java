@@ -16,6 +16,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectAccumulatedInvest
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectProgramDetailsDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
@@ -145,5 +146,10 @@ public class StrategicProjectsController {
   @GetMapping("/deliveriesByProject")
   public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProject(@RequestParam String filterJson) {
     return service.getDeliveriesByProject(filterJson);
+  }
+
+  @GetMapping("/programDetails")
+  public StrategicProjectProgramDetailsDto getProgramDetails(@RequestParam String filterJson) {
+    return service.getProgramDetails(filterJson);
   }
 }

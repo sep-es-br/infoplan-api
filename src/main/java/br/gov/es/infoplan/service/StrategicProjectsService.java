@@ -8,6 +8,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectAccumulatedInvest
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectProgramDetailsDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesDto;
@@ -119,6 +120,18 @@ public class StrategicProjectsService extends PentahoBIService {
   @Value("${pentahoBI.pmo.target.timestamp}")
   private String targetTimestamp;
 
+  @Value("${pentahoBI.pmo.target.programDetailsContagemPE}")
+  private String targetProgramDetailsContagemPE;
+
+  @Value("${pentahoBI.pmo.target.programDetailsCusto}")
+  private String targetProgramDetailsCusto;
+
+  @Value("${pentahoBI.pmo.target.programDetailsProjetos}")
+  private String targetProgramDetailsProjetos;
+
+  @Value("${pentahoBI.pmo.target.programDetailsResponsavel}")
+  private String targetProgramDetailsResponsavel;
+
   // DATA ACCESSID
 
   @Value("${pentahoBI.pmo.dataAccessId.area}")
@@ -192,6 +205,18 @@ public class StrategicProjectsService extends PentahoBIService {
 
   @Value("${pentahoBI.pmo.dataAccessId.timestamp}")
   private String dataAccessIdTimestamp;
+
+  @Value("${pentahoBI.pmo.dataAccessId.programDetailsContagemPE}")
+  private String dataAccessIdProgramDetailsContagemPE;
+
+  @Value("${pentahoBI.pmo.dataAccessId.programDetailsCusto}")
+  private String dataAccessIdProgramDetailsCusto;
+
+  @Value("${pentahoBI.pmo.dataAccessId.programDetailsProjetos}")
+  private String dataAccessIdProgramDetailsProjetos;
+
+  @Value("${pentahoBI.pmo.dataAccessId.programDetailsResponsavel}")
+  private String dataAccessIdProgramDetailsResponsavel;
 
   private <T> List<T> consult(
       String target,
@@ -485,6 +510,29 @@ public class StrategicProjectsService extends PentahoBIService {
   public StrategicProjectFilterValuesDto getDeliveries(String areaId, String programId, String projectId) {
     StrategicProjectFilterValuesDto dto = new StrategicProjectFilterValuesDto();
     dto.setEntregas(consultEntrega(areaId, programId, projectId));
+
+    return dto;
+  }
+
+  public StrategicProjectProgramDetailsDto getProgramDetails(String programId) {
+    StrategicProjectProgramDetailsDto dto = new StrategicProjectProgramDetailsDto();
+    dto.setContagemPE(consultProgramDetailsContagemPE(programId).get(0).getContagemPE());
+    
+    List<StrategicProjectProgramDetailsDto> consultCusto = consultProgramDetailsCusto(programId);
+    dto.setCustoPrevisto(consultCusto.get(0).getCustoPrevisto());
+    dto.setCustoRealizado(consultCusto.get(0).getCustoRealizado());
+
+    dto.setQtdeProjetos(consultProgramDetailsProjetos(programId).get(0).getQtdeProjetos());
+
+    List<StrategicProjectProgramDetailsDto> consultResponsavel = consultProgramDetailsResponsavel(programId);
+    dto.setAreaId(consultResponsavel.get(0).getAreaId());
+    dto.setNomeArea(consultResponsavel.get(0).getNomeArea());
+    dto.setProgramaId(consultResponsavel.get(0).getProgramaId());
+    dto.setNomePrograma(consultResponsavel.get(0).getNomePrograma());
+    dto.setObjetivo(consultResponsavel.get(0).getObjetivo());
+    dto.setTransversal(consultResponsavel.get(0).getTransversal());
+    dto.setResponsavel(consultResponsavel.get(0).getResponsavel());
+    dto.setFuncaoResponsavel(consultResponsavel.get(0).getFuncaoResponsavel());
 
     return dto;
   }
@@ -841,8 +889,53 @@ public class StrategicProjectsService extends PentahoBIService {
     HashMap<String, Object> params = new HashMap<>();
 
     return consult(targetTimestamp, dataAccessIdTimestamp, params,
-        rs -> new StrategicProjectTimestampDto(
-            rs.get("timestamp").asText()));
+      rs -> new StrategicProjectTimestampDto(
+        rs.get("timestamp").asText()
+      ));
+  }
+
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsContagemPE(String programId) {
+    HashMap<String, Object> params = new HashMap<>();
+
+    return consult(targetProgramDetailsContagemPE, dataAccessIdProgramDetailsContagemPE, params,
+      rs -> new StrategicProjectProgramDetailsDto(
+        rs.get("contagemPE").asInt()
+      ));
+  }
+
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsCusto(String programId) {
+    HashMap<String, Object> params = new HashMap<>();
+
+    return consult(targetProgramDetailsCusto, dataAccessIdProgramDetailsCusto, params,
+      rs -> new StrategicProjectProgramDetailsDto(
+        rs.get("custoPrevisto").asLong(),
+        rs.get("custoRealizado").asLong()
+      ));
+  }
+
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsProjetos(String programId) {
+    HashMap<String, Object> params = new HashMap<>();
+
+    return consult(targetProgramDetailsProjetos, dataAccessIdProgramDetailsProjetos, params,
+      rs -> new StrategicProjectProgramDetailsDto(
+        rs.get("qtdeprojetos").asInt()
+      ));
+  }
+
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsResponsavel(String programId) {
+    HashMap<String, Object> params = new HashMap<>();
+
+    return consult(targetProgramDetailsResponsavel, dataAccessIdProgramDetailsResponsavel, params,
+      rs -> new StrategicProjectProgramDetailsDto(
+        rs.get("cod_area").asInt(),
+        rs.get("nome_area").asText(),
+        rs.get("cod_programa").asInt(),
+        rs.get("nome_programa").asText(),
+        rs.get("objetivo").asText(),
+        rs.get("transversal").asInt(),
+        rs.get("responsavel").asText(),
+        rs.get("funcao").asText()
+      ));
   }
 
   public static Map<String, Object> createFilterParams(StrategicProjectFilter filter) {
