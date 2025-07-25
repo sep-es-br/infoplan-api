@@ -514,27 +514,49 @@ public class StrategicProjectsService extends PentahoBIService {
     return dto;
   }
 
-  public StrategicProjectProgramDetailsDto getProgramDetails(String programId) {
-    StrategicProjectProgramDetailsDto dto = new StrategicProjectProgramDetailsDto();
-    dto.setContagemPE(consultProgramDetailsContagemPE(programId).get(0).getContagemPE());
-    
-    List<StrategicProjectProgramDetailsDto> consultCusto = consultProgramDetailsCusto(programId);
-    dto.setCustoPrevisto(consultCusto.get(0).getCustoPrevisto());
-    dto.setCustoRealizado(consultCusto.get(0).getCustoRealizado());
+  public StrategicProjectProgramDetailsDto getProgramDetails(String filterJson) {
+    try {
+      StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+      StrategicProjectProgramDetailsDto dto = new StrategicProjectProgramDetailsDto();
 
-    dto.setQtdeProjetos(consultProgramDetailsProjetos(programId).get(0).getQtdeProjetos());
+      List<StrategicProjectProgramDetailsDto> consultContagemPE = consultProgramDetailsContagemPE(
+          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+      if (!consultContagemPE.isEmpty()) {
+        dto.setContagemPE(consultContagemPE.get(0).getContagemPE());
+      }
 
-    List<StrategicProjectProgramDetailsDto> consultResponsavel = consultProgramDetailsResponsavel(programId);
-    dto.setAreaId(consultResponsavel.get(0).getAreaId());
-    dto.setNomeArea(consultResponsavel.get(0).getNomeArea());
-    dto.setProgramaId(consultResponsavel.get(0).getProgramaId());
-    dto.setNomePrograma(consultResponsavel.get(0).getNomePrograma());
-    dto.setObjetivo(consultResponsavel.get(0).getObjetivo());
-    dto.setTransversal(consultResponsavel.get(0).getTransversal());
-    dto.setResponsavel(consultResponsavel.get(0).getResponsavel());
-    dto.setFuncaoResponsavel(consultResponsavel.get(0).getFuncaoResponsavel());
+      List<StrategicProjectProgramDetailsDto> consultCusto = consultProgramDetailsCusto(
+          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+      if (!consultCusto.isEmpty()) {
+        dto.setCustoPrevisto(consultCusto.get(0).getCustoPrevisto());
+        dto.setCustoRealizado(consultCusto.get(0).getCustoRealizado());
+      }
 
-    return dto;
+      List<StrategicProjectProgramDetailsDto> consultProjetos = consultProgramDetailsProjetos(
+          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+      if (!consultProjetos.isEmpty()) {
+        dto.setQtdeProjetos(consultProjetos.get(0).getQtdeProjetos());
+      }
+
+      List<StrategicProjectProgramDetailsDto> consultResponsavel = consultProgramDetailsResponsavel(
+          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+      if (!consultResponsavel.isEmpty()) {
+        StrategicProjectProgramDetailsDto firstEl = consultResponsavel.get(0);
+        dto.setAreaId(firstEl.getAreaId());
+        dto.setNomeArea(firstEl.getNomeArea());
+        dto.setProgramaId(firstEl.getProgramaId());
+        dto.setNomePrograma(firstEl.getNomePrograma());
+        dto.setObjetivo(firstEl.getObjetivo());
+        dto.setTransversal(firstEl.getTransversal());
+        dto.setResponsavel(firstEl.getResponsavel());
+        dto.setFuncaoResponsavel(firstEl.getFuncaoResponsavel());
+      }
+
+      return dto;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return new StrategicProjectProgramDetailsDto();
+    }
   }
 
   public List<StrategicProjectIdAndNameDto> consultArea() {
@@ -894,17 +916,37 @@ public class StrategicProjectsService extends PentahoBIService {
       ));
   }
 
-  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsContagemPE(String programId) {
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsContagemPE(
+    String programId,
+    int dataInicio,
+    int dataFim
+  ) {
     HashMap<String, Object> params = new HashMap<>();
 
-    return consult(targetProgramDetailsContagemPE, dataAccessIdProgramDetailsContagemPE, params,
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprograma", programId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
+
+    List<StrategicProjectProgramDetailsDto> consulta = consult(targetProgramDetailsContagemPE,
+      dataAccessIdProgramDetailsContagemPE, params,
       rs -> new StrategicProjectProgramDetailsDto(
         rs.get("contagemPE").asInt()
       ));
+
+    return consulta;
   }
 
-  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsCusto(String programId) {
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsCusto(
+    String programId,
+    int dataInicio,
+    int dataFim
+  ) {
     HashMap<String, Object> params = new HashMap<>();
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprograma", programId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
 
     return consult(targetProgramDetailsCusto, dataAccessIdProgramDetailsCusto, params,
       rs -> new StrategicProjectProgramDetailsDto(
@@ -913,8 +955,16 @@ public class StrategicProjectsService extends PentahoBIService {
       ));
   }
 
-  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsProjetos(String programId) {
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsProjetos(
+    String programId,
+    int dataInicio,
+    int dataFim
+  ) {
     HashMap<String, Object> params = new HashMap<>();
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprograma", programId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
 
     return consult(targetProgramDetailsProjetos, dataAccessIdProgramDetailsProjetos, params,
       rs -> new StrategicProjectProgramDetailsDto(
@@ -922,8 +972,16 @@ public class StrategicProjectsService extends PentahoBIService {
       ));
   }
 
-  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsResponsavel(String programId) {
+  public List<StrategicProjectProgramDetailsDto> consultProgramDetailsResponsavel(
+    String programId,
+    int dataInicio,
+    int dataFim
+  ) {
     HashMap<String, Object> params = new HashMap<>();
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprograma", programId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
 
     return consult(targetProgramDetailsResponsavel, dataAccessIdProgramDetailsResponsavel, params,
       rs -> new StrategicProjectProgramDetailsDto(
