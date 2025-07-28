@@ -9,6 +9,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectProgramDetailsDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectProjectDetailsDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesDto;
@@ -132,6 +133,18 @@ public class StrategicProjectsService extends PentahoBIService {
   @Value("${pentahoBI.pmo.target.programDetailsResponsavel}")
   private String targetProgramDetailsResponsavel;
 
+  @Value("${pentahoBI.pmo.target.projectDetailsContagemPE}")
+  private String targetProjectDetailsContagemPE;
+
+  @Value("${pentahoBI.pmo.target.projectDetailsCusto}")
+  private String targetProjectDetailsCusto;
+
+  @Value("${pentahoBI.pmo.target.projectDetailsProgramas}")
+  private String targetProjectDetailsPrograma;
+
+  @Value("${pentahoBI.pmo.target.projectDetailsResponsavel}")
+  private String targetProjectDetailsResponsavel;
+
   // DATA ACCESSID
 
   @Value("${pentahoBI.pmo.dataAccessId.area}")
@@ -217,6 +230,18 @@ public class StrategicProjectsService extends PentahoBIService {
 
   @Value("${pentahoBI.pmo.dataAccessId.programDetailsResponsavel}")
   private String dataAccessIdProgramDetailsResponsavel;
+
+  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsContagemPE}")
+  private String dataAccessIdProjectDetailsContagemPE;
+
+  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsCusto}")
+  private String dataAccessIdProjectDetailsCusto;
+
+  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsProgramas}")
+  private String dataAccessIdProjectDetailsPrograma;
+
+  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsResponsavel}")
+  private String dataAccessIdProjectDetailsResponsavel;
 
   private <T> List<T> consult(
       String target,
@@ -564,6 +589,62 @@ public class StrategicProjectsService extends PentahoBIService {
     } catch (Exception e) {
       e.printStackTrace();
       return new StrategicProjectProgramDetailsDto();
+    }
+  }
+
+  public StrategicProjectProjectDetailsDto getProjectDetails(String filterJson) {
+    try {
+      StrategicProjectFilter filter = new ObjectMapper().readValue(filterJson, StrategicProjectFilter.class);
+      StrategicProjectProjectDetailsDto dto = new StrategicProjectProjectDetailsDto();
+
+      List<StrategicProjectProjectDetailsDto> consultContagemPE = consultProjectDetailsContagemPE(
+        filter.getProjetoId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
+      if (!consultContagemPE.isEmpty()) {
+        dto.setContagemPE(consultContagemPE.get(0).getContagemPE());
+      }
+
+      List<StrategicProjectProjectDetailsDto> consultCusto = consultProjectDetailsCusto(
+        filter.getProjetoId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
+      if (!consultCusto.isEmpty()) {
+        dto.setCustoPrevisto(consultCusto.get(0).getCustoPrevisto());
+        dto.setCustoRealizado(consultCusto.get(0).getCustoRealizado());
+      }
+
+      List<StrategicProjectProjectDetailsDto> consultPrograma = consultProjectDetailsProgram(
+        filter.getProjetoId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
+      if (!consultPrograma.isEmpty()) {
+        dto.setProgramaId(consultPrograma.get(0).getProgramaId());
+        dto.setNomePrograma(consultPrograma.get(0).getNomePrograma());
+      }
+
+      List<StrategicProjectProjectDetailsDto> consultResponsavel = consultProjectDetailsResponsavel(
+        filter.getProjetoId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
+      if (!consultResponsavel.isEmpty()) {
+        StrategicProjectProjectDetailsDto firstEl = consultResponsavel.get(0);
+        dto.setOrgaoId(firstEl.getOrgaoId());
+        dto.setNomeOrgao(firstEl.getNomeOrgao());
+        dto.setAreaId(firstEl.getAreaId());
+        dto.setNomeArea(firstEl.getNomeArea());
+        dto.setProjetoId(firstEl.getProjetoId());
+        dto.setNomeProjeto(firstEl.getNomeProjeto());
+        dto.setDescricaoProjeto(firstEl.getDescricaoProjeto());
+        dto.setStatusProjeto(firstEl.getStatusProjeto());
+        dto.setResponsavel(firstEl.getResponsavel());
+        dto.setFuncaoResponsavel(firstEl.getFuncaoResponsavel());
+      }
+
+      return dto;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return new StrategicProjectProjectDetailsDto();
     }
   }
 
@@ -936,13 +1017,11 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    List<StrategicProjectProgramDetailsDto> consulta = consult(targetProgramDetailsContagemPE,
+    return consult(targetProgramDetailsContagemPE,
       dataAccessIdProgramDetailsContagemPE, params,
       rs -> new StrategicProjectProgramDetailsDto(
         rs.get("contagemPE").asInt()
       ));
-
-    return consulta;
   }
 
   public List<StrategicProjectProgramDetailsDto> consultProgramDetailsCusto(
@@ -1000,6 +1079,86 @@ public class StrategicProjectsService extends PentahoBIService {
         rs.get("nome_programa").asText(),
         rs.get("objetivo").asText(),
         rs.get("transversal").asInt(),
+        rs.get("responsavel").asText(),
+        rs.get("funcao").asText()
+      ));
+  }
+
+  public List<StrategicProjectProjectDetailsDto> consultProjectDetailsContagemPE(
+    String projetoId,
+    int dataInicio,
+    int dataFim
+  ) {
+    HashMap<String, Object> params = new HashMap<>();
+
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprojeto", projetoId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
+
+    return consult(targetProjectDetailsContagemPE, dataAccessIdProjectDetailsContagemPE, params,
+      rs -> new StrategicProjectProjectDetailsDto(
+        rs.get("contagemPE").asInt()
+      ));
+  }
+
+  public List<StrategicProjectProjectDetailsDto> consultProjectDetailsCusto(
+    String projetoId,
+    int dataInicio,
+    int dataFim
+  ) {
+    HashMap<String, Object> params = new HashMap<>();
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprojeto", projetoId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
+
+    return consult(targetProjectDetailsCusto, dataAccessIdProjectDetailsCusto, params,
+      rs -> new StrategicProjectProjectDetailsDto(
+        rs.get("custoPrevisto").asLong(),
+        rs.get("custoRealizado").asLong()
+      ));
+  }
+
+  public List<StrategicProjectProjectDetailsDto> consultProjectDetailsProgram(
+    String projetoId,
+    int dataInicio,
+    int dataFim
+  ) {
+    HashMap<String, Object> params = new HashMap<>();
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprojeto", projetoId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
+
+    return consult(targetProjectDetailsPrograma, dataAccessIdProjectDetailsPrograma, params,
+      rs -> new StrategicProjectProjectDetailsDto(
+        rs.get("cod_programa").asInt(),
+        rs.get("nome_programa").asText()
+      ));
+  }
+
+  public List<StrategicProjectProjectDetailsDto> consultProjectDetailsResponsavel(
+    String projetoId,
+    int dataInicio,
+    int dataFim
+  ) {
+    HashMap<String, Object> params = new HashMap<>();
+    params.put("paramportfolio", portfolioId);
+    params.put("paramprojeto", projetoId);
+    params.put("paramde", dataInicio);
+    params.put("paramate", dataFim);
+
+    return consult(targetProgramDetailsResponsavel, dataAccessIdProgramDetailsResponsavel, params,
+      rs -> new StrategicProjectProjectDetailsDto(
+        rs.get("cod_orgao").asInt(),
+        rs.get("nome_orgao").asText(),
+        rs.get("cod_area").asInt(),
+        rs.get("nome_area").asText(),
+        rs.get("cod_projeto").asInt(),
+        rs.get("nome_projeto").asText(),
+        rs.get("descricao").asText(),
+        rs.get("status_projeto").asText(),
         rs.get("responsavel").asText(),
         rs.get("funcao").asText()
       ));

@@ -17,6 +17,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectMilestonesByPerformaceDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectProgramDetailsDto;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectProjectDetailsDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassificationDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
@@ -58,7 +59,8 @@ public class StrategicProjectsController {
   }
 
   @GetMapping("/deliveries")
-  public StrategicProjectFilterValuesDto getDeliveries(@RequestParam String areaId, String programId, String projectId) {
+  public StrategicProjectFilterValuesDto getDeliveries(@RequestParam String areaId, String programId,
+      String projectId) {
     StrategicProjectFilterValuesDto strategicProjectDto = service.getDeliveries(areaId, programId, projectId);
     return strategicProjectDto;
   }
@@ -89,7 +91,8 @@ public class StrategicProjectsController {
   }
 
   @GetMapping("/milestones")
-  public List<StrategicProjectMilestonesByPerformaceDto> getCriticalMilestonesForPerformace(@RequestParam String filterJson) {
+  public List<StrategicProjectMilestonesByPerformaceDto> getCriticalMilestonesForPerformace(
+      @RequestParam String filterJson) {
     return service.getCriticalMilestonesForPerformace(filterJson);
   }
 
@@ -151,5 +154,10 @@ public class StrategicProjectsController {
   @GetMapping("/programDetails")
   public StrategicProjectProgramDetailsDto getProgramDetails(@RequestParam String filterJson) {
     return service.getProgramDetails(filterJson);
+  }
+
+  @GetMapping("/projectDetails")
+  public StrategicProjectProjectDetailsDto getProjectDetails(@RequestParam String filterJson) {
+    return service.getProjectDetails(filterJson);
   }
 }
