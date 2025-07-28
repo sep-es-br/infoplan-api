@@ -520,26 +520,34 @@ public class StrategicProjectsService extends PentahoBIService {
       StrategicProjectProgramDetailsDto dto = new StrategicProjectProgramDetailsDto();
 
       List<StrategicProjectProgramDetailsDto> consultContagemPE = consultProgramDetailsContagemPE(
-          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+        filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
       if (!consultContagemPE.isEmpty()) {
         dto.setContagemPE(consultContagemPE.get(0).getContagemPE());
       }
 
       List<StrategicProjectProgramDetailsDto> consultCusto = consultProgramDetailsCusto(
-          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+        filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
       if (!consultCusto.isEmpty()) {
         dto.setCustoPrevisto(consultCusto.get(0).getCustoPrevisto());
         dto.setCustoRealizado(consultCusto.get(0).getCustoRealizado());
       }
 
       List<StrategicProjectProgramDetailsDto> consultProjetos = consultProgramDetailsProjetos(
-          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+        filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
       if (!consultProjetos.isEmpty()) {
         dto.setQtdeProjetos(consultProjetos.get(0).getQtdeProjetos());
       }
 
       List<StrategicProjectProgramDetailsDto> consultResponsavel = consultProgramDetailsResponsavel(
-          filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim());
+        filter.getProgramaId().get(0).toString(), filter.getDataInicio(), filter.getDataFim()
+      );
+
       if (!consultResponsavel.isEmpty()) {
         StrategicProjectProgramDetailsDto firstEl = consultResponsavel.get(0);
         dto.setAreaId(firstEl.getAreaId());
@@ -968,7 +976,8 @@ public class StrategicProjectsService extends PentahoBIService {
 
     return consult(targetProgramDetailsProjetos, dataAccessIdProgramDetailsProjetos, params,
       rs -> new StrategicProjectProgramDetailsDto(
-        rs.get("qtdeprojetos").asInt()
+        rs.get("qtdeprojetos").asInt(),
+        ""
       ));
   }
 
