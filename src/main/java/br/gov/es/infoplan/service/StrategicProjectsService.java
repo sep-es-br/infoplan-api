@@ -1149,7 +1149,7 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProgramDetailsResponsavel, dataAccessIdProgramDetailsResponsavel, params,
+    return consult(targetProjectDetailsResponsavel, dataAccessIdProjectDetailsResponsavel, params,
       rs -> new StrategicProjectProjectDetailsDto(
         rs.get("cod_orgao").asInt(),
         rs.get("nome_orgao").asText(),
