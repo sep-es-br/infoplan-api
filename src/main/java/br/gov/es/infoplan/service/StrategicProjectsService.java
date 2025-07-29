@@ -4,6 +4,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilterValuesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectIdAndNameDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectInvestmentSelectedDto;
+import br.gov.es.infoplan.dto.strategicProject.ProgramDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectAccumulatedInvestmentDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectByStatusDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectDeliveriesBySelectedDto;
@@ -619,8 +620,13 @@ public class StrategicProjectsService extends PentahoBIService {
       );
 
       if (!consultPrograma.isEmpty()) {
-        dto.setProgramaId(consultPrograma.get(0).getProgramaId());
-        dto.setNomePrograma(consultPrograma.get(0).getNomePrograma());
+        consultPrograma.forEach((programa) -> {
+          if (consultPrograma.indexOf(programa) == 0) {
+            dto.setProgramas(programa.getProgramas());
+          } else {
+            dto.addPrograma(programa.getProgramas().get(0));
+          }
+        });
       }
 
       List<StrategicProjectProjectDetailsDto> consultResponsavel = consultProjectDetailsResponsavel(
@@ -1132,10 +1138,13 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramate", dataFim);
 
     return consult(targetProjectDetailsPrograma, dataAccessIdProjectDetailsPrograma, params,
-      rs -> new StrategicProjectProjectDetailsDto(
+    rs -> {
+      ProgramDto programa = new ProgramDto(
         rs.get("cod_programa").asInt(),
         rs.get("nome_programa").asText()
-      ));
+      );
+      return new StrategicProjectProjectDetailsDto(programa);
+    });
   }
 
   public List<StrategicProjectProjectDetailsDto> consultProjectDetailsResponsavel(

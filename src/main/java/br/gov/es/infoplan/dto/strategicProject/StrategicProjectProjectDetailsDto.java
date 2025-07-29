@@ -1,11 +1,13 @@
 package br.gov.es.infoplan.dto.strategicProject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StrategicProjectProjectDetailsDto {
   private int contagemPE;
   private Long custoPrevisto;
   private Long custoRealizado;
-  private int programaId;
-  private String nomePrograma;
+  private List<ProgramDto> programas;
   private int orgaoId;
   private String nomeOrgao;
   private int areaId;
@@ -17,7 +19,8 @@ public class StrategicProjectProjectDetailsDto {
   private String responsavel;
   private String funcaoResponsavel;
 
-  public StrategicProjectProjectDetailsDto() {}
+  public StrategicProjectProjectDetailsDto() {
+  }
 
   public StrategicProjectProjectDetailsDto(int contagemPE) {
     this.contagemPE = contagemPE;
@@ -28,9 +31,13 @@ public class StrategicProjectProjectDetailsDto {
     this.custoRealizado = custoRealizado;
   }
 
-  public StrategicProjectProjectDetailsDto(int programaId, String nomePrograma) {
-    this.programaId = programaId;
-    this.nomePrograma = nomePrograma;
+  public StrategicProjectProjectDetailsDto(List<ProgramDto> programas) {
+    this.programas = programas;
+  }
+
+  public StrategicProjectProjectDetailsDto(ProgramDto programa) {
+    this.programas = new ArrayList<ProgramDto>();
+    this.programas.add(programa);
   }
 
   public StrategicProjectProjectDetailsDto(
@@ -81,20 +88,16 @@ public class StrategicProjectProjectDetailsDto {
     this.custoRealizado = custoRealizado;
   }
 
-  public int getProgramaId() {
-    return programaId;
+  public List<ProgramDto> getProgramas() {
+    return this.programas;
   }
 
-  public void setProgramaId(int programaId) {
-    this.programaId = programaId;
+  public void setProgramas(List<ProgramDto> programas) {
+    this.programas = programas;
   }
 
-  public String getNomePrograma() {
-    return nomePrograma;
-  }
-
-  public void setNomePrograma(String nomePrograma) {
-    this.nomePrograma = nomePrograma;
+  public void addPrograma(ProgramDto programa) {
+    this.programas.add(programa);
   }
 
   public int getOrgaoId() {
