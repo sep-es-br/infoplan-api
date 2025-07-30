@@ -12,7 +12,6 @@ public class StrategicProjectProgramDetailsDto {
   private String objetivo;
   private int transversal;
   private String responsavel;
-  private String funcaoResponsavel;
 
   public StrategicProjectProgramDetailsDto() {}
 
@@ -36,8 +35,7 @@ public class StrategicProjectProgramDetailsDto {
     String nomePrograma,
     String objetivo,
     int transversal,
-    String responsavel,
-    String funcaoResponsavel
+    String responsavel
   ) {
     this.areaId = areaId;
     this.nomeArea = nomeArea;
@@ -46,7 +44,6 @@ public class StrategicProjectProgramDetailsDto {
     this.objetivo = objetivo;
     this.transversal = transversal;
     this.responsavel = responsavel;
-    this.funcaoResponsavel = funcaoResponsavel;
   }
 
   public int getContagemPE() {
@@ -114,11 +111,5 @@ public class StrategicProjectProgramDetailsDto {
   }
   public void setResponsavel(String responsavel) {
     this.responsavel = responsavel;
-  }
-  public String getFuncaoResponsavel() {
-    return funcaoResponsavel;
-  }
-  public void setFuncaoResponsavel(String funcaoResponsavel) {
-    this.funcaoResponsavel = funcaoResponsavel;
   }
 }
