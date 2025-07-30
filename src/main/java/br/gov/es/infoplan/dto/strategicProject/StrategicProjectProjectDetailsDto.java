@@ -17,7 +17,6 @@ public class StrategicProjectProjectDetailsDto {
   private String descricaoProjeto;
   private String statusProjeto;
   private String responsavel;
-  private String funcaoResponsavel;
 
   public StrategicProjectProjectDetailsDto() {
   }
@@ -41,17 +40,15 @@ public class StrategicProjectProjectDetailsDto {
   }
 
   public StrategicProjectProjectDetailsDto(
-    int orgaoId,
-    String nomeOrgao,
-    int areaId,
-    String nomeArea,
-    int projetoId,
-    String nomeProjeto,
-    String descricaoProjeto,
-    String statusProjeto,
-    String responsavel,
-    String funcaoResponsavel
-  ) {
+      int orgaoId,
+      String nomeOrgao,
+      int areaId,
+      String nomeArea,
+      int projetoId,
+      String nomeProjeto,
+      String descricaoProjeto,
+      String statusProjeto,
+      String responsavel) {
     this.orgaoId = orgaoId;
     this.nomeOrgao = nomeOrgao;
     this.areaId = areaId;
@@ -61,7 +58,6 @@ public class StrategicProjectProjectDetailsDto {
     this.descricaoProjeto = descricaoProjeto;
     this.statusProjeto = statusProjeto;
     this.responsavel = responsavel;
-    this.funcaoResponsavel = funcaoResponsavel;
   }
 
   public int getContagemPE() {
@@ -170,13 +166,5 @@ public class StrategicProjectProjectDetailsDto {
 
   public void setResponsavel(String responsavel) {
     this.responsavel = responsavel;
-  }
-
-  public String getFuncaoResponsavel() {
-    return funcaoResponsavel;
-  }
-
-  public void setFuncaoResponsavel(String funcaoResponsavel) {
-    this.funcaoResponsavel = funcaoResponsavel;
   }
 }

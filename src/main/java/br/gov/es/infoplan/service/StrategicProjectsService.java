@@ -644,7 +644,6 @@ public class StrategicProjectsService extends PentahoBIService {
         dto.setDescricaoProjeto(firstEl.getDescricaoProjeto());
         dto.setStatusProjeto(firstEl.getStatusProjeto());
         dto.setResponsavel(firstEl.getResponsavel());
-        dto.setFuncaoResponsavel(firstEl.getFuncaoResponsavel());
       }
 
       return dto;
@@ -1168,8 +1167,7 @@ public class StrategicProjectsService extends PentahoBIService {
         rs.get("nome_projeto").asText(),
         rs.get("descricao").asText(),
         rs.get("status_projeto").asText(),
-        rs.get("responsavel").asText(),
-        rs.get("funcao").asText()
+        rs.get("responsavel").asText()
       ));
   }
 
