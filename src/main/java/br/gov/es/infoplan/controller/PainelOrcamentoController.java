@@ -61,7 +61,8 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaImpostosResponseDTO> responseList = painelOrcamentoService.getReceitaImpostoList(ano, mes, tipoFonte);
+        List<ReceitaImpostosResponseDTO> responseList = painelOrcamentoService
+                .getReceitaImpostoList(ano, mes, tipoFonte);
 
         return responseList;
     }
@@ -72,7 +73,8 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaICMSResponseDTO> responseList = painelOrcamentoService.getReceitaICMSList(ano, mes, tipoFonte);
+        List<ReceitaICMSResponseDTO> responseList = painelOrcamentoService
+                .getReceitaICMSList(ano, mes, tipoFonte);
 
         return responseList;
     }
@@ -83,7 +85,8 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaParticipacaoResponseDTO> responseList = painelOrcamentoService.getReceitaParticipacaoList(ano, mes, tipoFonte);
+        List<ReceitaParticipacaoResponseDTO> responseList = painelOrcamentoService
+                .getReceitaParticipacaoList(ano, mes, tipoFonte);
 
         return responseList;
     }
@@ -94,7 +97,8 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaDespesaGNDResponseDTO> responseList = painelOrcamentoService.getReceitaDespesaGNDList(ano, mes, tipoFonte);
+        List<ReceitaDespesaGNDResponseDTO> responseList = painelOrcamentoService
+                .getReceitaDespesaGNDList(ano, mes, tipoFonte);
 
         return responseList;
     }
@@ -107,9 +111,23 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaDespesaGNDTotalResponseDTO> responseList = painelOrcamentoService.getReceitaDespesaGNDTotalList(ano, mes, tipoFonte);
+        List<ReceitaDespesaGNDTotalResponseDTO> responseList = painelOrcamentoService
+                .getReceitaDespesaGNDTotalList(ano, mes, tipoFonte);
 
         return responseList;
+    }
+
+
+    @GetMapping("receita-transferencia-corrente")
+    public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrenteList(
+            @RequestParam Long ano,
+            @RequestParam int[] mes,
+            @RequestParam int[] tipoFonte
+    ) {
+        List<ReceitaTransferenciaCorrenteResponseDTO> response = painelOrcamentoService
+                .getReceitaTransferenciaCorrente(ano, mes, tipoFonte);
+
+        return response;
     }
 
 }

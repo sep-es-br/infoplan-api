@@ -76,6 +76,11 @@ public class PainelOrcamentoService {
     @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaDespesaGND}")
     private String targetpainelOrcamentoDashReceitaDespesaGND;
 
+    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaTransferenciaCorrente}")
+    private String dataAccessIdpainelOrcamentoDashReceitaTransferenciaCorrente;
+
+    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaTransferenciaCorrente}")
+    private String targetpainelOrcamentoDashReceitaTransferenciaCorrente;
 
 
     public ReceitaTotalResponseDTO getReceitaTotal(PainelOrcamentoRequestDTO painelOrcamento) {
@@ -147,7 +152,8 @@ public class PainelOrcamentoService {
     }
 
 
-    public List<ReceitaDespesaGNDResponseDTO> getReceitaDespesaGNDList(Long ano, int[] mes, int[] tipoFonte) {
+    public List<ReceitaDespesaGNDResponseDTO> getReceitaDespesaGNDList
+            (Long ano, int[] mes, int[] tipoFonte) {
 
         PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
@@ -161,7 +167,8 @@ public class PainelOrcamentoService {
     }
 
 
-    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList(Long ano, int[] mes, int[] tipoFonte) {
+    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList
+            (Long ano, int[] mes, int[] tipoFonte) {
         PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
@@ -173,16 +180,59 @@ public class PainelOrcamentoService {
         return response;
     }
 
+    public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrente
+            (Long ano, int[] mes, int[] tipoFonte) {
+        PainelOrcamentoRequestDTO requestDTO = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+
+        List<ReceitaTransferenciaCorrenteResponseDTO> response = consultarReceitaTransferenciaCorrente(requestDTO);
+
+        if(response.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return response;
+    }
+
+    private List<ReceitaTransferenciaCorrenteResponseDTO> consultarReceitaTransferenciaCorrente
+            (PainelOrcamentoRequestDTO request) {
+        HashMap<String, Object> params = params(request);
+        return apiUtils
+                .consult(
+                        targetpainelOrcamentoDashReceitaTransferenciaCorrente,
+                        dataAccessIdpainelOrcamentoDashReceitaTransferenciaCorrente,
+                        pmoPath,
+                        params, rs ->
+                                new ReceitaTransferenciaCorrenteResponseDTO(
+                                        rs.get("ano").asLong(),
+                                        rs.get("nome_item_patrimonial").asText(),
+                                        new BigDecimal(rs.get("vlr_receita_liquida")
+                                                .asDouble(2))
+                                                .setScale(2, RoundingMode.HALF_UP)
+                ));
+
+    }
+
     private List<ReceitaDespesaGNDTotalResponseDTO> consultarReceitaDespesaGNDTotal(PainelOrcamentoRequestDTO request) {
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetpainelOrcamentoDashReceitaDespesaGNDTotal, dataAccessIdpainelOrcamentoDashReceitaDespesaGNDTotal,
-                pmoPath, params, rs -> new ReceitaDespesaGNDTotalResponseDTO(
-                        rs.get("ano").asLong(),
-                        new BigDecimal(rs.get("vlr_orcado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_autorizado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_empenhado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_liquidado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_pago_com_rap").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
+        return apiUtils
+                .consult(
+                        targetpainelOrcamentoDashReceitaDespesaGNDTotal,
+                        dataAccessIdpainelOrcamentoDashReceitaDespesaGNDTotal,
+                        pmoPath,
+                        params,
+                        rs -> new ReceitaDespesaGNDTotalResponseDTO(
+                                                        rs.get("ano").asLong(),
+                                                        new BigDecimal(rs.get("vlr_orcado").asDouble(2))
+                                                                .setScale(2, RoundingMode.HALF_UP),
+                                                        new BigDecimal(rs.get("vlr_autorizado").asDouble(2))
+                                                                .setScale(2, RoundingMode.HALF_UP),
+                                                        new BigDecimal(rs.get("vlr_empenhado").asDouble(2))
+                                                                .setScale(2, RoundingMode.HALF_UP),
+                                                        new BigDecimal(rs.get("vlr_liquidado").asDouble(2))
+                                                                .setScale(2, RoundingMode.HALF_UP),
+                                                        new BigDecimal(rs.get("vlr_pago_com_rap")
+                                                                .asDouble(2))
+                                                                .setScale(2, RoundingMode.HALF_UP)
                 ));
     }
 
@@ -295,4 +345,5 @@ public class PainelOrcamentoService {
         PainelOrcamentoRequestDTO dto = new PainelOrcamentoRequestDTO(ano, mes, tipoFonte);
         return dto;
     }
+
 }

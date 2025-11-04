@@ -10,9 +10,10 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReceitaParticipacaoResponseDTO {
+public class ReceitaTransferenciaCorrenteResponseDTO {
     private Long ano;
     @JsonProperty("nome_item_patrimonial")
     private String nomeItemPatrimonial;
     private BigDecimal receitaLiquida;
+
 }

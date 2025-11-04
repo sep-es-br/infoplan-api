@@ -14,6 +14,5 @@ public class ReceitaImpostosResponseDTO {
     private Long ano;
     @JsonProperty("nome_item_patrimonial")
     private String nomeItemPatrimonial;
-    @JsonProperty("vlr_receita_liquida")
     private BigDecimal receitaLiquida;
 }

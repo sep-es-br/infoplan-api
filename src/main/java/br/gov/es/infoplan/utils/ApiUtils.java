@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,28 +33,6 @@ public class ApiUtils extends PentahoBIService {
             System.out.println(result);
 
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
-
-            resultset = resultset.stream()
-                    .map(map -> map.entrySet().stream()
-                            .collect(Collectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> {
-                                        JsonNode node = e.getValue();
-                                        if (node.isTextual()) {
-                                            try {
-                                                String original = node.asText();
-                                                byte[] bytes = original.getBytes(StandardCharsets.ISO_8859_1);
-                                                String corrigido = new String(bytes, StandardCharsets.UTF_8);
-                                                return new TextNode(corrigido);
-                                            } catch (Exception ex) {
-                                                return node;
-                                            }
-                                        }
-                                        return node;
-                                    }
-                            ))
-                    )
-                    .toList();
 
             return resultset.stream().map(mapper).toList();
 
