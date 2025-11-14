@@ -91,7 +91,7 @@ public class PainelOrcamentoController {
         return responseList;
     }
 
-    @GetMapping("receita-despesasGnd")
+    @GetMapping("receita-despesas-gnd")
     public List<ReceitaDespesaGNDResponseDTO> getReceitaDespesaGNDList(
             @RequestParam Long ano,
             @RequestParam int[] mes,
@@ -105,7 +105,7 @@ public class PainelOrcamentoController {
 
 
 
-    @GetMapping("receita-despesasGnd-total")
+    @GetMapping("receita-despesas-gnd-total")
     public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList(
             @RequestParam Long ano,
             @RequestParam int[] mes,

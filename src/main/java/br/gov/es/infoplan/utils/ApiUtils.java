@@ -33,7 +33,6 @@ public class ApiUtils extends PentahoBIService {
             System.out.println(result);
 
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
-
             return resultset.stream().map(mapper).toList();
 
         } catch (Exception e) {
