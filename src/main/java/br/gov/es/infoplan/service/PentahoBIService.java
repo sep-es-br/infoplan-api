@@ -49,7 +49,7 @@ public abstract class PentahoBIService {
         List<String> paramPairs = allParams.entrySet().stream()
                                     .map(entry -> entry.getKey() + "=" + entry.getValue())
                                     .toList();
-        
+
         strBuilder.append(String.join("&", paramPairs));
 
         return strBuilder.toString();
@@ -57,7 +57,8 @@ public abstract class PentahoBIService {
 
     protected abstract String buildEndpointUri(String target, String dataAccess, Map<String, Object> params);
 
-    protected String doRequest(String uri) throws Exception{
+
+    protected  String doRequest(String uri) throws Exception{
         
         String notEncoded = userId + ":" + password;
         String encodedAuth = "Basic " + Base64.getEncoder().encodeToString(notEncoded.getBytes());
@@ -73,7 +74,7 @@ public abstract class PentahoBIService {
         return restTemplate.exchange(RequestEntity.get(new URI(uri)).headers(headers).build(), String.class).getBody();
     }
 
-    protected List<Map<String, JsonNode>> extractDataFromResponse(String json) {
+    protected  List<Map<String, JsonNode>> extractDataFromResponse(String json) {
         ArrayList<Map<String, JsonNode>> lista = new ArrayList<>();
 
         try {
