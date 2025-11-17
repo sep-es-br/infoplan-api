@@ -3,6 +3,7 @@ package br.gov.es.infoplan.utils;
 import br.gov.es.infoplan.service.PentahoBIService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,26 @@ public class ApiUtils extends PentahoBIService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiUtils.class);
 
+//    public <T> List<T> consult(
+//            String target,
+//            String dataAccessId,
+//            String pmoPath,
+//            Map<String, Object> params,
+//            Function<Map<String, JsonNode>, T> mapper) {
+//
+//        try {
+//            String result = doRequest(buildEndpointUri(pmoPath, target, dataAccessId, params));
+//            System.out.println(result);
+//
+//            List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
+//            return resultset.stream().map(mapper).toList();
+//
+//        } catch (Exception e) {
+//            LOGGER.error("Error during consult: ", e);
+//            return List.of();
+//        }
+//    }
+
     public <T> List<T> consult(
             String target,
             String dataAccessId,
@@ -30,6 +51,9 @@ public class ApiUtils extends PentahoBIService {
 
         try {
             String result = doRequest(buildEndpointUri(pmoPath, target, dataAccessId, params));
+
+            // Corrigir as entidades HTML
+            result = StringEscapeUtils.unescapeHtml4(result);
             System.out.println(result);
 
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
