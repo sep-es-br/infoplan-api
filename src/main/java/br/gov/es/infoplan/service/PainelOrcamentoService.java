@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,9 +86,33 @@ public class PainelOrcamentoService {
 
     public ReceitaTotalResponseDTO getReceitaTotal(PainelOrcamentoRequestDTO painelOrcamento) {
         List<ReceitaTotalResponseDTO> listDTO = consultarReceitaTotal(painelOrcamento);
+
+        BigDecimal porcentagemLiquidadaPrevista = calcDivisorPrevistaRealizada(listDTO);
+
+        listDTO.stream().map(res -> {
+            res.setPorcentagem(porcentagemLiquidadaPrevista);
+            return res;
+        }).collect(Collectors.toList());
+
         return listDTO.isEmpty() ? new ReceitaTotalResponseDTO() : listDTO.get(0);
     }
 
+
+    private BigDecimal calcDivisorPrevistaRealizada(List<ReceitaTotalResponseDTO> receita) {
+        var response = receita.get(0);
+
+        BigDecimal receitaLiquida = response.getVlr_receita_liquida();
+        BigDecimal receitaPrevista = response.getVlr_receita_prevista();
+        BigDecimal porcetagem = new BigDecimal("100");
+
+//        System.out.println("receitaLiquida : " + receitaLiquida);
+//        System.out.println("receitaPrevista : " + receitaPrevista);
+        BigDecimal result = receitaLiquida.divide(receitaPrevista, 2, RoundingMode.HALF_UP);
+        BigDecimal multiply = result.multiply(porcetagem);
+
+//        System.out.println("porcentagem realizada: " + multiply);
+        return multiply;
+    }
 
     public List<ReceitaCategoriaResponseDTO> getReceitaCategoria(Long ano, int[] mes, int[] tipoFonte) {
         PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
@@ -172,6 +197,17 @@ public class PainelOrcamentoService {
         PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
+        ReceitaDespesaGNDTotalResponseDTO getIndex = response.get(1);
+        BigDecimal porcentagemEmpenhada = calcPorcetagemEmpenhada(getIndex);
+        BigDecimal porcentagemLiquidada = calcPorcetagemLiquidada(getIndex);
+//        System.out.println("porcetagem Liquidada: " + porcentagemLiquidada);
+//        System.out.println("porcetagem Empenhada: " + porcentagemEmpenhada);
+
+        response.stream().map(res -> {
+            res.setPorcentagemEmpenhada(porcentagemEmpenhada);
+            res.setPorcentagemLiquidada(porcentagemLiquidada);
+            return res;
+        }).collect(Collectors.toList());
 
         if(response.isEmpty()) {
             return Collections.emptyList();
@@ -179,6 +215,33 @@ public class PainelOrcamentoService {
 
         return response;
     }
+
+
+    private BigDecimal calcPorcetagemEmpenhada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
+        BigDecimal receitaEmpenhada = receitaDespesasGndTotal.getEmpenhado();
+        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
+        BigDecimal divisor = new BigDecimal("100");
+//        System.out.println("receitaEmpenhada : " + receitaEmpenhada);
+//        System.out.println("receitaAutorizada : " + receitaAutorizada);
+
+        BigDecimal division = receitaEmpenhada.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
+        BigDecimal porcentagem = division.multiply(divisor);
+
+        return porcentagem;
+    }
+
+    private BigDecimal calcPorcetagemLiquidada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
+        BigDecimal receitaLiquidadda = receitaDespesasGndTotal.getLiquidado();
+        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
+        BigDecimal divisor = new BigDecimal("100");
+
+        BigDecimal division = receitaLiquidadda.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
+//        System.out.println("DIVISÃO : " + division);
+        BigDecimal porcentagem = division.multiply(divisor);
+
+        return porcentagem;
+    }
+
 
     public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrente
             (Long ano, int[] mes, int[] tipoFonte) {

@@ -54,7 +54,7 @@ public class ApiUtils extends PentahoBIService {
 
             // Corrigir as entidades HTML
             result = StringEscapeUtils.unescapeHtml4(result);
-            System.out.println(result);
+//            System.out.println(result);
 
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
             return resultset.stream().map(mapper).toList();

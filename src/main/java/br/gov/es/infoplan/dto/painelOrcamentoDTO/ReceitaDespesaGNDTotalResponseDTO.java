@@ -27,4 +27,22 @@ public class ReceitaDespesaGNDTotalResponseDTO {
 
     @JsonProperty("vlr_pago_com_rap")
     private BigDecimal pagoComRap;
+
+    @JsonProperty("porcentagem_empenhada")
+    private BigDecimal porcentagemEmpenhada;
+
+    @JsonProperty("porcentagem_liquidada")
+    private BigDecimal porcentagemLiquidada;
+
+    @JsonProperty("porcentagem_realizada")
+    private BigDecimal porcentagemRealizada;
+
+    public ReceitaDespesaGNDTotalResponseDTO(Long ano, BigDecimal orcado, BigDecimal autorizado, BigDecimal empenhado, BigDecimal liquidado, BigDecimal pagoComRap) {
+        this.ano = ano;
+        this.orcado = orcado;
+        this.autorizado = autorizado;
+        this.empenhado = empenhado;
+        this.liquidado = liquidado;
+        this.pagoComRap = pagoComRap;
+    }
 }
