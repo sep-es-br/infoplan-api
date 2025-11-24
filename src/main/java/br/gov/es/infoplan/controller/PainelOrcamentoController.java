@@ -10,7 +10,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "${frontend.host}")
 @RestController
-@RequestMapping(value = "/painelOrcamento")
+@RequestMapping(value = "/execucaoOrcamentaria")
 @RequiredArgsConstructor
 public class PainelOrcamentoController {
 
