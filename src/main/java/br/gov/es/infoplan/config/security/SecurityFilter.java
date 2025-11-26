@@ -1,11 +1,22 @@
 package br.gov.es.infoplan.config.security;
 
+import br.gov.es.infoplan.exception.mensagens.MensagemErroRest;
+import br.gov.es.infoplan.service.AutenticacaoService;
+import br.gov.es.infoplan.service.TokenService;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.chrono.ChronoLocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,27 +27,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
-
-import br.gov.es.infoplan.exception.mensagens.MensagemErroRest;
-import br.gov.es.infoplan.service.TokenService;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.chrono.ChronoLocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.auth0.jwt.JWT;
-
 @Component
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
+    private final AutenticacaoService authSrv;
     
     @Value("${papel.geral}")
     private String papelGeral;
@@ -74,10 +70,8 @@ public class SecurityFilter extends OncePerRequestFilter {
 
                 List<String> roles = tokenService.getRoleFromToken(token);
 
-                HashMap<String, String> moduloPermissao = new HashMap<>();
-                moduloPermissao.put("/capitation", papelCapitacao);
-
-                for(Map.Entry<String,String> entry : moduloPermissao.entrySet()){
+                
+                for(Map.Entry<String,String> entry : this.authSrv.moduloPermissao.entrySet()){
                     if(request.getRequestURI().contains(entry.getKey()) && 
                         !checarPermissao(papelGeral, roles) &&
                         !checarPermissao(entry.getValue(), roles)){
