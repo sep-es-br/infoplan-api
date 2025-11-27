@@ -16,6 +16,7 @@ import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -37,24 +38,6 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Value("${papel.geral}")
     private String papelGeral;
     
-    @Value("${papel.capitacao}")
-    private String papelCapitacao;
-    
-    @Value("${papel.indicadores}")
-    private String papelIndicadores;
-    
-    @Value("${papel.indicadoresAdmin}")
-    private String papelIndicadoresAdmin;
-    
-    @Value("${papel.sigefes}")
-    private String papelSigefes;
-    
-    @Value("${papel.projEstrategico}")
-    private String papelProjEstrategico;
-    
-    @Value("${papel.gestaoFiscal}")
-    private String papelGestaoFiscal;
-    
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -68,22 +51,21 @@ public class SecurityFilter extends OncePerRequestFilter {
             try {
                 String subject = tokenService.validarToken(token);
 
-                List<String> roles = tokenService.getRoleFromToken(token);
-
+                List<String> roles = tokenService.getRoleFromToken(token);               
                 
-                for(Map.Entry<String,String> entry : this.authSrv.moduloPermissao.entrySet()){
-                    if(request.getRequestURI().contains(entry.getKey()) && 
-                        !checarPermissao(papelGeral, roles) &&
-                        !checarPermissao(entry.getValue(), roles)){
-                        enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey() + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
-                        return;
-                    }
-                } 
-
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roles);
-
+                if(!checarPermissao(papelGeral, roles)){
+                    for(Map.Entry<String,String> entry : this.authSrv.moduloPermissao.entrySet()){
+                        if(request.getRequestURI().contains(entry.getKey()) && 
+                            !checarPermissao(entry.getValue(), roles)){
+                            enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey() + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
+                            return;
+                        }
+                    } 
+                }
+                
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        subject, null, List.of(authority));
+                        subject, null, 
+                roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(Collectors.toList()));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JWTVerificationException e) {
