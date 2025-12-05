@@ -1,6 +1,7 @@
 package br.gov.es.infoplan.service;
 
-import br.gov.es.infoplan.dto.painelOrcamentoDTO.*;
+import br.gov.es.infoplan.dto.execucaoOrcamentariaDTO.*;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.utils.ApiUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class PainelOrcamentoService {
+public class ExecucaoOrcamentariaService {
 
     private final Logger LOGGER = LogManager.getLogger(PentahoBIService.class);
 
@@ -26,65 +26,65 @@ public class PainelOrcamentoService {
     private ApiUtils apiUtils;
 
 
-    @Value("${pentahoBI.painelOrcamento.path}")
+    @Value("${pentahoBI.execucaoOrcamentaria.path}")
     private String pmoPath;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaTotal}")
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaTotal}")
     private String targetPainelOrcamentoRecitaTotal;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaTotal}")
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaTotal}")
     private String dataAccessIdPainelOrcamentoRecitaTotal;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaCategoria}")
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaCategoria}")
     private String targetPainelOrcamentoRecitaCategoria;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaCategoria}")
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaCategoria}")
     private String dataAccessIdPainelOrcamentoCategoria;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaOrigem}")
-    private String targetpainelOrcamentoDashReceitaOrigem;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaOrigem}")
+    private String targetexecucaoOrcamentariaDashReceitaOrigem;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaOrigem}")
-    private String dataAccessIdpainelOrcamentoDashReceitaOrigem;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaOrigem}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaOrigem;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaImposto}")
-    private String dataAccessIdpainelOrcamentoDashReceitaImposto;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaImposto}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaImposto;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaImposto}")
-    private String targetpainelOrcamentoDashReceitaImposto;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaImposto}")
+    private String targetexecucaoOrcamentariaDashReceitaImposto;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaICMS}")
-    private String dataAccessIdpainelOrcamentoDashReceitaICMS;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaICMS}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaICMS;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaICMS}")
-    private String targetpainelOrcamentoDashReceitaICMS;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaICMS}")
+    private String targetexecucaoOrcamentariaDashReceitaICMS;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaParticipacao}")
-    private String dataAccessIdpainelOrcamentoDashReceitaParticipacao;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaParticipacao}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaParticipacao;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaParticipacao}")
-    private String targetpainelOrcamentoDashReceitaParticipacao;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaParticipacao}")
+    private String targetexecucaoOrcamentariaDashReceitaParticipacao;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaDespesaGNDTotal}")
-    private String dataAccessIdpainelOrcamentoDashReceitaDespesaGNDTotal;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaDespesaGNDTotal}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGNDTotal;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaDespesaGNDTotal}")
-    private String targetpainelOrcamentoDashReceitaDespesaGNDTotal;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaDespesaGNDTotal}")
+    private String targetexecucaoOrcamentariaDashReceitaDespesaGNDTotal;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaDespesaGND}")
-    private String dataAccessIdpainelOrcamentoDashReceitaDespesaGND;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaDespesaGND}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGND;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaDespesaGND}")
-    private String targetpainelOrcamentoDashReceitaDespesaGND;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaDespesaGND}")
+    private String targetexecucaoOrcamentariaDashReceitaDespesaGND;
 
-    @Value("${pentahoBI.pmo.dataAccessId.painelOrcamentoDashReceitaTransferenciaCorrente}")
-    private String dataAccessIdpainelOrcamentoDashReceitaTransferenciaCorrente;
+    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaTransferenciaCorrente}")
+    private String dataAccessIdexecucaoOrcamentariaDashReceitaTransferenciaCorrente;
 
-    @Value("${pentahoBI.pmo.target.painelOrcamentoDashReceitaTransferenciaCorrente}")
-    private String targetpainelOrcamentoDashReceitaTransferenciaCorrente;
+    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaTransferenciaCorrente}")
+    private String targetexecucaoOrcamentariaDashReceitaTransferenciaCorrente;
 
 
-    public ReceitaTotalResponseDTO getReceitaTotal(PainelOrcamentoRequestDTO painelOrcamento) {
+    public ReceitaTotalResponseDTO getReceitaTotal(ExecucaoOrcamentariaRequestDTO painelOrcamento) {
         List<ReceitaTotalResponseDTO> listDTO = consultarReceitaTotal(painelOrcamento);
 
         BigDecimal porcentagemLiquidadaPrevista = calcDivisorPrevistaRealizada(listDTO);
@@ -115,7 +115,7 @@ public class PainelOrcamentoService {
     }
 
     public List<ReceitaCategoriaResponseDTO> getReceitaCategoria(Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
         List<ReceitaCategoriaResponseDTO> receitaCategoriaList = consultarReceitaCategoria(request);
 
         if (receitaCategoriaList.isEmpty()) {
@@ -126,7 +126,7 @@ public class PainelOrcamentoService {
     }
 
     public List<ReceitaOrigemResponseDTO> getReceitaOrigemList(Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaOrigemResponseDTO> responseList = consultarRceitaOrigem(request);
 
@@ -139,7 +139,7 @@ public class PainelOrcamentoService {
 
 
     public List<ReceitaImpostosResponseDTO> getReceitaImpostoList(Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaImpostosResponseDTO> response = consultarReceitaImposto(request);
 
@@ -153,7 +153,7 @@ public class PainelOrcamentoService {
 
 
     public List<ReceitaICMSResponseDTO> getReceitaICMSList(Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaICMSResponseDTO> response = consultarReceitaICMS(request);
 
@@ -165,7 +165,7 @@ public class PainelOrcamentoService {
     }
 
     public List<ReceitaParticipacaoResponseDTO> getReceitaParticipacaoList(Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaParticipacaoResponseDTO> response = consultarReceitaParticipacao(request);
 
@@ -180,7 +180,7 @@ public class PainelOrcamentoService {
     public List<ReceitaDespesaGNDResponseDTO> getReceitaDespesaGNDList
             (Long ano, int[] mes, int[] tipoFonte) {
 
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaDespesaGNDResponseDTO> response = consultarReceitaDespesaGND(request);
 
@@ -194,7 +194,7 @@ public class PainelOrcamentoService {
 
     public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList
             (Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
         ReceitaDespesaGNDTotalResponseDTO getIndex = response.get(1);
@@ -245,7 +245,7 @@ public class PainelOrcamentoService {
 
     public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrente
             (Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO requestDTO = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+        ExecucaoOrcamentariaRequestDTO requestDTO = convertPaineOrcamentoDto(ano, mes, tipoFonte);
 
         List<ReceitaTransferenciaCorrenteResponseDTO> response = consultarReceitaTransferenciaCorrente(requestDTO);
 
@@ -257,12 +257,12 @@ public class PainelOrcamentoService {
     }
 
     private List<ReceitaTransferenciaCorrenteResponseDTO> consultarReceitaTransferenciaCorrente
-            (PainelOrcamentoRequestDTO request) {
+            (ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
         return apiUtils
                 .consult(
-                        targetpainelOrcamentoDashReceitaTransferenciaCorrente,
-                        dataAccessIdpainelOrcamentoDashReceitaTransferenciaCorrente,
+                        targetexecucaoOrcamentariaDashReceitaTransferenciaCorrente,
+                        dataAccessIdexecucaoOrcamentariaDashReceitaTransferenciaCorrente,
                         pmoPath,
                         params, rs ->
                                 new ReceitaTransferenciaCorrenteResponseDTO(
@@ -275,12 +275,12 @@ public class PainelOrcamentoService {
 
     }
 
-    private List<ReceitaDespesaGNDTotalResponseDTO> consultarReceitaDespesaGNDTotal(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaDespesaGNDTotalResponseDTO> consultarReceitaDespesaGNDTotal(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
         return apiUtils
                 .consult(
-                        targetpainelOrcamentoDashReceitaDespesaGNDTotal,
-                        dataAccessIdpainelOrcamentoDashReceitaDespesaGNDTotal,
+                        targetexecucaoOrcamentariaDashReceitaDespesaGNDTotal,
+                        dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGNDTotal,
                         pmoPath,
                         params,
                         rs -> new ReceitaDespesaGNDTotalResponseDTO(
@@ -299,9 +299,9 @@ public class PainelOrcamentoService {
                 ));
     }
 
-    private List<ReceitaDespesaGNDResponseDTO> consultarReceitaDespesaGND(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaDespesaGNDResponseDTO> consultarReceitaDespesaGND(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetpainelOrcamentoDashReceitaDespesaGND, dataAccessIdpainelOrcamentoDashReceitaDespesaGND,
+        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaDespesaGND, dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGND,
                 pmoPath, params, rs -> new ReceitaDespesaGNDResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("mes").asLong(),
@@ -315,9 +315,9 @@ public class PainelOrcamentoService {
                 ));
     }
 
-    private List<ReceitaParticipacaoResponseDTO> consultarReceitaParticipacao(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaParticipacaoResponseDTO> consultarReceitaParticipacao(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetpainelOrcamentoDashReceitaParticipacao, dataAccessIdpainelOrcamentoDashReceitaParticipacao,
+        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaParticipacao, dataAccessIdexecucaoOrcamentariaDashReceitaParticipacao,
                 pmoPath, params, rs -> new ReceitaParticipacaoResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("nome_item_patrimonial").asText(),
@@ -325,10 +325,10 @@ public class PainelOrcamentoService {
                 ));
     }
 
-    private List<ReceitaICMSResponseDTO> consultarReceitaICMS(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaICMSResponseDTO> consultarReceitaICMS(ExecucaoOrcamentariaRequestDTO request) {
 
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetpainelOrcamentoDashReceitaImposto, dataAccessIdpainelOrcamentoDashReceitaImposto,
+        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaICMS, dataAccessIdexecucaoOrcamentariaDashReceitaICMS,
                 pmoPath, params, rs -> new ReceitaICMSResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("nome_item_patrimonial").asText(),
@@ -336,10 +336,10 @@ public class PainelOrcamentoService {
                 ));
     }
 
-    private List<ReceitaImpostosResponseDTO> consultarReceitaImposto(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaImpostosResponseDTO> consultarReceitaImposto(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
 
-        return apiUtils.consult(targetpainelOrcamentoDashReceitaImposto, dataAccessIdpainelOrcamentoDashReceitaImposto,
+        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaImposto, dataAccessIdexecucaoOrcamentariaDashReceitaImposto,
                 pmoPath, params, rs -> new ReceitaImpostosResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("nome_item_patrimonial").asText(),
@@ -349,10 +349,10 @@ public class PainelOrcamentoService {
     }
 
 
-    private List<ReceitaOrigemResponseDTO> consultarRceitaOrigem(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaOrigemResponseDTO> consultarRceitaOrigem(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
 
-        return apiUtils.consult(targetpainelOrcamentoDashReceitaOrigem, dataAccessIdpainelOrcamentoDashReceitaOrigem,
+        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaOrigem, dataAccessIdexecucaoOrcamentariaDashReceitaOrigem,
                 pmoPath, params, rs -> new ReceitaOrigemResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("origem").asText(),
@@ -361,7 +361,7 @@ public class PainelOrcamentoService {
     }
 
 
-    private List<ReceitaCategoriaResponseDTO> consultarReceitaCategoria(PainelOrcamentoRequestDTO request) {
+    private List<ReceitaCategoriaResponseDTO> consultarReceitaCategoria(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
 
         return apiUtils.consult(targetPainelOrcamentoRecitaCategoria, dataAccessIdPainelOrcamentoCategoria, pmoPath,
@@ -373,7 +373,7 @@ public class PainelOrcamentoService {
     }
 
 
-    public List<ReceitaTotalResponseDTO> consultarReceitaTotal(PainelOrcamentoRequestDTO request) {
+    public List<ReceitaTotalResponseDTO> consultarReceitaTotal(ExecucaoOrcamentariaRequestDTO request) {
 
         HashMap<String, Object> params = params(request);
 
@@ -386,11 +386,12 @@ public class PainelOrcamentoService {
                         ).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(
                                 rs.get("vlr_receita_liquida").asDouble(2)
-                        ).setScale(2, RoundingMode.HALF_UP)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        rs.get("dt_fim_extracao").asText()
                 ));
     }
 
-    private HashMap<String, Object> params(PainelOrcamentoRequestDTO request) {
+    private HashMap<String, Object> params(ExecucaoOrcamentariaRequestDTO request) {
 
         String meses = Arrays.stream(request.getMes()).mapToObj(String::valueOf).collect(Collectors.joining(","));
         String tipoFontes = Arrays.stream(request.getTipoFonte()).mapToObj(String::valueOf).collect(Collectors.joining(","));
@@ -404,8 +405,8 @@ public class PainelOrcamentoService {
         return params;
     }
 
-    private PainelOrcamentoRequestDTO convertPaineOrcamentoDto(Long ano, int[] mes, int[] tipoFonte) {
-        PainelOrcamentoRequestDTO dto = new PainelOrcamentoRequestDTO(ano, mes, tipoFonte);
+    private ExecucaoOrcamentariaRequestDTO convertPaineOrcamentoDto(Long ano, int[] mes, int[] tipoFonte) {
+        ExecucaoOrcamentariaRequestDTO dto = new ExecucaoOrcamentariaRequestDTO(ano, mes, tipoFonte);
         return dto;
     }
 
