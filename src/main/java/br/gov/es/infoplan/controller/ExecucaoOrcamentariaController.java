@@ -1,7 +1,8 @@
 package br.gov.es.infoplan.controller;
 
-import br.gov.es.infoplan.dto.painelOrcamentoDTO.*;
-import br.gov.es.infoplan.service.PainelOrcamentoService;
+import br.gov.es.infoplan.dto.execucaoOrcamentariaDTO.*;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
+import br.gov.es.infoplan.service.ExecucaoOrcamentariaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +13,10 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/execucaoOrcamentaria")
 @RequiredArgsConstructor
-public class PainelOrcamentoController {
+public class ExecucaoOrcamentariaController {
 
     @Autowired
-    private PainelOrcamentoService painelOrcamentoService;
+    private ExecucaoOrcamentariaService execucaoOrcamentariaService;
 
     @GetMapping("receita-total")
     public ReceitaTotalResponseDTO getReceitaTotal(
@@ -24,11 +25,11 @@ public class PainelOrcamentoController {
             @RequestParam int[] tipoFonte
     ) {
 
-        PainelOrcamentoRequestDTO dto = new PainelOrcamentoRequestDTO();
+        ExecucaoOrcamentariaRequestDTO dto = new ExecucaoOrcamentariaRequestDTO();
         dto.setAno(ano);
         dto.setMes(mes);
         dto.setTipoFonte(tipoFonte);
-        ReceitaTotalResponseDTO receita = painelOrcamentoService.getReceitaTotal(dto);
+        ReceitaTotalResponseDTO receita = execucaoOrcamentariaService.getReceitaTotal(dto);
         return receita;
     }
 
@@ -39,7 +40,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] tipoFonte
     ) {
 
-        List<ReceitaCategoriaResponseDTO> reponse = painelOrcamentoService.getReceitaCategoria(ano, mes, tipoFonte);
+        List<ReceitaCategoriaResponseDTO> reponse = execucaoOrcamentariaService.getReceitaCategoria(ano, mes, tipoFonte);
         return reponse;
     }
 
@@ -50,7 +51,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaOrigemResponseDTO> responseList = painelOrcamentoService.getReceitaOrigemList(ano, mes, tipoFonte);
+        List<ReceitaOrigemResponseDTO> responseList = execucaoOrcamentariaService.getReceitaOrigemList(ano, mes, tipoFonte);
 
         return responseList;
     }
@@ -61,7 +62,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaImpostosResponseDTO> responseList = painelOrcamentoService
+        List<ReceitaImpostosResponseDTO> responseList = execucaoOrcamentariaService
                 .getReceitaImpostoList(ano, mes, tipoFonte);
 
         return responseList;
@@ -73,7 +74,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaICMSResponseDTO> responseList = painelOrcamentoService
+        List<ReceitaICMSResponseDTO> responseList = execucaoOrcamentariaService
                 .getReceitaICMSList(ano, mes, tipoFonte);
 
         return responseList;
@@ -85,7 +86,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaParticipacaoResponseDTO> responseList = painelOrcamentoService
+        List<ReceitaParticipacaoResponseDTO> responseList = execucaoOrcamentariaService
                 .getReceitaParticipacaoList(ano, mes, tipoFonte);
 
         return responseList;
@@ -97,7 +98,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaDespesaGNDResponseDTO> responseList = painelOrcamentoService
+        List<ReceitaDespesaGNDResponseDTO> responseList = execucaoOrcamentariaService
                 .getReceitaDespesaGNDList(ano, mes, tipoFonte);
 
         return responseList;
@@ -111,7 +112,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaDespesaGNDTotalResponseDTO> responseList = painelOrcamentoService
+        List<ReceitaDespesaGNDTotalResponseDTO> responseList = execucaoOrcamentariaService
                 .getReceitaDespesaGNDTotalList(ano, mes, tipoFonte);
 
         return responseList;
@@ -124,7 +125,7 @@ public class PainelOrcamentoController {
             @RequestParam int[] mes,
             @RequestParam int[] tipoFonte
     ) {
-        List<ReceitaTransferenciaCorrenteResponseDTO> response = painelOrcamentoService
+        List<ReceitaTransferenciaCorrenteResponseDTO> response = execucaoOrcamentariaService
                 .getReceitaTransferenciaCorrente(ano, mes, tipoFonte);
 
         return response;

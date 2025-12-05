@@ -1,4 +1,4 @@
-package br.gov.es.infoplan.dto.painelOrcamentoDTO;
+package br.gov.es.infoplan.dto.execucaoOrcamentariaDTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -8,12 +8,11 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class ReceitaCategoriaResponseDTO {
-
+@AllArgsConstructor
+public class ReceitaImpostosResponseDTO {
     private Long ano;
-    private String categoria;
+    @JsonProperty("nome_item_patrimonial")
+    private String nomeItemPatrimonial;
     private BigDecimal receitaLiquida;
-
 }
