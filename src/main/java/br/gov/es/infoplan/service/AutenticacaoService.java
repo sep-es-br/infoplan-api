@@ -44,8 +44,11 @@ public class AutenticacaoService {
     @Value("${papel.projEstrategico}")
     private String papelProjEstrategico;
     
-    @Value("${papel.gestaoFiscal}")
-    private String papelGestaoFiscal;
+//    @Value("${papel.gestaoFiscal}")
+//    private String papelGestaoFiscal;
+
+    @Value("${papel.planejamentoOrcamentario}")
+    private String papelPlanejamentoOrcamentario;
     
     private final Logger logger = LogManager.getLogger(AutenticacaoService.class);
     private final TokenService tokenService;
@@ -57,6 +60,7 @@ public class AutenticacaoService {
         moduloPermissao.put("/capitation", papelCapitacao);
         moduloPermissao.put("/execucaoOrcamentaria", papelSigefes);
         moduloPermissao.put("/strategicProjects", papelProjEstrategico);
+        moduloPermissao.put("/planejamentoOrcamentario", papelPlanejamentoOrcamentario);
     }
 
 
