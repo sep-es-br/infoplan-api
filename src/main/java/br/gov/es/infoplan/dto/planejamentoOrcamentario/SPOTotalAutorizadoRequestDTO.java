@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SPOTotalAutorizadoRequestDTO {
 
-    private Long[] ano;
+    private Long ano;
     private int[] mes;
     private int[] tipoFonte;
     private int[] gnd;
