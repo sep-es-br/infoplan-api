@@ -1,9 +1,6 @@
 package br.gov.es.infoplan.service;
 
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalPrevistoDTO;
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalAutorizadoDTO;
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalAutorizadoRequestDTO;
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalPrevistoRequestDTO;
+import br.gov.es.infoplan.dto.planejamentoOrcamentario.*;
 import br.gov.es.infoplan.utils.ApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +35,18 @@ public class PlanejamentoOrcamentarioService {
     @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioTotalAutorizado}")
     private String dataAccessIdplanejamentoOrcamentarioTotalAutorizado;
 
+    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioFiltroUos}")
+    private String targetplanejamentoOrcamentarioFiltroUos;
+
+    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioFiltroUos}")
+    private String dataAccessIdplanejamentoOrcamentarioFiltroUos;
+
+    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioFiltroPos}")
+    private String targetplanejamentoOrcamentarioFiltroPos;
+
+    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioFiltroPos}")
+    private String dataAccessIdplanejamentoOrcamentarioFiltroPos;
+
     public List<SPOTotalPrevistoDTO> getTotalPrevisto(
             SPOTotalPrevistoRequestDTO dto) {
         List<SPOTotalPrevistoDTO> totalPrevistoList = consultarTotalPrevisto(dto);
@@ -61,6 +70,58 @@ public class PlanejamentoOrcamentarioService {
         return totalAutorizadoList;
     }
 
+    public List<SPOFiltroUosDTO> getListUos() {
+        List<SPOFiltroUosDTO> list = consultarUos();
+
+        if(list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
+
+
+    public List<SPOFiltroPosDTO> getListPos(String[] codUos, String ano) {
+        List<SPOFiltroPosDTO> list = consultarPos(codUos, ano);
+
+        if(list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
+
+    private List<SPOFiltroPosDTO> consultarPos(String[] codUos, String ano) {
+        String codUosList = Arrays.stream(codUos).collect(Collectors.joining(","));
+        HashMap params = new HashMap<>();
+        params.put("parampCodUo",codUosList);
+        params.put("parampAno", ano);
+
+        return apiUtils.consult(
+                targetplanejamentoOrcamentarioFiltroPos,
+                dataAccessIdplanejamentoOrcamentarioFiltroPos,
+                pmoPath,
+                params,
+                rs -> new SPOFiltroPosDTO(
+                        rs.get("cod_po").asText(),
+                        rs.get("nome_po").asText()
+                )
+        );
+    }
+
+    private List<SPOFiltroUosDTO> consultarUos() {
+
+        return apiUtils.consult(
+            targetplanejamentoOrcamentarioFiltroUos,
+                dataAccessIdplanejamentoOrcamentarioFiltroUos,
+                pmoPath,
+                new HashMap<>(),
+                rs -> new SPOFiltroUosDTO(
+                    rs.get("cod_uo").asText(),
+                    rs.get("nome_uo").asText()
+                )
+
+        );
+    }
+
     private List<SPOTotalAutorizadoDTO> consultarTotalAutorizado(
             SPOTotalAutorizadoRequestDTO request
     ) {
@@ -72,11 +133,11 @@ public class PlanejamentoOrcamentarioService {
                 pmoPath,
                 params,
                 rs -> new SPOTotalAutorizadoDTO(
-                        new BigDecimal(rs.get("vlr_autorizado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_empenhado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_liquidado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_pago_com_rap").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_pago_sem_rap").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
+                        new BigDecimal(rs.get("vlr_autorizado").asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get("vlr_empenhado").asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get("vlr_liquidado").asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get("vlr_pago_com_rap").asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get("vlr_pago_sem_rap").asDouble(0)).setScale(2, RoundingMode.HALF_UP)
                 )
         );
     }
@@ -92,8 +153,8 @@ public class PlanejamentoOrcamentarioService {
                 pmoPath,
                 params,
                 rs -> new SPOTotalPrevistoDTO(
-                        new BigDecimal(rs.get("vlr_previsto").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get("vlr_contratado").asDouble(2)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get("vlr_previsto").asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get("vlr_contratado").asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         rs.get("dt_fim_extracao").asText()
                 )
         );
@@ -105,12 +166,9 @@ public class PlanejamentoOrcamentarioService {
         String uo = Arrays.stream(request.getUo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
         String gnd = Arrays.stream(request.getGnd()).mapToObj(String::valueOf).collect(Collectors.joining(","));
         String po = Arrays.stream(request.getPo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String ano = Arrays.stream(request.getAno())
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
         HashMap<String, Object> params = new HashMap<>();
 
-        params.put("parampAno", ano);
+        params.put("parampAno", request.getAno());
         params.put("parampFonte",tipoFontes);
         params.put("parampUo", uo);
         params.put("parampGnd", gnd);
@@ -126,12 +184,9 @@ public class PlanejamentoOrcamentarioService {
         String uo = Arrays.stream(request.getUo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
         String gnd = Arrays.stream(request.getGnd()).mapToObj(String::valueOf).collect(Collectors.joining(","));
         String po = Arrays.stream(request.getPo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String ano = Arrays.stream(request.getAno())
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
         HashMap<String, Object> params = new HashMap<>();
 
-        params.put("parampAno", ano);
+        params.put("parampAno", request.getAno());
         params.put("parampMes",meses);
         params.put("parampFonte",tipoFontes);
         params.put("parampUo", uo);
@@ -140,5 +195,4 @@ public class PlanejamentoOrcamentarioService {
 
         return params;
     }
-
 }

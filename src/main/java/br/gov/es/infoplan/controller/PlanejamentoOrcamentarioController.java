@@ -1,13 +1,11 @@
 package br.gov.es.infoplan.controller;
 
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalPrevistoDTO;
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalAutorizadoDTO;
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalAutorizadoRequestDTO;
-import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalPrevistoRequestDTO;
+import br.gov.es.infoplan.dto.planejamentoOrcamentario.*;
 import br.gov.es.infoplan.service.PlanejamentoOrcamentarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -20,7 +18,7 @@ public class PlanejamentoOrcamentarioController {
 
     @GetMapping("totalPrevisto")
     public List<SPOTotalPrevistoDTO> getTotalPrevisto(
-            @RequestParam Long[] ano,
+            @RequestParam Long ano,
             @RequestParam int[] tipoFonte,
             @RequestParam int[] uo,
             @RequestParam int[] po,
@@ -42,7 +40,7 @@ public class PlanejamentoOrcamentarioController {
 
     @GetMapping("totalAutorizado")
     public List<SPOTotalAutorizadoDTO> getTotalPrevisto(
-            @RequestParam Long[] ano,
+            @RequestParam Long ano,
             @RequestParam int[] tipoFonte,
             @RequestParam int[] mes,
             @RequestParam int[] uo,
@@ -63,4 +61,16 @@ public class PlanejamentoOrcamentarioController {
         return totalPrevisto;
     }
 
+
+    @GetMapping("filtroUos")
+    public List<SPOFiltroUosDTO> getListUos() {
+        List<SPOFiltroUosDTO> list = planejamentoOrcamentarioService.getListUos();
+        return list;
+    }
+
+    @GetMapping("filtroPos/{ano}/{codUos}")
+    public List<SPOFiltroPosDTO> getListPos(@PathVariable String[] codUos, @PathVariable String ano) {
+        List<SPOFiltroPosDTO> list = planejamentoOrcamentarioService.getListPos(codUos, ano);
+        return list;
+    }
 }

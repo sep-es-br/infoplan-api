@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SPOTotalPrevistoRequestDTO {
-    private Long[] ano;
+    private Long ano;
     private int[] tipoFonte;
     private int[] gnd;
     private int[] uo;
