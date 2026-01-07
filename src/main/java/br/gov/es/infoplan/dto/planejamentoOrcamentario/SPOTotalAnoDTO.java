@@ -10,14 +10,8 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SPODashboardPoDTO {
-    private String uo;
-
-    private String po;
-
-    private String sigla;
-
-    private String nome;
+public class SPOTotalAnoDTO {
+    private String ano;
 
     @JsonProperty("vlr_previsto")
     private BigDecimal previsto;
@@ -27,4 +21,15 @@ public class SPODashboardPoDTO {
 
     @JsonProperty("vlr_autorizado")
     private BigDecimal autorizado;
+
+    @JsonProperty("vlr_empenhado")
+    private BigDecimal empenhado;
+
+    @JsonProperty("vlr_pago")
+    private BigDecimal pago;
+
+    @JsonProperty("vlr_pago_com_rap")
+    private BigDecimal pagoComRap;
+
+
 }

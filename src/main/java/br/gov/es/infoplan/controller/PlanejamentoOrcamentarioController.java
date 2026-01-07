@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -47,9 +46,7 @@ public class PlanejamentoOrcamentarioController {
 
     @GetMapping("dashboardUo")
     List<SPODashboardUoDTO> getDashboardUoList(@Validated SPOFiltroDTO filtro) {
-
         List<SPODashboardUoDTO> listDashboard = planejamentoOrcamentarioService.getListDashboardUo(filtro);
-
         return listDashboard;
     }
 
@@ -58,4 +55,29 @@ public class PlanejamentoOrcamentarioController {
         List<SPODashboardPoDTO> list = planejamentoOrcamentarioService.getListDashboardPo(filtro);
         return list;
     }
+
+    @GetMapping("totalAutorizadoUo")
+    List<SPOTotalAutorizadoUoDTO> getTotalAutorizadoUoList(@Validated SPOFiltroDTO filtro) {
+        List<SPOTotalAutorizadoUoDTO> list = planejamentoOrcamentarioService.getTotalAutorizadoUoList(filtro);
+        return list;
+    }
+
+    @GetMapping("totalAutorizadoPo")
+    List<SPOTotalAutorizadoPoDTO> getTotalAutorizadoPoList(@Validated SPOFiltroDTO filtro) {
+        List<SPOTotalAutorizadoPoDTO> list = planejamentoOrcamentarioService.getTotalAutorizadoPoList(filtro);
+        return list;
+    }
+
+    @GetMapping("totalAno")
+    List<SPOTotalAnoDTO> getTotalAno(@Validated SPOFiltroDTO filtro) {
+        List<SPOTotalAnoDTO> list = planejamentoOrcamentarioService.getTotalAno(filtro);
+        return list;
+    }
+
+    @GetMapping("totalAnoSigefes")
+    List<SPOTotalAnoSigefes> getTotalAnoSigefes(@Validated SPOFiltroDTO filtro) {
+        List<SPOTotalAnoSigefes> list = planejamentoOrcamentarioService.getTotalAnoSigefes(filtro);
+        return list;
+    }
+
 }

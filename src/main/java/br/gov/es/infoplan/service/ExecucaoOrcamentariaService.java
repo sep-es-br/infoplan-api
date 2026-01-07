@@ -1,8 +1,12 @@
 package br.gov.es.infoplan.service;
 
+import br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys;
+import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.dto.execucaoOrcamentariaDTO.*;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.utils.ApiUtils;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,71 +22,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ExecucaoOrcamentariaService {
-
-    private final Logger LOGGER = LogManager.getLogger(PentahoBIService.class);
 
     @Autowired
     private ApiUtils apiUtils;
 
+    @Autowired
+    private PentahoBiProperties properties;
 
-    @Value("${pentahoBI.execucaoOrcamentaria.path}")
     private String pmoPath;
 
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaTotal}")
-    private String targetPainelOrcamentoRecitaTotal;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaTotal}")
-    private String dataAccessIdPainelOrcamentoRecitaTotal;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaCategoria}")
-    private String targetPainelOrcamentoRecitaCategoria;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaCategoria}")
-    private String dataAccessIdPainelOrcamentoCategoria;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaOrigem}")
-    private String targetexecucaoOrcamentariaDashReceitaOrigem;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaOrigem}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaOrigem;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaImposto}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaImposto;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaImposto}")
-    private String targetexecucaoOrcamentariaDashReceitaImposto;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaICMS}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaICMS;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaICMS}")
-    private String targetexecucaoOrcamentariaDashReceitaICMS;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaParticipacao}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaParticipacao;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaParticipacao}")
-    private String targetexecucaoOrcamentariaDashReceitaParticipacao;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaDespesaGNDTotal}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGNDTotal;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaDespesaGNDTotal}")
-    private String targetexecucaoOrcamentariaDashReceitaDespesaGNDTotal;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaDespesaGND}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGND;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaDespesaGND}")
-    private String targetexecucaoOrcamentariaDashReceitaDespesaGND;
-
-    @Value("${pentahoBI.pmo.dataAccessId.execucaoOrcamentariaDashReceitaTransferenciaCorrente}")
-    private String dataAccessIdexecucaoOrcamentariaDashReceitaTransferenciaCorrente;
-
-    @Value("${pentahoBI.pmo.target.execucaoOrcamentariaDashReceitaTransferenciaCorrente}")
-    private String targetexecucaoOrcamentariaDashReceitaTransferenciaCorrente;
-
+    @PostConstruct
+    public void init() {
+        this.pmoPath = properties.getExecucaoOrcamentaria().getPath();
+        log.info("PMO Path inicializado: {}", pmoPath);
+    }
 
     public ReceitaTotalResponseDTO getReceitaTotal(ExecucaoOrcamentariaRequestDTO painelOrcamento) {
         List<ReceitaTotalResponseDTO> listDTO = consultarReceitaTotal(painelOrcamento);
@@ -105,12 +60,9 @@ public class ExecucaoOrcamentariaService {
         BigDecimal receitaPrevista = response.getVlr_receita_prevista();
         BigDecimal porcetagem = new BigDecimal("100");
 
-//        System.out.println("receitaLiquida : " + receitaLiquida);
-//        System.out.println("receitaPrevista : " + receitaPrevista);
         BigDecimal result = receitaLiquida.divide(receitaPrevista, 2, RoundingMode.HALF_UP);
         BigDecimal multiply = result.multiply(porcetagem);
 
-//        System.out.println("porcentagem realizada: " + multiply);
         return multiply;
     }
 
@@ -236,7 +188,6 @@ public class ExecucaoOrcamentariaService {
         BigDecimal divisor = new BigDecimal("100");
 
         BigDecimal division = receitaLiquidadda.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
-//        System.out.println("DIVISÃO : " + division);
         BigDecimal porcentagem = division.multiply(divisor);
 
         return porcentagem;
@@ -259,10 +210,13 @@ public class ExecucaoOrcamentariaService {
     private List<ReceitaTransferenciaCorrenteResponseDTO> consultarReceitaTransferenciaCorrente
             (ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaTransferenciaCorrente");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaTransferenciaCorrente");
+
         return apiUtils
                 .consult(
-                        targetexecucaoOrcamentariaDashReceitaTransferenciaCorrente,
-                        dataAccessIdexecucaoOrcamentariaDashReceitaTransferenciaCorrente,
+                        target,
+                        dataAccessId,
                         pmoPath,
                         params, rs ->
                                 new ReceitaTransferenciaCorrenteResponseDTO(
@@ -277,10 +231,13 @@ public class ExecucaoOrcamentariaService {
 
     private List<ReceitaDespesaGNDTotalResponseDTO> consultarReceitaDespesaGNDTotal(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaDespesaGNDTotal");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaDespesaGNDTotal");
+
         return apiUtils
                 .consult(
-                        targetexecucaoOrcamentariaDashReceitaDespesaGNDTotal,
-                        dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGNDTotal,
+                        target,
+                        dataAccessId,
                         pmoPath,
                         params,
                         rs -> new ReceitaDespesaGNDTotalResponseDTO(
@@ -301,8 +258,15 @@ public class ExecucaoOrcamentariaService {
 
     private List<ReceitaDespesaGNDResponseDTO> consultarReceitaDespesaGND(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaDespesaGND, dataAccessIdexecucaoOrcamentariaDashReceitaDespesaGND,
-                pmoPath, params, rs -> new ReceitaDespesaGNDResponseDTO(
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaDespesaGND");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaDespesaGND");
+
+        return apiUtils
+                .consult(
+                        target,
+                        dataAccessId,
+                        pmoPath,
+                        params, rs -> new ReceitaDespesaGNDResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("mes").asLong(),
                         rs.get("nome_gnd").asText(),
@@ -317,8 +281,15 @@ public class ExecucaoOrcamentariaService {
 
     private List<ReceitaParticipacaoResponseDTO> consultarReceitaParticipacao(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaParticipacao, dataAccessIdexecucaoOrcamentariaDashReceitaParticipacao,
-                pmoPath, params, rs -> new ReceitaParticipacaoResponseDTO(
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaParticipacao");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaParticipacao");
+
+        return apiUtils
+                .consult(
+                        target,
+                        dataAccessId,
+                        pmoPath,
+                        params, rs -> new ReceitaParticipacaoResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("nome_item_patrimonial").asText(),
                         new BigDecimal(rs.get("vlr_receita_liquida").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
@@ -328,8 +299,15 @@ public class ExecucaoOrcamentariaService {
     private List<ReceitaICMSResponseDTO> consultarReceitaICMS(ExecucaoOrcamentariaRequestDTO request) {
 
         HashMap<String, Object> params = params(request);
-        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaICMS, dataAccessIdexecucaoOrcamentariaDashReceitaICMS,
-                pmoPath, params, rs -> new ReceitaICMSResponseDTO(
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaICMS");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaICMS");
+
+        return apiUtils
+                .consult(
+                        target,
+                        dataAccessId,
+                        pmoPath,
+                        params, rs -> new ReceitaICMSResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("nome_item_patrimonial").asText(),
                         new BigDecimal(rs.get("vlr_receita_liquida").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
@@ -338,9 +316,15 @@ public class ExecucaoOrcamentariaService {
 
     private List<ReceitaImpostosResponseDTO> consultarReceitaImposto(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaImposto");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaImposto");
 
-        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaImposto, dataAccessIdexecucaoOrcamentariaDashReceitaImposto,
-                pmoPath, params, rs -> new ReceitaImpostosResponseDTO(
+        return apiUtils
+                .consult(
+                        target,
+                        dataAccessId,
+                        pmoPath,
+                        params, rs -> new ReceitaImpostosResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("nome_item_patrimonial").asText(),
                         new BigDecimal(rs.get("vlr_receita_liquida").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
@@ -351,9 +335,15 @@ public class ExecucaoOrcamentariaService {
 
     private List<ReceitaOrigemResponseDTO> consultarRceitaOrigem(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaOrigem");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaOrigem");
 
-        return apiUtils.consult(targetexecucaoOrcamentariaDashReceitaOrigem, dataAccessIdexecucaoOrcamentariaDashReceitaOrigem,
-                pmoPath, params, rs -> new ReceitaOrigemResponseDTO(
+        return apiUtils
+                .consult(
+                        target,
+                        dataAccessId,
+                        pmoPath,
+                        params, rs -> new ReceitaOrigemResponseDTO(
                         rs.get("ano").asLong(),
                         rs.get("origem").asText(),
                         new BigDecimal(rs.get("vlr_receita_liquida").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
@@ -363,12 +353,18 @@ public class ExecucaoOrcamentariaService {
 
     private List<ReceitaCategoriaResponseDTO> consultarReceitaCategoria(ExecucaoOrcamentariaRequestDTO request) {
         HashMap<String, Object> params = params(request);
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaCategoria");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaCategoria");
 
-        return apiUtils.consult(targetPainelOrcamentoRecitaCategoria, dataAccessIdPainelOrcamentoCategoria, pmoPath,
-                params, rs -> new ReceitaCategoriaResponseDTO(
-                    rs.get("ano").asLong(),
-                    rs.get("categoria").asText(),
-                    new BigDecimal(rs.get("vlr_receita_liquida").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
+        return apiUtils
+                .consult(
+                        target,
+                        dataAccessId,
+                        pmoPath,
+                        params, rs -> new ReceitaCategoriaResponseDTO(
+                        rs.get("ano").asLong(),
+                        rs.get("categoria").asText(),
+                        new BigDecimal(rs.get("vlr_receita_liquida").asDouble(2)).setScale(2, RoundingMode.HALF_UP)
                 ));
     }
 
@@ -376,8 +372,9 @@ public class ExecucaoOrcamentariaService {
     public List<ReceitaTotalResponseDTO> consultarReceitaTotal(ExecucaoOrcamentariaRequestDTO request) {
 
         HashMap<String, Object> params = params(request);
-
-        return apiUtils.consult(targetPainelOrcamentoRecitaTotal, dataAccessIdPainelOrcamentoRecitaTotal, pmoPath, params,
+        String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaTotal");
+        String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaTotal");
+        return apiUtils.consult(target, dataAccessId, pmoPath, params,
                 rs -> new ReceitaTotalResponseDTO(
                         rs.get("ano").asInt(),
                         new BigDecimal(
