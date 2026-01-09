@@ -1,65 +1,40 @@
 package br.gov.es.infoplan.service;
 
+import br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys;
 import br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigParams;
+import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.config.spo.SPOPentahoConfigKey;
 import br.gov.es.infoplan.dto.planejamentoOrcamentario.*;
 import br.gov.es.infoplan.utils.ApiUtils;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PlanejamentoOrcamentarioService {
 
     @Autowired
     private ApiUtils apiUtils;
 
-    @Value("${pentahoBI.planejamentoOrcamentario.path}")
+    @Autowired
+    private PentahoBiProperties properties;
+
     private String pmoPath;
 
-    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioTotalPrevisto}")
-    private String targetplanejamentoOrcamentarioTotalPrevisto;
 
-    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioTotalPrevisto}")
-    private String dataAccessIdplanejamentoOrcamentarioTotalPrevisto;
-
-    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioTotalAutorizado}")
-    private String targetplanejamentoOrcamentarioTotalAutorizado;
-
-    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioTotalAutorizado}")
-    private String dataAccessIdplanejamentoOrcamentarioTotalAutorizado;
-
-    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioFiltroUos}")
-    private String targetplanejamentoOrcamentarioFiltroUos;
-
-    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioFiltroUos}")
-    private String dataAccessIdplanejamentoOrcamentarioFiltroUos;
-
-    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioFiltroPos}")
-    private String targetplanejamentoOrcamentarioFiltroPos;
-
-    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioFiltroPos}")
-    private String dataAccessIdplanejamentoOrcamentarioFiltroPos;
-
-    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioDashboardUo}")
-    private String targetplanejamentoOrcamentarioDashboardUo;
-
-    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioDashboardUo}")
-    private String dataAccessIdplanejamentoOrcamentarioDashboardUo;
-
-    @Value("${pentahoBI.pmo.target.planejamentoOrcamentarioDashboardPo}")
-    private String targetplanejamentoOrcamentarioDashboardPo;
-
-    @Value("${pentahoBI.pmo.dataAccessId.planejamentoOrcamentarioDashboardPo}")
-    private String dataAccessIdplanejamentoOrcamentarioDashboardPo;
+    @PostConstruct
+    public void init() {
+        this.pmoPath = properties.getPlanejamentoOrcamentario().getPath();
+        log.info("PMO Path inicializado: {}", pmoPath);
+    }
 
     public List<SPOTotalPrevistoDTO> getTotalPrevisto(
             SPOFiltroDTO dto) {
@@ -96,17 +71,179 @@ public class PlanejamentoOrcamentarioService {
         return list;
     }
 
-    private List<SPODashboardPoDTO> consultarDashboardPo(SPOFiltroDTO filtro) {
+    public List<SPOTotalAutorizadoUoDTO> getTotalAutorizadoUoList(SPOFiltroDTO filtro) {
+        List<SPOTotalAutorizadoUoDTO> list = consultarTotalAutorizadoUo(filtro);
+
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoUoDTO()));
+        }
+
+        list.forEach(res -> {
+            BigDecimal pctE = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemEmpenhado());
+            BigDecimal pctL = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemLiquidado());
+            BigDecimal pctP = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemPagoSemRap());
+
+            res.setPorcentagemEmpenhado(pctE);
+            res.setPorcentagemLiquidado(pctL);
+            res.setPorcentagemPagoSemRap(pctP);
+        });
+
+        return list;
+    }
+
+
+    public List<SPOTotalAutorizadoPoDTO> getTotalAutorizadoPoList(SPOFiltroDTO filtro) {
+        List<SPOTotalAutorizadoPoDTO> list = consultarTotalAutorizadoPo(filtro);
+
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoPoDTO()));
+        }
+
+        list.forEach(res -> {
+            BigDecimal pctE = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemEmpenhado());
+            BigDecimal pctL = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemLiquidado());
+            BigDecimal pctP = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemPagoSemRap());
+
+            res.setPorcentagemEmpenhado(pctE);
+            res.setPorcentagemLiquidado(pctL);
+            res.setPorcentagemPagoSemRap(pctP);
+        });
+
+        return list;
+    }
+
+    public List<SPOTotalAnoDTO> getTotalAno(SPOFiltroDTO filtro) {
+        List<SPOTotalAnoDTO> list = consultarTotalAno(filtro);
+        return list;
+    }
+
+    public List<SPOTotalAnoSigefes> getTotalAnoSigefes(SPOFiltroDTO filtro) {
+        List<SPOTotalAnoSigefes> list = consultarTotalAnoSigefes(filtro);
+        return list;
+    }
+
+    private List<SPOTotalAnoSigefes> consultarTotalAnoSigefes(SPOFiltroDTO filtro) {
         HashMap<String, Object> params = paramsTotalAutorizado(filtro);
 
+        String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO_SIGEFES);
+        String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO_SIGEFES);
+
         return apiUtils.consult(
-                targetplanejamentoOrcamentarioDashboardPo,
-                dataAccessIdplanejamentoOrcamentarioDashboardPo,
+                target,
+                dataAccessId,
+                pmoPath,
+                params,
+                rs -> new SPOTotalAnoSigefes(
+                        rs.get(SPOPentahoConfigKey.ANO).asText(),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO_COM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
+
+                )
+        );
+    }
+
+    private List<SPOTotalAnoDTO> consultarTotalAno(SPOFiltroDTO filtro) {
+        HashMap<String, Object> params = paramsTotalAutorizado(filtro);
+
+        String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO);
+        String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO);
+
+        return apiUtils.consult(
+                target,
+                dataAccessId,
+                pmoPath,
+                params,
+                rs -> new SPOTotalAnoDTO(
+                    rs.get(SPOPentahoConfigKey.ANO).asText(),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_CONTRATADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO_COM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
+
+                )
+        );
+    }
+    private List<SPOTotalAutorizadoPoDTO> consultarTotalAutorizadoPo(SPOFiltroDTO filtro) {
+        HashMap<String, Object> params = paramsTotalAutorizado(filtro);
+
+        String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_PO);
+        String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_PO);
+
+        return apiUtils.consult(
+                target,
+                dataAccessId,
+                pmoPath,
+                params,
+                rs -> new SPOTotalAutorizadoPoDTO(
+                        rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
+                        rs.get(SPOPentahoConfigKey.UO).asText(),
+                        rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                        rs.get(SPOPentahoConfigKey.PO).asText(),
+                        rs.get(SPOPentahoConfigKey.NOME).asText(),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
+
+                )
+        );
+    }
+
+    private List<SPOTotalAutorizadoUoDTO> consultarTotalAutorizadoUo(SPOFiltroDTO filtro) {
+        HashMap<String, Object> params = paramsTotalAutorizado(filtro);
+
+        String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_UO);
+        String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_UO);
+
+        return apiUtils.consult(
+                target,
+                dataAccessId,
+                pmoPath,
+                params,
+                rs -> new SPOTotalAutorizadoUoDTO(
+                        rs.get(SPOPentahoConfigKey.UO).asText(),
+                        rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                        rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
+                )
+        );
+    }
+
+
+    private List<SPODashboardPoDTO> consultarDashboardPo(SPOFiltroDTO filtro) {
+        HashMap<String, Object> params = paramsTotalAutorizado(filtro);
+        String target = properties.getTargetOrThrow("planejamentoOrcamentarioDashboardPo");
+        String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioDashboardPo");
+        return apiUtils.consult(
+                target,
+                dataAccessId,
                 pmoPath,
                 params,
                 rs -> new SPODashboardPoDTO(
-                        rs.get(SPOPentahoConfigKey.PO).asText(),
+                        rs.get(SPOPentahoConfigKey.UO).asText(),
                         rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                        rs.get(SPOPentahoConfigKey.PO).asText(),
                         rs.get(SPOPentahoConfigKey.NOME).asText(),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
@@ -121,9 +258,11 @@ public class PlanejamentoOrcamentarioService {
     private List<SPODashboardUoDTO> consultarDashboardUo(SPOFiltroDTO filtro) {
        HashMap<String, Object> params = paramsTotalAutorizado(filtro);
 
-       return apiUtils.consult(
-               targetplanejamentoOrcamentarioDashboardUo,
-               dataAccessIdplanejamentoOrcamentarioDashboardUo,
+        String target = properties.getTargetOrThrow("planejamentoOrcamentarioDashboardUo");
+        String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioDashboardUo");
+        return apiUtils.consult(
+                target,
+                dataAccessId,
                pmoPath,
                params,
                rs -> new SPODashboardUoDTO(
@@ -146,9 +285,11 @@ public class PlanejamentoOrcamentarioService {
         params.put("parampCodUo",codUosList);
         params.put("parampAno", ano);
 
+        String target = properties.getTargetOrThrow("planejamentoOrcamentarioFiltroPos");
+        String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioFiltroPos");
         return apiUtils.consult(
-                targetplanejamentoOrcamentarioFiltroPos,
-                dataAccessIdplanejamentoOrcamentarioFiltroPos,
+                target,
+                dataAccessId,
                 pmoPath,
                 params,
                 rs -> new SPOFiltroPosDTO(
@@ -159,9 +300,11 @@ public class PlanejamentoOrcamentarioService {
     }
 
     private List<SPOFiltroUosDTO> consultarUos() {
+        String target = properties.getTargetOrThrow("planejamentoOrcamentarioFiltroUos");
+        String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioFiltroUos");
         return apiUtils.consult(
-            targetplanejamentoOrcamentarioFiltroUos,
-                dataAccessIdplanejamentoOrcamentarioFiltroUos,
+                target,
+                dataAccessId,
                 pmoPath,
                 new HashMap<>(),
                 rs -> new SPOFiltroUosDTO(
@@ -174,10 +317,11 @@ public class PlanejamentoOrcamentarioService {
 
     private List<SPOTotalAutorizadoDTO> consultarTotalAutorizado(SPOFiltroDTO request) {
         HashMap<String, Object> params = paramsTotalAutorizado(request);
-
+        String target = properties.getTargetOrThrow("planejamentoOrcamentarioTotalAutorizado");
+        String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioTotalAutorizado");
         return apiUtils.consult(
-                targetplanejamentoOrcamentarioTotalAutorizado,
-                dataAccessIdplanejamentoOrcamentarioTotalAutorizado,
+                target,
+                dataAccessId,
                 pmoPath,
                 params,
                 rs -> new SPOTotalAutorizadoDTO(
@@ -189,7 +333,7 @@ public class PlanejamentoOrcamentarioService {
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO_COM_RAP)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_COM_RAP)
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
                 )
         );
@@ -199,10 +343,11 @@ public class PlanejamentoOrcamentarioService {
             SPOFiltroDTO request
     ) {
         HashMap<String, Object> params = paramsTotalPrevisto(request);
-
+        String target = properties.getTargetOrThrow("planejamentoOrcamentarioTotalPrevisto");
+        String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioTotalPrevisto");
         return apiUtils.consult(
-                targetplanejamentoOrcamentarioTotalPrevisto,
-                dataAccessIdplanejamentoOrcamentarioTotalPrevisto,
+                target,
+                dataAccessId,
                 pmoPath,
                 params,
                 rs -> new SPOTotalPrevistoDTO(
