@@ -74,46 +74,42 @@ public class PlanejamentoOrcamentarioService {
     public List<SPOTotalAutorizadoUoDTO> getTotalAutorizadoUoList(SPOFiltroDTO filtro) {
         List<SPOTotalAutorizadoUoDTO> list = consultarTotalAutorizadoUo(filtro);
 
-        SPOTotalAutorizadoUoDTO response = list.get(0);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoUoDTO()));
+        }
 
-        BigDecimal porcentagemEmpenhado = SPOTotalAutorizadoUoDTO.
-                calcularPorcentagem(response.getPorcentagemAutorizado(), response.getPorcentagemEmpenhado());
-        BigDecimal porcentagemLiquidado = SPOTotalAutorizadoUoDTO.
-                calcularPorcentagem(response.getPorcentagemAutorizado(), response.getPorcentagemLiquidado());
-        BigDecimal porcentagemPagoSemRap = SPOTotalAutorizadoUoDTO.
-                calcularPorcentagem(response.getPorcentagemAutorizado(), response.getPorcentagemPagoSemRap());
+        list.forEach(res -> {
+            BigDecimal pctE = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemEmpenhado());
+            BigDecimal pctL = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemLiquidado());
+            BigDecimal pctP = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemPagoSemRap());
 
-        list.stream().map((res) -> {
-            res.setPorcentagemEmpenhado(porcentagemEmpenhado);
-            res.setPorcentagemLiquidado(porcentagemLiquidado);
-            res.setPorcentagemPagoSemRap(porcentagemPagoSemRap);
-            return res;
-        }).collect(Collectors.toList());
+            res.setPorcentagemEmpenhado(pctE);
+            res.setPorcentagemLiquidado(pctL);
+            res.setPorcentagemPagoSemRap(pctP);
+        });
 
-        return list.isEmpty() ? new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoUoDTO())) : list;
+        return list;
     }
 
 
     public List<SPOTotalAutorizadoPoDTO> getTotalAutorizadoPoList(SPOFiltroDTO filtro) {
         List<SPOTotalAutorizadoPoDTO> list = consultarTotalAutorizadoPo(filtro);
 
-        SPOTotalAutorizadoPoDTO response = list.get(0);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoPoDTO()));
+        }
 
-        BigDecimal porcentagemEmpenhado = SPOTotalAutorizadoUoDTO.
-                calcularPorcentagem(response.getPorcentagemAutorizado(), response.getPorcentagemEmpenhado());
-        BigDecimal porcentagemLiquidado = SPOTotalAutorizadoUoDTO.
-                calcularPorcentagem(response.getPorcentagemAutorizado(), response.getPorcentagemLiquidado());
-        BigDecimal porcentagemPagoSemRap = SPOTotalAutorizadoUoDTO.
-                calcularPorcentagem(response.getPorcentagemAutorizado(), response.getPorcentagemPagoSemRap());
+        list.forEach(res -> {
+            BigDecimal pctE = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemEmpenhado());
+            BigDecimal pctL = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemLiquidado());
+            BigDecimal pctP = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(), res.getPorcentagemPagoSemRap());
 
-        list.stream().map((res) -> {
-            res.setPorcentagemEmpenhado(porcentagemEmpenhado);
-            res.setPorcentagemLiquidado(porcentagemLiquidado);
-            res.setPorcentagemPagoSemRap(porcentagemPagoSemRap);
-            return res;
-        }).collect(Collectors.toList());
+            res.setPorcentagemEmpenhado(pctE);
+            res.setPorcentagemLiquidado(pctL);
+            res.setPorcentagemPagoSemRap(pctP);
+        });
 
-        return list.isEmpty() ? new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoPoDTO())) : list;
+        return list;
     }
 
     public List<SPOTotalAnoDTO> getTotalAno(SPOFiltroDTO filtro) {
@@ -221,6 +217,7 @@ public class PlanejamentoOrcamentarioService {
                 rs -> new SPOTotalAutorizadoUoDTO(
                         rs.get(SPOPentahoConfigKey.UO).asText(),
                         rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                        rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
@@ -245,8 +242,8 @@ public class PlanejamentoOrcamentarioService {
                 params,
                 rs -> new SPODashboardPoDTO(
                         rs.get(SPOPentahoConfigKey.UO).asText(),
-                        rs.get(SPOPentahoConfigKey.PO).asText(),
                         rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                        rs.get(SPOPentahoConfigKey.PO).asText(),
                         rs.get(SPOPentahoConfigKey.NOME).asText(),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),

@@ -1,24 +1,17 @@
 package br.gov.es.infoplan.service;
 
-import br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys;
 import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.dto.execucaoOrcamentariaDTO.*;
-import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
+import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalAutorizadoUoDTO;
 import br.gov.es.infoplan.utils.ApiUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -147,15 +140,19 @@ public class ExecucaoOrcamentariaService {
     public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList
             (Long ano, int[] mes, int[] tipoFonte) {
         ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
-
         List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
-        ReceitaDespesaGNDTotalResponseDTO getIndex = response.get(1);
-        BigDecimal porcentagemEmpenhada = calcPorcetagemEmpenhada(getIndex);
-        BigDecimal porcentagemLiquidada = calcPorcetagemLiquidada(getIndex);
-//        System.out.println("porcetagem Liquidada: " + porcentagemLiquidada);
-//        System.out.println("porcetagem Empenhada: " + porcentagemEmpenhada);
+
+
+
+        if (response == null || response.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(new ReceitaDespesaGNDTotalResponseDTO()));
+        }
 
         response.stream().map(res -> {
+
+            BigDecimal porcentagemEmpenhada = calcPorcetagemEmpenhada(res);
+            BigDecimal porcentagemLiquidada = calcPorcetagemLiquidada(res);
+
             res.setPorcentagemEmpenhada(porcentagemEmpenhada);
             res.setPorcentagemLiquidada(porcentagemLiquidada);
             return res;
@@ -173,8 +170,6 @@ public class ExecucaoOrcamentariaService {
         BigDecimal receitaEmpenhada = receitaDespesasGndTotal.getEmpenhado();
         BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
         BigDecimal divisor = new BigDecimal("100");
-//        System.out.println("receitaEmpenhada : " + receitaEmpenhada);
-//        System.out.println("receitaAutorizada : " + receitaAutorizada);
 
         BigDecimal division = receitaEmpenhada.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
         BigDecimal porcentagem = division.multiply(divisor);

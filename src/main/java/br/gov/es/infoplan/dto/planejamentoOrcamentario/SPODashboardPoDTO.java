@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 public class SPODashboardPoDTO {
     private String uo;
 
-    private String po;
-
     private String sigla;
+
+    private String po;
 
     private String nome;
 
