@@ -32,32 +32,68 @@ public class ExecucaoOrcamentariaService {
         log.info("PMO Path inicializado: {}", pmoPath);
     }
 
+
     public ReceitaTotalResponseDTO getReceitaTotal(ExecucaoOrcamentariaRequestDTO painelOrcamento) {
-        List<ReceitaTotalResponseDTO> listDTO = consultarReceitaTotal(painelOrcamento);
+        List<ReceitaTotalResponseDTO> receitas = consultarReceitaTotal(painelOrcamento);
 
-        BigDecimal porcentagemLiquidadaPrevista = calcDivisorPrevistaRealizada(listDTO);
+        if (receitas.isEmpty()) {
+            return new ReceitaTotalResponseDTO();
+        }
 
-        listDTO.stream().map(res -> {
-            res.setPorcentagem(porcentagemLiquidadaPrevista);
-            return res;
-        }).collect(Collectors.toList());
+        BigDecimal porcentagemLiquidadaPrevista = calcDivisorPrevistaRealizada(receitas);
 
-        return listDTO.isEmpty() ? new ReceitaTotalResponseDTO() : listDTO.get(0);
+        ReceitaTotalResponseDTO principal = receitas.get(0);
+        principal.setPorcentagem(porcentagemLiquidadaPrevista);
+
+        return principal;
     }
 
 
     private BigDecimal calcDivisorPrevistaRealizada(List<ReceitaTotalResponseDTO> receita) {
-        var response = receita.get(0);
+        if (receita == null || receita.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
 
-        BigDecimal receitaLiquida = response.getVlr_receita_liquida();
-        BigDecimal receitaPrevista = response.getVlr_receita_prevista();
-        BigDecimal porcetagem = new BigDecimal("100");
+        ReceitaTotalResponseDTO dados = receita.get(0);
+        BigDecimal liquida = dados.getVlr_receita_liquida();
+        BigDecimal prevista = dados.getVlr_receita_prevista();
 
-        BigDecimal result = receitaLiquida.divide(receitaPrevista, 2, RoundingMode.HALF_UP);
-        BigDecimal multiply = result.multiply(porcetagem);
+        if (prevista == null || prevista.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
 
-        return multiply;
+        if (liquida == null) liquida = BigDecimal.ZERO;
+
+        return liquida.multiply(new BigDecimal("100"))
+                .divide(prevista, 2, RoundingMode.HALF_UP);
     }
+
+//    public ReceitaTotalResponseDTO getReceitaTotal(ExecucaoOrcamentariaRequestDTO painelOrcamento) {
+//        List<ReceitaTotalResponseDTO> listDTO = consultarReceitaTotal(painelOrcamento);
+//
+//        BigDecimal porcentagemLiquidadaPrevista = calcDivisorPrevistaRealizada(listDTO);
+//
+//        listDTO.stream().map(res -> {
+//            res.setPorcentagem(porcentagemLiquidadaPrevista);
+//            return res;
+//        }).collect(Collectors.toList());
+//
+//        return listDTO.isEmpty() ? new ReceitaTotalResponseDTO() : listDTO.get(0);
+//    }
+
+
+//    private BigDecimal calcDivisorPrevistaRealizada(List<ReceitaTotalResponseDTO> receita) {
+//        var response = receita.get(0);
+//
+//        BigDecimal receitaLiquida = response.getVlr_receita_liquida();
+//        BigDecimal receitaPrevista = response.getVlr_receita_prevista();
+//        BigDecimal porcetagem = new BigDecimal("100");
+//
+//        BigDecimal result = receitaLiquida.divide(receitaPrevista, 2, RoundingMode.HALF_UP);
+//        BigDecimal multiply = result.multiply(porcetagem);
+//
+//        return multiply;
+//    }
 
     public List<ReceitaCategoriaResponseDTO> getReceitaCategoria(Long ano, int[] mes, int[] tipoFonte) {
         ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
@@ -137,56 +173,82 @@ public class ExecucaoOrcamentariaService {
     }
 
 
-    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList
-            (Long ano, int[] mes, int[] tipoFonte) {
+//    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList
+//            (Long ano, int[] mes, int[] tipoFonte) {
+//        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+//        List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
+//
+//
+//
+//        if (response == null || response.isEmpty()) {
+//            return new ArrayList<>(Arrays.asList(new ReceitaDespesaGNDTotalResponseDTO()));
+//        }
+//
+//        response.stream().map(res -> {
+//
+//            BigDecimal porcentagemEmpenhada = calcPorcetagemEmpenhada(res);
+//            BigDecimal porcentagemLiquidada = calcPorcetagemLiquidada(res);
+//
+//            res.setPorcentagemEmpenhada(porcentagemEmpenhada);
+//            res.setPorcentagemLiquidada(porcentagemLiquidada);
+//            return res;
+//        }).collect(Collectors.toList());
+//
+//        if(response.isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        return response;
+//    }
+
+    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList(Long ano, int[] mes, int[] tipoFonte) {
         ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
         List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
 
-
-
         if (response == null || response.isEmpty()) {
-            return new ArrayList<>(Arrays.asList(new ReceitaDespesaGNDTotalResponseDTO()));
+            return List.of(new ReceitaDespesaGNDTotalResponseDTO());
         }
 
-        response.stream().map(res -> {
-
-            BigDecimal porcentagemEmpenhada = calcPorcetagemEmpenhada(res);
-            BigDecimal porcentagemLiquidada = calcPorcetagemLiquidada(res);
-
-            res.setPorcentagemEmpenhada(porcentagemEmpenhada);
-            res.setPorcentagemLiquidada(porcentagemLiquidada);
-            return res;
-        }).collect(Collectors.toList());
-
-        if(response.isEmpty()) {
-            return Collections.emptyList();
-        }
+        response.forEach(res -> {
+            res.setPorcentagemEmpenhada(calcularPorcentagem(res.getEmpenhado(), res.getAutorizado()));
+            res.setPorcentagemLiquidada(calcularPorcentagem(res.getLiquidado(), res.getAutorizado()));
+        });
 
         return response;
     }
 
 
-    private BigDecimal calcPorcetagemEmpenhada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
-        BigDecimal receitaEmpenhada = receitaDespesasGndTotal.getEmpenhado();
-        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
-        BigDecimal divisor = new BigDecimal("100");
+    private BigDecimal calcularPorcentagem(BigDecimal parte, BigDecimal total) {
+        if (total == null || total.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal valorParte = (parte == null) ? BigDecimal.ZERO : parte;
 
-        BigDecimal division = receitaEmpenhada.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
-        BigDecimal porcentagem = division.multiply(divisor);
-
-        return porcentagem;
+        return valorParte.multiply(new BigDecimal("100"))
+                .divide(total, 2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal calcPorcetagemLiquidada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
-        BigDecimal receitaLiquidadda = receitaDespesasGndTotal.getLiquidado();
-        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
-        BigDecimal divisor = new BigDecimal("100");
-
-        BigDecimal division = receitaLiquidadda.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
-        BigDecimal porcentagem = division.multiply(divisor);
-
-        return porcentagem;
-    }
+//    private BigDecimal calcPorcetagemEmpenhada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
+//        BigDecimal receitaEmpenhada = receitaDespesasGndTotal.getEmpenhado();
+//        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
+//        BigDecimal divisor = new BigDecimal("100");
+//
+//        BigDecimal division = receitaEmpenhada.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
+//        BigDecimal porcentagem = division.multiply(divisor);
+//
+//        return porcentagem;
+//    }
+//
+//    private BigDecimal calcPorcetagemLiquidada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
+//        BigDecimal receitaLiquidadda = receitaDespesasGndTotal.getLiquidado();
+//        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
+//        BigDecimal divisor = new BigDecimal("100");
+//
+//        BigDecimal division = receitaLiquidadda.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
+//        BigDecimal porcentagem = division.multiply(divisor);
+//
+//        return porcentagem;
+//    }
 
 
     public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrente

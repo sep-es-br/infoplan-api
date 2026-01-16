@@ -7,6 +7,7 @@ public class SPOPentahoConfigKey {
     public static final String PO = "po";
     public static final String NOME = "nome";
     public static final String NOME_UO = "nome_uo";
+    public static final String NOME_PO = "nome_po";
     public static final String SIGLA = "sigla";
     public static final String VLR_PREVISTO = "vlr_previsto";
     public static final String VLR_CONTRATADO = "vlr_contratado";

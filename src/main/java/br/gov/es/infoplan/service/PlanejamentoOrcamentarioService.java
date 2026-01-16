@@ -185,11 +185,11 @@ public class PlanejamentoOrcamentarioService {
                 pmoPath,
                 params,
                 rs -> new SPOTotalAutorizadoPoDTO(
-                        rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
                         rs.get(SPOPentahoConfigKey.UO).asText(),
                         rs.get(SPOPentahoConfigKey.SIGLA).asText(),
                         rs.get(SPOPentahoConfigKey.PO).asText(),
                         rs.get(SPOPentahoConfigKey.NOME).asText(),
+                        rs.get(SPOPentahoConfigKey.NOME_PO).asText(),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
@@ -197,7 +197,10 @@ public class PlanejamentoOrcamentarioService {
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
+
 
                 )
         );
@@ -225,7 +228,10 @@ public class PlanejamentoOrcamentarioService {
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
+                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
+
                 )
         );
     }
@@ -362,38 +368,43 @@ public class PlanejamentoOrcamentarioService {
         );
     }
 
-    private HashMap<String, Object> paramsTotalPrevisto(SPOFiltroDTO request) {
+    // Adicione este método auxiliar para tratar a conversão com segurança
+    private String joinArray(String[] array) {
+        if (array == null || array.length == 0) {
+            return ""; // Ou retornar null, dependendo de como o Pentaho espera "Todos"
+        }
+        return Arrays.stream(array)
+                .filter(Objects::nonNull) // Remove possíveis nulos dentro do array
+                .collect(Collectors.joining(","));
+    }
 
-        String tipoFontes = Arrays.stream(request.getTipoFonte()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String uo = Arrays.stream(request.getUo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String gnd = Arrays.stream(request.getGnd()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String po = Arrays.stream(request.getPo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
+    private HashMap<String, Object> paramsTotalPrevisto(SPOFiltroDTO request) {
         HashMap<String, Object> params = new HashMap<>();
 
         params.put(PentahoBiConfigParams.PARAMP_ANO, request.getAno());
-        params.put(PentahoBiConfigParams.PARAMP_FONTE,tipoFontes);
-        params.put(PentahoBiConfigParams.PARAMP_UO, uo);
-        params.put(PentahoBiConfigParams.PARAMP_GND, gnd);
-        params.put(PentahoBiConfigParams.PARAMP_PO, po);
+        params.put(PentahoBiConfigParams.PARAMP_FONTE, joinArray(request.getTipoFonte()));
+
+        // Correção direta para UO e PO
+        params.put(PentahoBiConfigParams.PARAMP_UO, joinArray(request.getUo()));
+        params.put(PentahoBiConfigParams.PARAMP_PO, joinArray(request.getPo()));
+
+        params.put(PentahoBiConfigParams.PARAMP_GND, joinArray(request.getGnd()));
 
         return params;
     }
 
     private HashMap<String, Object> paramsTotalAutorizado(SPOFiltroDTO request) {
-
-        String meses = Arrays.stream(request.getMes()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String tipoFontes = Arrays.stream(request.getTipoFonte()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String uo = Arrays.stream(request.getUo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String gnd = Arrays.stream(request.getGnd()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String po = Arrays.stream(request.getPo()).mapToObj(String::valueOf).collect(Collectors.joining(","));
         HashMap<String, Object> params = new HashMap<>();
 
         params.put(PentahoBiConfigParams.PARAMP_ANO, request.getAno());
-        params.put(PentahoBiConfigParams.PARAMP_MESSES, meses);
-        params.put(PentahoBiConfigParams.PARAMP_FONTE, tipoFontes);
-        params.put(PentahoBiConfigParams.PARAMP_UO, uo);
-        params.put(PentahoBiConfigParams.PARAMP_GND, gnd);
-        params.put(PentahoBiConfigParams.PARAMP_PO, po);
+        params.put(PentahoBiConfigParams.PARAMP_MESSES, joinArray(request.getMes()));
+        params.put(PentahoBiConfigParams.PARAMP_FONTE, joinArray(request.getTipoFonte()));
+
+        // Correção direta para UO e PO
+        params.put(PentahoBiConfigParams.PARAMP_UO, joinArray(request.getUo()));
+        params.put(PentahoBiConfigParams.PARAMP_PO, joinArray(request.getPo()));
+
+        params.put(PentahoBiConfigParams.PARAMP_GND, joinArray(request.getGnd()));
 
         return params;
     }
