@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SPOFiltroDTO {
     private Long ano;
-    private int[] tipoFonte;
-    private int[] mes;
-    private int[] uo;
-    private int[] po;
-    private int[] gnd;
+    private String[] tipoFonte;
+    private String[] mes;
+    private String[] uo;
+    private String[] po;
+    private String[] gnd;
 
 }

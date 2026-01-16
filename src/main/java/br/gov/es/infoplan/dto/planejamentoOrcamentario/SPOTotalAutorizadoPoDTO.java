@@ -12,8 +12,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SPOTotalAutorizadoPoDTO {
-    @JsonProperty("nome_uo")
-    private String nomeUo;
 
     @JsonProperty("cod_uo")
     private String codUo;
@@ -23,6 +21,9 @@ public class SPOTotalAutorizadoPoDTO {
 
     @JsonProperty("cod_po")
     private String codPo;
+
+    @JsonProperty("nome_uo")
+    private String nomeUo;
 
     @JsonProperty("nome_po")
     private String nomePo;
@@ -38,4 +39,7 @@ public class SPOTotalAutorizadoPoDTO {
 
     @JsonProperty("porcentagem_pago_sem_rap")
     private BigDecimal porcentagemPagoSemRap;
+
+    @JsonProperty("vlr_previsto")
+    private BigDecimal previsto;
 }

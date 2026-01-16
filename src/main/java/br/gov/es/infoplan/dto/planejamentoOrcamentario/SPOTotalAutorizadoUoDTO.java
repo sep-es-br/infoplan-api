@@ -32,6 +32,8 @@ public class SPOTotalAutorizadoUoDTO {
     @JsonProperty("porcentagem_pago_sem_rap")
     private BigDecimal porcentagemPagoSemRap;
 
+    @JsonProperty("vlr_previsto")
+    private BigDecimal previsto;
 
     public static BigDecimal calcularPorcentagem(BigDecimal autorizado, BigDecimal value) {
         if(value == null) {
