@@ -36,22 +36,17 @@ public class SPOTotalAutorizadoUoDTO {
     private BigDecimal previsto;
 
     public static BigDecimal calcularPorcentagem(BigDecimal autorizado, BigDecimal value) {
-        if(value == null) {
-           throw  new NullPointerException("Valor sem encontra nulo.");
-        }
-
-        if (autorizado.compareTo(BigDecimal.ZERO) == 0) {
+        if (value == null) {
             return BigDecimal.ZERO;
         }
 
+        if (autorizado == null || autorizado.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
 
-        BigDecimal multiplicador = new BigDecimal(100);
-        BigDecimal resultado = value.divide(autorizado, 2, RoundingMode.HALF_UP);
-
-        BigDecimal porcentagem = resultado.multiply(multiplicador);
-        return porcentagem;
+        return value.multiply(new BigDecimal(100))
+                .divide(autorizado, 2, RoundingMode.HALF_UP);
     }
-
 //    public static BigDecimal calcularPorcentagem(BigDecimal autorizado, BigDecimal value) {
 //        if (value == null || autorizado == null) {
 //            throw new IllegalArgumentException("Os valores não podem ser nulos.");
