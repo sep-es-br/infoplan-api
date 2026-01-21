@@ -5,6 +5,7 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.service.ExecucaoOrcamentariaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,115 +21,88 @@ public class ExecucaoOrcamentariaController {
 
     @GetMapping("receita-total")
     public ReceitaTotalResponseDTO getReceitaTotal(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
     ) {
-
-        ExecucaoOrcamentariaRequestDTO dto = new ExecucaoOrcamentariaRequestDTO();
-        dto.setAno(ano);
-        dto.setMes(mes);
-        dto.setTipoFonte(tipoFonte);
-        ReceitaTotalResponseDTO receita = execucaoOrcamentariaService.getReceitaTotal(dto);
+        ReceitaTotalResponseDTO receita = execucaoOrcamentariaService.getReceitaTotal(requestDTO);
         return receita;
     }
 
     @GetMapping("receita-categoria")
     public List<ReceitaCategoriaResponseDTO> getReceitaCategoriaList (
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
     ) {
 
-        List<ReceitaCategoriaResponseDTO> reponse = execucaoOrcamentariaService.getReceitaCategoria(ano, mes, tipoFonte);
+        List<ReceitaCategoriaResponseDTO> reponse = execucaoOrcamentariaService.getReceitaCategoria(requestDTO);
         return reponse;
     }
 
 
     @GetMapping("receita-origem")
     public List<ReceitaOrigemResponseDTO> getReceitaOrigemList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
     ) {
-        List<ReceitaOrigemResponseDTO> responseList = execucaoOrcamentariaService.getReceitaOrigemList(ano, mes, tipoFonte);
+        List<ReceitaOrigemResponseDTO> responseList = execucaoOrcamentariaService.getReceitaOrigemList(requestDTO);
 
         return responseList;
     }
 
     @GetMapping("receita-impostos")
     public List<ReceitaImpostosResponseDTO> getReceitaImpostoList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
-    ) {
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
+    ){
         List<ReceitaImpostosResponseDTO> responseList = execucaoOrcamentariaService
-                .getReceitaImpostoList(ano, mes, tipoFonte);
+                .getReceitaImpostoList(requestDTO);
 
         return responseList;
     }
 
     @GetMapping("receita-icms")
     public List<ReceitaICMSResponseDTO> getReceitaICMSList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
     ) {
         List<ReceitaICMSResponseDTO> responseList = execucaoOrcamentariaService
-                .getReceitaICMSList(ano, mes, tipoFonte);
+                .getReceitaICMSList(requestDTO);
 
         return responseList;
     }
 
     @GetMapping("receita-participacao")
     public List<ReceitaParticipacaoResponseDTO> getReceitaParticipacaoList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
     ) {
         List<ReceitaParticipacaoResponseDTO> responseList = execucaoOrcamentariaService
-                .getReceitaParticipacaoList(ano, mes, tipoFonte);
+                .getReceitaParticipacaoList(requestDTO);
 
         return responseList;
     }
 
     @GetMapping("receita-despesas-gnd")
     public List<ReceitaDespesaGNDResponseDTO> getReceitaDespesaGNDList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated RequestPoderExecutivoDTO requestDTO
     ) {
         List<ReceitaDespesaGNDResponseDTO> responseList = execucaoOrcamentariaService
-                .getReceitaDespesaGNDList(ano, mes, tipoFonte);
-
+                .getReceitaDespesaGNDList(requestDTO);
         return responseList;
-        //
     }
 
 
 
     @GetMapping("receita-despesas-gnd-total")
     public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated RequestPoderExecutivoDTO requestDTO
     ) {
         List<ReceitaDespesaGNDTotalResponseDTO> responseList = execucaoOrcamentariaService
-                .getReceitaDespesaGNDTotalList(ano, mes, tipoFonte);
-
+                .getReceitaDespesaGNDTotalList(requestDTO);
         return responseList;
     }
 
 
     @GetMapping("receita-transferencia-corrente")
     public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrenteList(
-            @RequestParam Long ano,
-            @RequestParam int[] mes,
-            @RequestParam int[] tipoFonte
+            @Validated ExecucaoOrcamentariaRequestDTO requestDTO
     ) {
         List<ReceitaTransferenciaCorrenteResponseDTO> response = execucaoOrcamentariaService
-                .getReceitaTransferenciaCorrente(ano, mes, tipoFonte);
-
+                .getReceitaTransferenciaCorrente(requestDTO);
         return response;
     }
 

@@ -368,13 +368,12 @@ public class PlanejamentoOrcamentarioService {
         );
     }
 
-    // Adicione este método auxiliar para tratar a conversão com segurança
-    private String joinArray(String[] array) {
+    public static String joinArray(String[] array) {
         if (array == null || array.length == 0) {
-            return ""; // Ou retornar null, dependendo de como o Pentaho espera "Todos"
+            return "";
         }
         return Arrays.stream(array)
-                .filter(Objects::nonNull) // Remove possíveis nulos dentro do array
+                .filter(Objects::nonNull)
                 .collect(Collectors.joining(","));
     }
 
