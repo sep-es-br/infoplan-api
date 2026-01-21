@@ -4,14 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ReceitaCategoriaResponseDTO {
-
+@NoArgsConstructor
+public class RequestPoderExecutivoDTO {
     private Long ano;
-    private String categoria;
-    private BigDecimal receitaLiquida;
+    private int[] mes;
+    private int[] tipoFonte;
+    private int[] codPoder;
 }

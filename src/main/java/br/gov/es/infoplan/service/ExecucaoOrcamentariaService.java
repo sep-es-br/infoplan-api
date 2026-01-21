@@ -1,5 +1,6 @@
 package br.gov.es.infoplan.service;
 
+import br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigParams;
 import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.dto.execucaoOrcamentariaDTO.*;
 import br.gov.es.infoplan.dto.planejamentoOrcamentario.SPOTotalAutorizadoUoDTO;
@@ -13,6 +14,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static br.gov.es.infoplan.service.PlanejamentoOrcamentarioService.joinArray;
 
 @Service
 @Slf4j
@@ -95,9 +98,8 @@ public class ExecucaoOrcamentariaService {
 //        return multiply;
 //    }
 
-    public List<ReceitaCategoriaResponseDTO> getReceitaCategoria(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
-        List<ReceitaCategoriaResponseDTO> receitaCategoriaList = consultarReceitaCategoria(request);
+    public List<ReceitaCategoriaResponseDTO> getReceitaCategoria(ExecucaoOrcamentariaRequestDTO requestDTO) {
+        List<ReceitaCategoriaResponseDTO> receitaCategoriaList = consultarReceitaCategoria(requestDTO);
 
         if (receitaCategoriaList.isEmpty()) {
             return Collections.emptyList();
@@ -106,10 +108,9 @@ public class ExecucaoOrcamentariaService {
         return receitaCategoriaList;
     }
 
-    public List<ReceitaOrigemResponseDTO> getReceitaOrigemList(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+    public List<ReceitaOrigemResponseDTO> getReceitaOrigemList(ExecucaoOrcamentariaRequestDTO requestDTO) {
 
-        List<ReceitaOrigemResponseDTO> responseList = consultarRceitaOrigem(request);
+        List<ReceitaOrigemResponseDTO> responseList = consultarRceitaOrigem(requestDTO);
 
         if(responseList.isEmpty()) {
             return Collections.emptyList();
@@ -119,10 +120,9 @@ public class ExecucaoOrcamentariaService {
     }
 
 
-    public List<ReceitaImpostosResponseDTO> getReceitaImpostoList(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+    public List<ReceitaImpostosResponseDTO> getReceitaImpostoList(ExecucaoOrcamentariaRequestDTO requestDTO) {
 
-        List<ReceitaImpostosResponseDTO> response = consultarReceitaImposto(request);
+        List<ReceitaImpostosResponseDTO> response = consultarReceitaImposto(requestDTO);
 
         if(response.isEmpty()) {
             return Collections.emptyList();
@@ -133,10 +133,9 @@ public class ExecucaoOrcamentariaService {
     }
 
 
-    public List<ReceitaICMSResponseDTO> getReceitaICMSList(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+    public List<ReceitaICMSResponseDTO> getReceitaICMSList(ExecucaoOrcamentariaRequestDTO requestDTO) {
 
-        List<ReceitaICMSResponseDTO> response = consultarReceitaICMS(request);
+        List<ReceitaICMSResponseDTO> response = consultarReceitaICMS(requestDTO);
 
         if(response.isEmpty()) {
             return Collections.emptyList();
@@ -145,10 +144,9 @@ public class ExecucaoOrcamentariaService {
         return response;
     }
 
-    public List<ReceitaParticipacaoResponseDTO> getReceitaParticipacaoList(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+    public List<ReceitaParticipacaoResponseDTO> getReceitaParticipacaoList(ExecucaoOrcamentariaRequestDTO requestDTO) {
 
-        List<ReceitaParticipacaoResponseDTO> response = consultarReceitaParticipacao(request);
+        List<ReceitaParticipacaoResponseDTO> response = consultarReceitaParticipacao(requestDTO);
 
         if(response.isEmpty()) {
             return Collections.emptyList();
@@ -159,11 +157,9 @@ public class ExecucaoOrcamentariaService {
 
 
     public List<ReceitaDespesaGNDResponseDTO> getReceitaDespesaGNDList
-            (Long ano, int[] mes, int[] tipoFonte) {
+            (RequestPoderExecutivoDTO requestDTO) {
 
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
-
-        List<ReceitaDespesaGNDResponseDTO> response = consultarReceitaDespesaGND(request);
+        List<ReceitaDespesaGNDResponseDTO> response = consultarReceitaDespesaGND(requestDTO);
 
         if(response.isEmpty()) {
             return Collections.emptyList();
@@ -174,8 +170,8 @@ public class ExecucaoOrcamentariaService {
 
 
 //    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList
-//            (Long ano, int[] mes, int[] tipoFonte) {
-//        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+//            (ExecucaoOrcamentariaRequestDTO requestDTO) {
+//
 //        List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
 //
 //
@@ -201,9 +197,9 @@ public class ExecucaoOrcamentariaService {
 //        return response;
 //    }
 
-    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(ano, mes, tipoFonte);
-        List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(request);
+    public List<ReceitaDespesaGNDTotalResponseDTO> getReceitaDespesaGNDTotalList(RequestPoderExecutivoDTO requestDTO) {
+//        ExecucaoOrcamentariaRequestDTO request = convertPaineOrcamentoDto(requestDTO);
+        List<ReceitaDespesaGNDTotalResponseDTO> response = consultarReceitaDespesaGNDTotal(requestDTO);
 
         if (response == null || response.isEmpty()) {
             return List.of(new ReceitaDespesaGNDTotalResponseDTO());
@@ -228,32 +224,8 @@ public class ExecucaoOrcamentariaService {
                 .divide(total, 2, RoundingMode.HALF_UP);
     }
 
-//    private BigDecimal calcPorcetagemEmpenhada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
-//        BigDecimal receitaEmpenhada = receitaDespesasGndTotal.getEmpenhado();
-//        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
-//        BigDecimal divisor = new BigDecimal("100");
-//
-//        BigDecimal division = receitaEmpenhada.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
-//        BigDecimal porcentagem = division.multiply(divisor);
-//
-//        return porcentagem;
-//    }
-//
-//    private BigDecimal calcPorcetagemLiquidada(ReceitaDespesaGNDTotalResponseDTO receitaDespesasGndTotal) {
-//        BigDecimal receitaLiquidadda = receitaDespesasGndTotal.getLiquidado();
-//        BigDecimal receitaAutorizada = receitaDespesasGndTotal.getAutorizado();
-//        BigDecimal divisor = new BigDecimal("100");
-//
-//        BigDecimal division = receitaLiquidadda.divide(receitaAutorizada, 2, RoundingMode.HALF_UP);
-//        BigDecimal porcentagem = division.multiply(divisor);
-//
-//        return porcentagem;
-//    }
-
-
     public List<ReceitaTransferenciaCorrenteResponseDTO> getReceitaTransferenciaCorrente
-            (Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO requestDTO = convertPaineOrcamentoDto(ano, mes, tipoFonte);
+            (ExecucaoOrcamentariaRequestDTO requestDTO) {
 
         List<ReceitaTransferenciaCorrenteResponseDTO> response = consultarReceitaTransferenciaCorrente(requestDTO);
 
@@ -286,8 +258,8 @@ public class ExecucaoOrcamentariaService {
 
     }
 
-    private List<ReceitaDespesaGNDTotalResponseDTO> consultarReceitaDespesaGNDTotal(ExecucaoOrcamentariaRequestDTO request) {
-        HashMap<String, Object> params = params(request);
+    private List<ReceitaDespesaGNDTotalResponseDTO> consultarReceitaDespesaGNDTotal(RequestPoderExecutivoDTO request) {
+        HashMap<String, Object> params = paramsPoderExecutivo(request);
         String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaDespesaGNDTotal");
         String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaDespesaGNDTotal");
 
@@ -313,8 +285,8 @@ public class ExecucaoOrcamentariaService {
                 ));
     }
 
-    private List<ReceitaDespesaGNDResponseDTO> consultarReceitaDespesaGND(ExecucaoOrcamentariaRequestDTO request) {
-        HashMap<String, Object> params = params(request);
+    private List<ReceitaDespesaGNDResponseDTO> consultarReceitaDespesaGND(RequestPoderExecutivoDTO request) {
+        HashMap<String, Object> params = paramsPoderExecutivo(request);
         String target = properties.getTargetOrThrow("execucaoOrcamentariaDashReceitaDespesaGND");
         String dataAccessId = properties.getDataAccessIdOrThrow("execucaoOrcamentariaDashReceitaDespesaGND");
 
@@ -459,9 +431,19 @@ public class ExecucaoOrcamentariaService {
         return params;
     }
 
-    private ExecucaoOrcamentariaRequestDTO convertPaineOrcamentoDto(Long ano, int[] mes, int[] tipoFonte) {
-        ExecucaoOrcamentariaRequestDTO dto = new ExecucaoOrcamentariaRequestDTO(ano, mes, tipoFonte);
-        return dto;
+    private HashMap<String, Object> paramsPoderExecutivo(RequestPoderExecutivoDTO request) {
+        String meses = Arrays.stream(request.getMes()).mapToObj(String::valueOf).collect(Collectors.joining(","));
+        String tipoFontes = Arrays.stream(request.getTipoFonte()).mapToObj(String::valueOf).collect(Collectors.joining(","));
+        String codPoder = Arrays.stream(request.getCodPoder()).mapToObj(String::valueOf).collect(Collectors.joining(","));
+
+        HashMap<String, Object> params = new HashMap<>();
+
+        params.put("parampAno", request.getAno());
+        params.put("parampMes", meses);
+        params.put("parampTipoFonte",tipoFontes);
+        params.put("parampCodPoder", codPoder);
+
+        return params;
     }
 
 }
