@@ -250,7 +250,8 @@ public class PlanejamentoOrcamentarioService {
                         rs.get(SPOPentahoConfigKey.UO).asText(),
                         rs.get(SPOPentahoConfigKey.SIGLA).asText(),
                         rs.get(SPOPentahoConfigKey.PO).asText(),
-                        rs.get(SPOPentahoConfigKey.NOME).asText(),
+                        rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
+                        rs.get(SPOPentahoConfigKey.NOME_PO).asText(),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
                                 .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_CONTRATADO)

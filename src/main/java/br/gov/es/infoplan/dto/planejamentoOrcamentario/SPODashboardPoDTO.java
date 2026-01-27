@@ -17,7 +17,11 @@ public class SPODashboardPoDTO {
 
     private String po;
 
-    private String nome;
+    @JsonProperty("nome_uo")
+    private String nomeUo;
+
+    @JsonProperty("nome_po")
+    private String nomePo;
 
     @JsonProperty("vlr_previsto")
     private BigDecimal previsto;
