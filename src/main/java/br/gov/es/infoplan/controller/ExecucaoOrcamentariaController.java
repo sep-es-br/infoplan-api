@@ -13,7 +13,6 @@ import java.util.List;
 @CrossOrigin(origins = "${frontend.host}")
 @RestController
 @RequestMapping(value = "/execucaoOrcamentaria")
-@RequiredArgsConstructor
 public class ExecucaoOrcamentariaController {
 
     @Autowired
