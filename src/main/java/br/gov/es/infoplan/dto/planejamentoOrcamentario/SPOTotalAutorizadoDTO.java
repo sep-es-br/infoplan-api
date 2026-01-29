@@ -17,9 +17,9 @@ public class SPOTotalAutorizadoDTO {
 
     private BigDecimal liquidado;
 
-    private BigDecimal pago;
+    @JsonProperty("pago_com_rap")
+    private BigDecimal pagoComRap;
 
-    @JsonProperty("pago_sem_rap")
-    private BigDecimal pagoSemRAP;
+    private BigDecimal pago;
 
 }
