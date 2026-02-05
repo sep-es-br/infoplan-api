@@ -821,8 +821,8 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProject(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-      String target = properties.getTargetOrThrow("deliveriesByProject");
-      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByProject");
+      String target = properties.getTargetOrThrow("investmentByProject");
+      String dataAccessId = properties.getDataAccessIdOrThrow("investmentByProject");
 
     return consult(target, dataAccessId, params,
         rs -> new StrategicProjectInvestmentSelectedDto(
