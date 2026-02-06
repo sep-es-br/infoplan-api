@@ -1,5 +1,6 @@
 package br.gov.es.infoplan.service;
 
+import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilter;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectFilterValuesDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectIdAndNameDto;
@@ -19,8 +20,10 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -39,210 +42,18 @@ public class StrategicProjectsService extends PentahoBIService {
 
   private final String TODOS = "";
 
+  @Autowired
+  private PentahoBiProperties properties;
+
   @Value("${portfolioId}")
   private String portfolioId;
 
-  // TARGETS
-
-  @Value("${pentahoBI.pmo.path}")
   private String pmoPath;
 
-  @Value("${pentahoBI.pmo.target.area}")
-  private String targetArea;
-
-  @Value("${pentahoBI.pmo.target.programa.original}")
-  private String targetProgramaOriginal;
-
-  @Value("${pentahoBI.pmo.target.programa.transversal}")
-  private String targetProgramaTransversal;
-
-  @Value("${pentahoBI.pmo.target.projeto}")
-  private String targetProjeto;
-
-  @Value("${pentahoBI.pmo.target.entrega}")
-  private String targetEntrega;
-
-  @Value("${pentahoBI.pmo.target.orgao}")
-  private String targetOrgao;
-
-  @Value("${pentahoBI.pmo.target.localidade}")
-  private String targetLocalidade;
-
-  @Value("${pentahoBI.pmo.target.totais}")
-  private String targetTotais;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByStatus}")
-  private String targetDeliveriesByStatus;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByPerformace}")
-  private String targetDeliveriesByPerformace;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByType}")
-  private String targetDeliveriesByType;
-
-  @Value("${pentahoBI.pmo.target.projectByStatus}")
-  private String targetProjectByStatus;
-
-  @Value("${pentahoBI.pmo.target.criticalMilestonesForPerformace}")
-  private String targetCriticalMilestonesForPerformace;
-
-  @Value("${pentahoBI.pmo.target.risksByClassification}")
-  private String targetRisksByClassification;
-
-  @Value("${pentahoBI.pmo.target.accumulatedInvestment}")
-  private String targetAccumulatedInvestment;
-
-  @Value("${pentahoBI.pmo.target.investmentByArea}")
-  private String targetInvestmentByArea;
-
-  @Value("${pentahoBI.pmo.target.investmentByDelivery}")
-  private String targetInvestmentByDelivery;
-
-  @Value("${pentahoBI.pmo.target.investmentByProgram}")
-  private String targetInvestmentByProgram;
-
-  @Value("${pentahoBI.pmo.target.investmentByProgramAt}")
-  private String targetInvestmentByProgramAt;
-
-  @Value("${pentahoBI.pmo.target.investmentByProject}")
-  private String targetInvestmentByProject;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByArea}")
-  private String targetDeliveriesByArea;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByProgram}")
-  private String targetDeliveriesByProgram;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByProgramAt}")
-  private String targetDeliveriesByProgramAt;
-
-  @Value("${pentahoBI.pmo.target.deliveriesByProject}")
-  private String targetDeliveriesByProject;
-
-  @Value("${pentahoBI.pmo.target.timestamp}")
-  private String targetTimestamp;
-
-  @Value("${pentahoBI.pmo.target.programDetailsContagemPE}")
-  private String targetProgramDetailsContagemPE;
-
-  @Value("${pentahoBI.pmo.target.programDetailsCusto}")
-  private String targetProgramDetailsCusto;
-
-  @Value("${pentahoBI.pmo.target.programDetailsProjetos}")
-  private String targetProgramDetailsProjetos;
-
-  @Value("${pentahoBI.pmo.target.programDetailsResponsavel}")
-  private String targetProgramDetailsResponsavel;
-
-  @Value("${pentahoBI.pmo.target.projectDetailsContagemPE}")
-  private String targetProjectDetailsContagemPE;
-
-  @Value("${pentahoBI.pmo.target.projectDetailsCusto}")
-  private String targetProjectDetailsCusto;
-
-  @Value("${pentahoBI.pmo.target.projectDetailsProgramas}")
-  private String targetProjectDetailsPrograma;
-
-  @Value("${pentahoBI.pmo.target.projectDetailsResponsavel}")
-  private String targetProjectDetailsResponsavel;
-
-  // DATA ACCESSID
-
-  @Value("${pentahoBI.pmo.dataAccessId.area}")
-  private String dataAccessIdArea;
-
-  @Value("${pentahoBI.pmo.dataAccessId.programa}")
-  private String dataAccessIdPrograma;
-
-  @Value("${pentahoBI.pmo.dataAccessId.projeto}")
-  private String dataAccessIdProjeto;
-
-  @Value("${pentahoBI.pmo.dataAccessId.entrega}")
-  private String dataAccessIdEntrega;
-
-  @Value("${pentahoBI.pmo.dataAccessId.orgao}")
-  private String dataAccessIdOrgao;
-
-  @Value("${pentahoBI.pmo.dataAccessId.localidade}")
-  private String dataAccessIdLocalidade;
-
-  @Value("${pentahoBI.pmo.dataAccessId.totais}")
-  private String dataAccessIdTotais;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByStatus}")
-  private String dataAccessIdDeliveriesByStatus;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByPerformace}")
-  private String dataAccessIdDeliveriesByPerformace;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByType}")
-  private String dataAccessIdDeliveriesByType;
-
-  @Value("${pentahoBI.pmo.dataAccessId.projectByStatus}")
-  private String dataAccessIdProjectByStatus;
-
-  @Value("${pentahoBI.pmo.dataAccessId.criticalMilestonesForPerformace}")
-  private String dataAccessIdCriticalMilestonesForPerformace;
-
-  @Value("${pentahoBI.pmo.dataAccessId.risksByClassification}")
-  private String dataAccessIdRisksByClassification;
-
-  @Value("${pentahoBI.pmo.dataAccessId.accumulatedInvestment}")
-  private String dataAccessIdAccumulatedInvestment;
-
-  @Value("${pentahoBI.pmo.dataAccessId.investmentByArea}")
-  private String dataAccessIdInvestmentByArea;
-
-  @Value("${pentahoBI.pmo.dataAccessId.investmentByDelivery}")
-  private String dataAccessIdInvestmentByDelivery;
-
-  @Value("${pentahoBI.pmo.dataAccessId.investmentByProgram}")
-  private String dataAccessIdInvestmentByProgram;
-
-  @Value("${pentahoBI.pmo.dataAccessId.investmentByProgramAt}")
-  private String dataAccessIdInvestmentByProgramAt;
-
-  @Value("${pentahoBI.pmo.dataAccessId.investmentByProject}")
-  private String dataAccessIdInvestmentByProject;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByArea}")
-  private String dataAccessIdDeliveriesByArea;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProgram}")
-  private String dataAccessIdDeliveriesByProgram;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProgramAt}")
-  private String dataAccessIdDeliveriesByProgramAt;
-
-  @Value("${pentahoBI.pmo.dataAccessId.deliveriesByProject}")
-  private String dataAccessIdDeliveriesByProject;
-
-  @Value("${pentahoBI.pmo.dataAccessId.timestamp}")
-  private String dataAccessIdTimestamp;
-
-  @Value("${pentahoBI.pmo.dataAccessId.programDetailsContagemPE}")
-  private String dataAccessIdProgramDetailsContagemPE;
-
-  @Value("${pentahoBI.pmo.dataAccessId.programDetailsCusto}")
-  private String dataAccessIdProgramDetailsCusto;
-
-  @Value("${pentahoBI.pmo.dataAccessId.programDetailsProjetos}")
-  private String dataAccessIdProgramDetailsProjetos;
-
-  @Value("${pentahoBI.pmo.dataAccessId.programDetailsResponsavel}")
-  private String dataAccessIdProgramDetailsResponsavel;
-
-  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsContagemPE}")
-  private String dataAccessIdProjectDetailsContagemPE;
-
-  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsCusto}")
-  private String dataAccessIdProjectDetailsCusto;
-
-  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsProgramas}")
-  private String dataAccessIdProjectDetailsPrograma;
-
-  @Value("${pentahoBI.pmo.dataAccessId.projectDetailsResponsavel}")
-  private String dataAccessIdProjectDetailsResponsavel;
+  @PostConstruct
+  public void init() {
+      this.pmoPath = properties.getStrategicProjects().getPath();
+  }
 
   private <T> List<T> consult(
       String target,
@@ -655,9 +466,13 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectIdAndNameDto> consultArea() {
     HashMap<String, Object> params = new HashMap<>();
     params.put("parampCodPortfolio", portfolioId);
+
+    String target = properties.getTargetOrThrow("area");
+    String dataAccessId = properties.getDataAccessIdOrThrow("area");
+
     return consult(
-        targetArea,
-        dataAccessIdArea,
+        target,
+        dataAccessId,
         params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
@@ -669,9 +484,14 @@ public class StrategicProjectsService extends PentahoBIService {
     HashMap<String, Object> params = new HashMap<>();
     params.put("parampCodPortfolio", portfolioId);
     params.put("parampCodArea", areaId);
+
+
+      String target = properties.getTargetOrThrow("programa.original");
+      String dataAccessId = properties.getDataAccessIdOrThrow("programa");
+
     return consult(
-        targetProgramaOriginal,
-        dataAccessIdPrograma,
+            target,
+            dataAccessId,
         params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
@@ -683,9 +503,12 @@ public class StrategicProjectsService extends PentahoBIService {
     HashMap<String, Object> params = new HashMap<>();
     params.put("parampCodPortfolio", portfolioId);
     params.put("parampCodArea", areaId);
+      String target = properties.getTargetOrThrow("programa.transversal");
+      String dataAccessId = properties.getDataAccessIdOrThrow("programa");
+
     return consult(
-        targetProgramaTransversal,
-        dataAccessIdPrograma,
+            target,
+            dataAccessId,
         params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
@@ -698,9 +521,13 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("parampCodPortfolio", portfolioId);
     params.put("parampCodArea", areaId);
     params.put("parampCodPrograma", programaId);
+
+      String target = properties.getTargetOrThrow("projeto");
+      String dataAccessId = properties.getDataAccessIdOrThrow("projeto");
+
     return consult(
-        targetProjeto,
-        dataAccessIdProjeto,
+            target,
+            dataAccessId,
         params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
@@ -714,9 +541,13 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("parampCodArea", areaId);
     params.put("parampCodPrograma", programaId);
     params.put("parampCodProjeto", projetoId);
+
+      String target = properties.getTargetOrThrow("entrega");
+      String dataAccessId = properties.getDataAccessIdOrThrow("entrega");
+
     return consult(
-        targetEntrega,
-        dataAccessIdEntrega,
+        target,
+        dataAccessId,
         params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
@@ -726,9 +557,12 @@ public class StrategicProjectsService extends PentahoBIService {
 
   public List<StrategicProjectIdAndNameDto> consultOrgao() {
     HashMap<String, Object> params = new HashMap<>();
+      String target = properties.getTargetOrThrow("orgao");
+      String dataAccessId = properties.getDataAccessIdOrThrow("orgao");
+
     return consult(
-        targetOrgao,
-        dataAccessIdOrgao,
+        target,
+        dataAccessId,
         params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
@@ -738,7 +572,11 @@ public class StrategicProjectsService extends PentahoBIService {
 
   public List<StrategicProjectIdAndNameDto> consultLocalidade() {
     HashMap<String, Object> params = new HashMap<>();
-    return consult(targetLocalidade, dataAccessIdLocalidade, params,
+
+      String target = properties.getTargetOrThrow("localidade");
+      String dataAccessId = properties.getDataAccessIdOrThrow("localidade");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectIdAndNameDto(
             rs.get("id").asInt(),
             rs.get("nome").asText(),
@@ -749,7 +587,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectTotaisDto> consultTotals(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetTotais, dataAccessIdTotais, params, rs -> new StrategicProjectTotaisDto(
+      String target = properties.getTargetOrThrow("totais");
+      String dataAccessId = properties.getDataAccessIdOrThrow("totais");
+
+    return consult(target, dataAccessId, params, rs -> new StrategicProjectTotaisDto(
         rs.get("totalPrevisto").doubleValue(),
         rs.get("totalRealizado").doubleValue(),
         rs.get("totalEntregasPE").asInt(),
@@ -759,8 +600,10 @@ public class StrategicProjectsService extends PentahoBIService {
 
   public List<StrategicProjectDeliveriesDto> consultDeliveryByStatus(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
+      String target = properties.getTargetOrThrow("deliveriesByStatus");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByStatus");
 
-    return consult(targetDeliveriesByStatus, dataAccessIdDeliveriesByStatus, params,
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesDto(
             rs.get("portfolioId").asInt(),
             rs.get("nome_portfolio").asText(),
@@ -783,7 +626,11 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectDeliveriesDto> consultDeliveriesByPerformace(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetDeliveriesByPerformace, dataAccessIdDeliveriesByPerformace, params,
+      String target = properties.getTargetOrThrow("deliveriesByPerformace");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByPerformace");
+
+
+      return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesDto(
             rs.get("portfolioId").asInt(),
             rs.get("nome_portfolio").asText(),
@@ -805,8 +652,10 @@ public class StrategicProjectsService extends PentahoBIService {
 
   public List<StrategicProjectDeliveriesDto> consultDeliveriesByType(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
+      String target = properties.getTargetOrThrow("deliveriesByType");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByType");
 
-    return consult(targetDeliveriesByType, dataAccessIdDeliveriesByType, params,
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesDto(
             rs.get("portfolioId").asInt(),
             rs.get("nome_portfolio").asText(),
@@ -828,7 +677,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectByStatusDto> consultProjectByStatus(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetProjectByStatus, dataAccessIdProjectByStatus, params,
+      String target = properties.getTargetOrThrow("projectByStatus");
+      String dataAccessId = properties.getDataAccessIdOrThrow("projectByStatus");
+
+      return consult(target, dataAccessId, params,
         rs -> new StrategicProjectByStatusDto(
             rs.get("portfolioId").asInt(),
             rs.get("nome_portfolio").asText(),
@@ -849,7 +701,10 @@ public class StrategicProjectsService extends PentahoBIService {
       StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetCriticalMilestonesForPerformace, dataAccessIdCriticalMilestonesForPerformace, params,
+      String target = properties.getTargetOrThrow("criticalMilestonesForPerformace");
+      String dataAccessId = properties.getDataAccessIdOrThrow("criticalMilestonesForPerformace");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectMilestonesByPerformaceDto(
             rs.get("portfolioId").asInt(),
             rs.get("nome_portfolio").asText(),
@@ -871,7 +726,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectRisksByClassificationDto> consultRisksByClassification(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetRisksByClassification, dataAccessIdRisksByClassification, params,
+      String target = properties.getTargetOrThrow("risksByClassification");
+      String dataAccessId = properties.getDataAccessIdOrThrow("risksByClassification");
+
+      return consult(target, dataAccessId, params,
         rs -> new StrategicProjectRisksByClassificationDto(
             rs.get("portfolioId").asInt(),
             rs.get("nome_portfolio").asText(),
@@ -892,7 +750,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectAccumulatedInvestmentDto> consultAccumulatedInvestment(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetAccumulatedInvestment, dataAccessIdAccumulatedInvestment, params,
+      String target = properties.getTargetOrThrow("accumulatedInvestment");
+      String dataAccessId = properties.getDataAccessIdOrThrow("accumulatedInvestment");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectAccumulatedInvestmentDto(
             rs.get("anoMes").asInt(),
             rs.get("custoPrevisto").doubleValue(),
@@ -904,7 +765,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByArea(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetInvestmentByArea, dataAccessIdInvestmentByArea, params,
+      String target = properties.getTargetOrThrow("investmentByArea");
+      String dataAccessId = properties.getDataAccessIdOrThrow("investmentByArea");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectInvestmentSelectedDto(
             rs.get("areaId").asInt(),
             rs.get("nome_area").asText(),
@@ -915,7 +779,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByDelivery(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetInvestmentByDelivery, dataAccessIdInvestmentByDelivery, params,
+      String target = properties.getTargetOrThrow("investmentByDelivery");
+      String dataAccessId = properties.getDataAccessIdOrThrow("investmentByDelivery");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectInvestmentSelectedDto(
             rs.get("entregaId").asInt(),
             rs.get("nome_entrega").asText(),
@@ -926,7 +793,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProgram(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetInvestmentByProgram, dataAccessIdInvestmentByProgram, params,
+      String target = properties.getTargetOrThrow("investmentByProgram");
+      String dataAccessId = properties.getDataAccessIdOrThrow("investmentByProgram");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectInvestmentSelectedDto(
             rs.get("programaId").asInt(),
             rs.get("nome_programa").asText(),
@@ -937,7 +807,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProgramAt(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetInvestmentByProgramAt, dataAccessIdInvestmentByProgramAt, params,
+      String target = properties.getTargetOrThrow("investmentByProgramAt");
+      String dataAccessId = properties.getDataAccessIdOrThrow("investmentByProgramAt");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectInvestmentSelectedDto(
             rs.get("programaTransversalId").asInt(),
             rs.get("nome_programa_transversal").asText(),
@@ -948,7 +821,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectInvestmentSelectedDto> consultInvestmentByProject(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetInvestmentByProject, dataAccessIdInvestmentByProject, params,
+      String target = properties.getTargetOrThrow("investmentByProject");
+      String dataAccessId = properties.getDataAccessIdOrThrow("investmentByProject");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectInvestmentSelectedDto(
             rs.get("projetoId").asInt(),
             rs.get("nome_projeto").asText(),
@@ -959,7 +835,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByArea(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetDeliveriesByArea, dataAccessIdDeliveriesByArea, params,
+      String target = properties.getTargetOrThrow("deliveriesByArea");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByArea");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesBySelectedDto(
             rs.get("areaId").asInt(),
             rs.get("nome_area").asText(),
@@ -970,7 +849,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByProgram(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetDeliveriesByProgram, dataAccessIdDeliveriesByProgram, params,
+      String target = properties.getTargetOrThrow("deliveriesByProgram");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByProgram");
+
+      return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesBySelectedDto(
             rs.get("programaId").asInt(),
             rs.get("nome_programa").asText(),
@@ -981,7 +863,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByProgramAt(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetDeliveriesByProgramAt, dataAccessIdDeliveriesByProgramAt, params,
+      String target = properties.getTargetOrThrow("deliveriesByProgramAt");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByProgramAt");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesBySelectedDto(
             rs.get("programaTransId").asInt(),
             rs.get("nome_programaTrans").asText(),
@@ -992,7 +877,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectDeliveriesBySelectedDto> consultDeliveriesByProject(StrategicProjectFilter filter) {
     Map<String, Object> params = createFilterParams(filter);
 
-    return consult(targetDeliveriesByProject, dataAccessIdDeliveriesByProject, params,
+      String target = properties.getTargetOrThrow("deliveriesByProject");
+      String dataAccessId = properties.getDataAccessIdOrThrow("deliveriesByProject");
+
+    return consult(target, dataAccessId, params,
         rs -> new StrategicProjectDeliveriesBySelectedDto(
             rs.get("projetoId").asInt(),
             rs.get("nome_projeto").asText(),
@@ -1003,7 +891,10 @@ public class StrategicProjectsService extends PentahoBIService {
   public List<StrategicProjectTimestampDto> consultTimestamp() {
     HashMap<String, Object> params = new HashMap<>();
 
-    return consult(targetTimestamp, dataAccessIdTimestamp, params,
+      String target = properties.getTargetOrThrow("timestamp");
+      String dataAccessId = properties.getDataAccessIdOrThrow("timestamp");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectTimestampDto(
         rs.get("timestamp").asText()
       ));
@@ -1021,8 +912,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProgramDetailsContagemPE,
-      dataAccessIdProgramDetailsContagemPE, params,
+      String target = properties.getTargetOrThrow("projectDetailsContagemPE");
+      String dataAccessId = properties.getDataAccessIdOrThrow("projectDetailsContagemPE");
+
+    return consult(target,dataAccessId, params,
       rs -> new StrategicProjectProgramDetailsDto(
         rs.get("contagemPE").asInt()
       ));
@@ -1039,7 +932,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProgramDetailsCusto, dataAccessIdProgramDetailsCusto, params,
+      String target = properties.getTargetOrThrow("projectDetailsCusto");
+      String dataAccessId = properties.getDataAccessIdOrThrow("projectDetailsCusto");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectProgramDetailsDto(
         rs.get("custoPrevisto").asLong(),
         rs.get("custoRealizado").asLong()
@@ -1057,7 +953,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProgramDetailsProjetos, dataAccessIdProgramDetailsProjetos, params,
+      String target = properties.getTargetOrThrow("programDetailsProjetos");
+      String dataAccessId = properties.getDataAccessIdOrThrow("programDetailsProjetos");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectProgramDetailsDto(
         rs.get("qtdeprojetos").asInt(),
         ""
@@ -1075,7 +974,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProgramDetailsResponsavel, dataAccessIdProgramDetailsResponsavel, params,
+      String target = properties.getTargetOrThrow("programDetailsResponsavel");
+      String dataAccessId = properties.getDataAccessIdOrThrow("programDetailsResponsavel");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectProgramDetailsDto(
         rs.get("cod_area").asInt(),
         rs.get("nome_area").asText(),
@@ -1099,7 +1001,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProjectDetailsContagemPE, dataAccessIdProjectDetailsContagemPE, params,
+      String target = properties.getTargetOrThrow("projectDetailsContagemPE");
+      String dataAccessId = properties.getDataAccessIdOrThrow("dataAccessIdProjectDetailsContagemPE");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectProjectDetailsDto(
         rs.get("contagemPE").asInt()
       ));
@@ -1116,7 +1021,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProjectDetailsCusto, dataAccessIdProjectDetailsCusto, params,
+      String target = properties.getTargetOrThrow("projectDetailsCusto");
+      String dataAccessId = properties.getDataAccessIdOrThrow("projectDetailsCusto");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectProjectDetailsDto(
         rs.get("custoPrevisto").asLong(),
         rs.get("custoRealizado").asLong()
@@ -1134,7 +1042,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProjectDetailsPrograma, dataAccessIdProjectDetailsPrograma, params,
+      String target = properties.getTargetOrThrow("projectDetailsProgramas");
+      String dataAccessId = properties.getDataAccessIdOrThrow("projectDetailsProgramas");
+
+    return consult(target, dataAccessId, params,
     rs -> {
       ProgramDto programa = new ProgramDto(
         rs.get("cod_programa").asInt(),
@@ -1155,7 +1066,10 @@ public class StrategicProjectsService extends PentahoBIService {
     params.put("paramde", dataInicio);
     params.put("paramate", dataFim);
 
-    return consult(targetProjectDetailsResponsavel, dataAccessIdProjectDetailsResponsavel, params,
+      String target = properties.getTargetOrThrow("programDetailsResponsavel");
+      String dataAccessId = properties.getDataAccessIdOrThrow("programDetailsResponsavel");
+
+    return consult(target, dataAccessId, params,
       rs -> new StrategicProjectProjectDetailsDto(
         rs.get("cod_orgao").asInt(),
         rs.get("nome_orgao").asText(),
