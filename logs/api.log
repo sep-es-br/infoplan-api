@@ -1,0 +1,27 @@
+2026-02-17 08:40:55.711 [restartedMain] INFO  b.g.e.i.InfoplanApiApplication - Starting InfoplanApiApplication using Java 21.0.10 with PID 18368 (C:\Users\ronic\OneDrive\Área de Trabalho\repositorio\infoplan-api\target\classes started by ronicley in C:\Users\ronic\OneDrive\Área de Trabalho\repositorio\infoplan-api)
+2026-02-17 08:40:55.725 [restartedMain] DEBUG b.g.e.i.InfoplanApiApplication - Running with Spring Boot v3.3.2, Spring v6.1.11
+2026-02-17 08:40:55.727 [restartedMain] INFO  b.g.e.i.InfoplanApiApplication - The following 1 profile is active: "dev"
+2026-02-17 08:40:55.826 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-02-17 08:40:55.827 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-02-17 08:40:57.629 [restartedMain] INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=3a5ca805-176b-3c35-ab9e-d9792a249780
+2026-02-17 08:40:58.474 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-02-17 08:40:58.500 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-02-17 08:40:58.501 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-02-17 08:40:58.649 [restartedMain] INFO  o.a.c.c.C.[.[localhost].[/infoplan] - Initializing Spring embedded WebApplicationContext
+2026-02-17 08:40:58.649 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2821 ms
+2026-02-17 08:40:58.862 [restartedMain] DEBUG b.g.e.i.c.security.SecurityFilter - Filter 'securityFilter' configured for use
+2026-02-17 08:41:00.164 [restartedMain] INFO  b.g.e.i.s.BudgetExecutionService - PMO Path initialized: /public/dashboard/receita
+2026-02-17 08:41:00.193 [restartedMain] INFO  b.g.e.i.s.PlanejamentoOrcamentarioService - PMO Path inicializado: /public/dashboard/spo_painel
+2026-02-17 08:41:01.239 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2026-02-17 08:41:01.401 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-02-17 08:41:01.551 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/infoplan'
+2026-02-17 08:41:01.567 [restartedMain] INFO  b.g.e.i.InfoplanApiApplication - Started InfoplanApiApplication in 7.076 seconds (process running for 8.099)
+2026-02-17 08:41:13.816 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/infoplan] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-17 08:41:13.817 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-02-17 08:41:13.818 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-02-17 08:41:13.856 [http-nio-8080-exec-1] INFO  b.g.e.i.c.s.AuthorizationRequestResolver - Nova requisição de autenticação para o Acesso Cidadão.
+2026-02-17 08:42:06.745 [http-nio-8080-exec-3] INFO  b.g.e.i.c.s.AuthorizationRequestResolver - Nova requisição de autenticação para o Acesso Cidadão.
+2026-02-17 08:42:12.610 [http-nio-8080-exec-9] INFO  b.g.e.i.service.AutenticacaoService - Autenticar usuário Infoplan.
+2026-02-17 08:44:26.420 [http-nio-8080-exec-4] INFO  b.g.e.i.c.s.AuthorizationRequestResolver - Nova requisição de autenticação para o Acesso Cidadão.
+2026-02-17 08:44:54.360 [http-nio-8080-exec-6] INFO  b.g.e.i.c.s.AuthorizationRequestResolver - Nova requisição de autenticação para o Acesso Cidadão.
+2026-02-17 08:44:54.812 [http-nio-8080-exec-10] INFO  b.g.e.i.service.AutenticacaoService - Autenticar usuário Infoplan.
