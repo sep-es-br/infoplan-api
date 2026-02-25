@@ -1,6 +1,7 @@
 package br.gov.es.infoplan.controller;
 
 import br.gov.es.infoplan.dto.budgetExecution.*;
+import br.gov.es.infoplan.service.AutenticacaoService;
 import br.gov.es.infoplan.service.BudgetExecutionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
