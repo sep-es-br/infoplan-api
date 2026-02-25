@@ -1,4 +1,4 @@
-package br.gov.es.infoplan.dto.execucaoOrcamentariaDTO;
+package br.gov.es.infoplan.dto.budgetExecution;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TotalAnoDTO {
+public class TotalYearDTO {
 
-    private Long ano;
+    private Long year;
     private BigDecimal total;
 }
