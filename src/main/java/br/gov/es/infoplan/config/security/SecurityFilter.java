@@ -9,6 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -28,20 +30,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     private final AutenticacaoService authSrv;
-    
+
     @Value("${papel.geral}")
     private String papelGeral;
-    
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().endsWith("/user-info")) {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        // if (request.getRequestURI().endsWith("/user-info") || ) {
+        // filterChain.doFilter(request, response);
+        // return;
+        // }
+        String uri = request.getRequestURI();
+
+        if (uri.contains("/user-info") || uri.contains("swagger") || uri.contains("api-docs")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,25 +59,28 @@ public class SecurityFilter extends OncePerRequestFilter {
             try {
                 String subject = tokenService.validarToken(token);
 
-                List<String> roles = tokenService.getRoleFromToken(token);               
-                
-                if(!checarPermissao(papelGeral, roles)){
-                    for(Map.Entry<String,String> entry : this.authSrv.moduloPermissao.entrySet()){
-                        if(request.getRequestURI().contains(entry.getKey()) && 
-                            !checarPermissao(entry.getValue(), roles)){
-                            enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey() + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
+                List<String> roles = tokenService.getRoleFromToken(token);
+
+                if (!checarPermissao(papelGeral, roles)) {
+                    for (Map.Entry<String, String> entry : this.authSrv.moduloPermissao.entrySet()) {
+                        if (request.getRequestURI().contains(entry.getKey()) &&
+                                !checarPermissao(entry.getValue(), roles)) {
+                            enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey()
+                                    + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
                             return;
                         }
-                    } 
+                    }
                 }
-                
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        subject, null, 
-                roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(Collectors.toList()));
+                        subject, null,
+                        roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                                .collect(Collectors.toList()));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JWTVerificationException e) {
-                var expiresAt = LocalDateTime.ofInstant(JWT.decode(token).getExpiresAt().toInstant(), ZoneOffset.of("-03:00"));
+                var expiresAt = LocalDateTime.ofInstant(JWT.decode(token).getExpiresAt().toInstant(),
+                        ZoneOffset.of("-03:00"));
                 List<String> erros = new ArrayList<>();
                 erros.add("Por favor, faça o login novamente.");
                 if (LocalDateTime.now().isAfter((ChronoLocalDateTime<?>) expiresAt))
@@ -83,22 +94,39 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     private boolean checarPermissao(String permissoes, List<String> roles) {
-        for(String permissao : permissoes.split(",")) {
-            if(roles.contains(permissao.trim())) return true;
+        for (String permissao : permissoes.split(",")) {
+            if (roles.contains(permissao.trim()))
+                return true;
         }
         return false;
     }
 
-   private String recuperarToken(HttpServletRequest request) {
-       var authHeader = request.getHeader("Authorization");
-       if (authHeader == null) return null;
-       return authHeader.replace("Bearer ", "");
-   }
-   
-   private void enviarMensagemErro(List<String> erros, HttpServletResponse response, HttpStatus status) throws IOException {
-    String mensagem = ToStringBuilder.reflectionToString(new MensagemErroRest(status, "Token Inválido", erros), ToStringStyle.JSON_STYLE);
-    response.setHeader("Content-Type", "application/json");
-    response.setStatus(status.value());
-    response.getWriter().write(mensagem);
-}
+    private String recuperarToken(HttpServletRequest request) {
+        var authHeader = request.getHeader("Authorization");
+        if (authHeader == null)
+            return null;
+        return authHeader.replace("Bearer ", "");
+    }
+
+    private void enviarMensagemErro(List<String> erros, HttpServletResponse response, HttpStatus status)
+            throws IOException {
+        String mensagem = ToStringBuilder.reflectionToString(new MensagemErroRest(status, "Token Inválido", erros),
+                ToStringStyle.JSON_STYLE);
+        response.setHeader("Content-Type", "application/json");
+        response.setStatus(status.value());
+        response.getWriter().write(mensagem);
+    }
+
+    private static final List<String> SWAGGER_WHITELIST = List.of(
+            "/v1/api-docs",
+            "/v1/api-docs/",
+            "/swagger-ui",
+            "/swagger-ui/",
+            "/swagger-ui.html",
+            "/swagger-resources",
+            "/swagger-resources/");
+
+    private boolean isSwaggerRequest(String uri) {
+        return SWAGGER_WHITELIST.stream().anyMatch(uri::startsWith);
+    }
 }

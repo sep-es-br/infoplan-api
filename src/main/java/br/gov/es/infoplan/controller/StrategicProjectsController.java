@@ -22,8 +22,11 @@ import br.gov.es.infoplan.dto.strategicProject.StrategicProjectRisksByClassifica
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTotaisDto;
 import br.gov.es.infoplan.service.StrategicProjectsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Projetos Estratégicos")
 @CrossOrigin(origins = "${frontend.host}")
 @RestController
 @RequestMapping("/strategicProjects")
@@ -34,13 +37,15 @@ public class StrategicProjectsController {
   @Value("${frontend.host}")
   private String frontHost;
 
-  @GetMapping("/timestamp")
+    @Operation(summary = "Timestamp de Atualização", description = "Retorna a data e hora da última atualização dos dados de projetos estratégicos")
+    @GetMapping("/timestamp")
   public StrategicProjectTimestampDto getTimestamp() {
     StrategicProjectTimestampDto strategicProjectDto = service.getTimestamp();
     return strategicProjectDto;
   }
 
-  @GetMapping("/all")
+    @Operation(summary = "Listar todos os filtros", description = "Busca todos os valores disponíveis para os filtros de projetos")
+    @GetMapping("/all")
   public StrategicProjectFilterValuesDto getAll() {
     StrategicProjectFilterValuesDto strategicProjectDto = service.getAllFilter();
     return strategicProjectDto;
@@ -65,12 +70,14 @@ public class StrategicProjectsController {
     return strategicProjectDto;
   }
 
-  @GetMapping("/totais")
+    @Operation(summary = "Resumo detalhado", description = "Busca os valores totais filtrados por JSON")
+    @GetMapping("/totais")
   public StrategicProjectTotaisDto getTotals(@RequestParam String filterJson) {
     return service.getTotals(filterJson);
   }
 
-  @GetMapping("/deliveriesByStatus")
+    @Operation(summary = "Entregas por Status", description = "Lista as entregas dos projetos filtradas por status")
+    @GetMapping("/deliveriesByStatus")
   public List<StrategicProjectDeliveriesDto> getDeliveriesByStatus(@RequestParam String filterJson) {
     return service.getDeliveriesByStatus(filterJson);
   }
@@ -101,7 +108,8 @@ public class StrategicProjectsController {
     return service.getRisksByClassification(filterJson);
   }
 
-  @GetMapping("/accumulatedInvestment")
+    @Operation(summary = "Investimento Acumulado", description = "Série histórica do investimento acumulado nos projetos")
+    @GetMapping("/accumulatedInvestment")
   public List<StrategicProjectAccumulatedInvestmentDto> getAccumulatedInvestment(@RequestParam String filterJson) {
     return service.getAccumulatedInvestment(filterJson);
   }
@@ -156,7 +164,8 @@ public class StrategicProjectsController {
     return service.getProgramDetails(filterJson);
   }
 
-  @GetMapping("/projectDetails")
+    @Operation(summary = "Detalhes do Projeto", description = "Busca informações detalhadas de um projeto específico")
+    @GetMapping("/projectDetails")
   public StrategicProjectProjectDetailsDto getProjectDetails(@RequestParam String filterJson) {
     return service.getProjectDetails(filterJson);
   }

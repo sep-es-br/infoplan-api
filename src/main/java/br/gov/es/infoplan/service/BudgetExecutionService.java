@@ -6,7 +6,6 @@ import br.gov.es.infoplan.utils.ApiUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -342,10 +341,12 @@ public class BudgetExecutionService {
     }
 
     private HashMap<String, Object> params(BudgetExecutionRequestDTO request) {
-
-        String months = Arrays.stream(request.getMonth()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String sourceTypes = Arrays.stream(request.getSourceType()).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
+        String months = request.getMonth() != null
+                ? request.getMonth().stream().map(String::valueOf).collect(Collectors.joining(","))
+                : "";
+        String sourceTypes = request.getSourceType() != null
+                ? request.getSourceType().stream().map(String::valueOf).collect(Collectors.joining(","))
+                : "";
 
         HashMap<String, Object> params = new HashMap<>();
 
@@ -357,11 +358,15 @@ public class BudgetExecutionService {
     }
 
     private HashMap<String, Object> paramsExecutiveBranch(ExecutiveBranchRequestDTO request) {
-        String months = Arrays.stream(request.getMonth()).mapToObj(String::valueOf).collect(Collectors.joining(","));
-        String sourceTypes = Arrays.stream(request.getSourceType()).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        String branchCodes = Arrays.stream(request.getBranchCode()).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
+        String months = request.getMonth() != null
+                ? request.getMonth().stream().map(String::valueOf).collect(Collectors.joining(","))
+                : "";
+        String sourceTypes = request.getSourceType() != null
+                ? request.getSourceType().stream().map(String::valueOf).collect(Collectors.joining(","))
+                : "";
+        String branchCodes = request.getBranchCode() != null
+                ? request.getBranchCode().stream().map(String::valueOf).collect(Collectors.joining(","))
+                : "";
 
         HashMap<String, Object> params = new HashMap<>();
 
