@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.Base64;
 
+@Tag(name = "Autenticação")
 @CrossOrigin(origins = "${frontend.host}")
 @RestController
 @RequestMapping("/signin")
@@ -24,15 +28,17 @@ public class AutenticacaoController {
 
     private final AutenticacaoService service;
 
+    @Operation(summary = "Callback do Acesso Cidadão", description = "Endpoint de retorno que processa o token do Acesso Cidadão e redireciona para o frontend")
     @GetMapping("/acesso-cidadao-response")
     public RedirectView acessoCidadaoResponse(String accessToken) {
         String tokenEmBase64 = Base64.getEncoder().encodeToString(accessToken.getBytes());
         return new RedirectView(String.format("%s/token?token=%s", frontHost, tokenEmBase64));
     }
 
+    @Operation(summary = "Obter informações do usuário logado", description = "Retorna os dados do perfil do usuário a partir do token Bearer enviado no header")
     @GetMapping("/user-info")
     public UsuarioDto montarUsuarioDto(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
-        return service.autenticar( authorization.replace("Bearer ", ""));
+        return service.autenticar(authorization.replace("Bearer ", ""));
     }
 }
