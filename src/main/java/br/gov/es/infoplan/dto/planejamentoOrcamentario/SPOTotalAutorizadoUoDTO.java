@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Data
 @AllArgsConstructor
@@ -34,32 +33,5 @@ public class SPOTotalAutorizadoUoDTO {
 
     @JsonProperty("vlr_previsto")
     private BigDecimal previsto;
-
-    public static BigDecimal calcularPorcentagem(BigDecimal autorizado, BigDecimal value) {
-        if (value == null) {
-            return BigDecimal.ZERO;
-        }
-
-        if (autorizado == null || autorizado.compareTo(BigDecimal.ZERO) == 0) {
-            return BigDecimal.ZERO;
-        }
-
-        return value.multiply(new BigDecimal(100))
-                .divide(autorizado, 2, RoundingMode.HALF_UP);
-    }
-//    public static BigDecimal calcularPorcentagem(BigDecimal autorizado, BigDecimal value) {
-//        if (value == null || autorizado == null) {
-//            throw new IllegalArgumentException("Os valores não podem ser nulos.");
-//        }
-//
-//        if (autorizado.compareTo(BigDecimal.ZERO) == 0) {
-//            return BigDecimal.ZERO;
-//        }
-//
-//        // 2. Lógica otimizada: (Valor * 100) / Autorizado
-//        // Usamos o scale no final para garantir a precisão do arredondamento
-//        return value.multiply(new BigDecimal("100"))
-//                .divide(autorizado, 2, RoundingMode.HALF_UP);
-//    }
 
 }

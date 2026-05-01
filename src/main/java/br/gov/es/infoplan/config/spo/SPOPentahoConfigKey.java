@@ -3,11 +3,16 @@ package br.gov.es.infoplan.config.spo;
 public class SPOPentahoConfigKey {
     public static final String VLR_AUTORIZADO = "vlr_autorizado";
     public static final String UO = "uo";
+    public static final String COD_UO = "cod_uo";
     public static final String ANO = "ano";
     public static final String PO = "po";
     public static final String NOME = "nome";
     public static final String NOME_UO = "nome_uo";
     public static final String NOME_PO = "nome_po";
+    public static final String COD_ACAO = "cod_acao";
+    public static final String NOME_ACAO = "nom_acao";
+    public static final String COD_FONTE = "cod_fonte";
+    public static final String NOME_FONTE = "nome_fonte";
     public static final String SIGLA = "sigla";
     public static final String VLR_PREVISTO = "vlr_previsto";
     public static final String VLR_CONTRATADO = "vlr_contratado";
