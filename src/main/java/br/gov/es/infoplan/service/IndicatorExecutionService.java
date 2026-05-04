@@ -4,15 +4,18 @@ import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterActionDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.response.ActionResponseDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.response.BudgetaryUnitResponseDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.response.FullSourceResponseDTO;
+import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
+import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
 import br.gov.es.infoplan.utils.ApiUtils;
+import com.nimbusds.oauth2.sdk.SuccessResponse;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,13 +83,125 @@ public class IndicatorExecutionService {
     }
 
 
+    public WithoutReversationResponseDTO getCardAvailableWithoutReversation(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_SEM_RESERVA,
+                pmoPath,
+                params(request),
+                rs -> new WithoutReversationResponseDTO(
+                        new BigDecimal(
+                                rs.get(DISPONIVEL_SEM_RESERVA)
+                                        .asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+
+    public CardSuccessResponseDTO getCardSuccessPlanned(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_SUCESSO,
+                pmoPath,
+                params(request),
+                rs -> new CardSuccessResponseDTO(
+                        new BigDecimal(
+                                rs.get(SUCCESS_PLANNED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+
+    public CardPOLiquidatedResponseDTO getCardPOLiquidated(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_PO_COM_MAIOR_LIQUIDADO,
+                pmoPath,
+                params(request),
+                rs -> new CardPOLiquidatedResponseDTO(
+                        rs.get(COD_PO).asText(),
+                        rs.get(NOME_PO).asText(),
+                        new BigDecimal(
+                                rs.get(LIQUIDATED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+    public CardComparativeResponseDTO getCardComparative(FilterGeneralRequestDTO request) {
+        return  apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_COMPARATIVO,
+                pmoPath,
+                params(request),
+                rs -> new CardComparativeResponseDTO(
+                        new BigDecimal(
+                                rs.get(COMPARATIVE).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+
+    public CardFeasibilityResponseDTO getCardFeasibility(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_EXEQUIBILIDADE,
+                pmoPath,
+                params(request),
+                rs -> new CardFeasibilityResponseDTO(
+                        new BigDecimal(
+                                rs.get(FEASIBILITY).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+
+    public CardMissionResponseDTO getCardMission(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_MISSAO,
+                pmoPath,
+                params(request),
+                rs -> new CardMissionResponseDTO(
+                        new BigDecimal(
+                                rs.get(MISSION).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+
+    public CardChangeResponseDTO getCardChange(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_ALTERACAO,
+                pmoPath,
+                params(request),
+                rs -> new CardChangeResponseDTO(
+                        new BigDecimal(
+                                rs.get(CHANGE).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
+    public CardIGOResponseDTO getCardIGO(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_IGO,
+                pmoPath,
+                params(request),
+                rs -> new CardIGOResponseDTO(
+                        new BigDecimal(
+                                rs.get(IGO).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        ).get(0);
+    }
+
     private Map<String, Object> params(FilterBugataryUnitDTO request) {
         Map<String, Object> params = new HashMap<>();
 
         String year = request.year();
 
         if (year != null && !year.isEmpty()) {
-            params.put(PARAMP_ANO, year);
+            params.put(PARAMP_ANO_M, year);
         }
 
         return params;
@@ -99,7 +214,7 @@ public class IndicatorExecutionService {
         String uo = request.uo();
 
         if (year != null && !year.isEmpty()) {
-            params.put(PARAMP_ANO, year);
+            params.put(PARAMP_ANO_M, year);
         }
 
         params.put(PARAMP_COD_UO, uo);
@@ -115,7 +230,7 @@ public class IndicatorExecutionService {
         String action = request.action();
 
         if (year != null && !year.isEmpty()) {
-            params.put(PARAMP_ANO, year);
+            params.put(PARAMP_ANO_M, year);
         }
 
         params.put(PARAMP_COD_UO, uo);
@@ -123,4 +238,33 @@ public class IndicatorExecutionService {
 
         return params;
     }
+
+    private Map<String, Object> params(FilterGeneralRequestDTO request) {
+        Map<String, Object> params = new HashMap<>();
+
+        String year = request.year();
+        String gnd = request.codGnd();
+        String uo = request.codUo();
+        String month = request.month();
+        String typeSource = request.typeSource();
+        String codSource = request.codSource();
+        String codAmendment = request.codAmendment();
+        String action = request.codAction();
+
+        if (year != null && !year.isEmpty()) {
+            params.put(PARAMP_ANO_M, year);
+        }
+
+        params.put(PARAMP_COD_UO, uo);
+        params.put(PARAMP_COD_ACAO, action);
+        params.put(PARAMP_ANO_M, year);
+        params.put(PARAMP_COD_EMENDA, codAmendment);
+        params.put(PARAMP_COD_FONTE, codSource);
+        params.put(PARAMP_TIPO_FONTE, typeSource);
+        params.put(PARAMP_COD_GND, gnd);
+        params.put(PARAMP_MES, month);
+
+        return params;
+    }
+
 }
