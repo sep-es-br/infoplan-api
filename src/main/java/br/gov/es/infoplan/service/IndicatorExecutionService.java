@@ -128,7 +128,7 @@ public class IndicatorExecutionService {
     }
 
     public CardComparativeResponseDTO getCardComparative(FilterGeneralRequestDTO request) {
-        return  apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_COMPARATIVO,
                 pmoPath,
                 params(request),
@@ -195,6 +195,30 @@ public class IndicatorExecutionService {
         ).get(0);
     }
 
+
+    public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO,
+                pmoPath,
+                params(request),
+                rs -> new DashAvailabilityUoResponseDTO(
+                        new BigDecimal(
+                                rs.get(DISPONIVEL).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(DISPONIVEL_SEM_RESERVA).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(DISPONIVEL_COM_RESERVA).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(EMPENHADO_A_LIQUIDAR).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        rs.get(ANO).asLong()
+                )
+        ).get(0);
+    }
+
     private Map<String, Object> params(FilterBugataryUnitDTO request) {
         Map<String, Object> params = new HashMap<>();
 
@@ -222,7 +246,7 @@ public class IndicatorExecutionService {
         return params;
     }
 
-    private  Map<String, Object> params(FilterFullSourceDTO request) {
+    private Map<String, Object> params(FilterFullSourceDTO request) {
         Map<String, Object> params = new HashMap<>();
 
         String year = request.year();
@@ -263,8 +287,6 @@ public class IndicatorExecutionService {
         params.put(PARAMP_TIPO_FONTE, typeSource);
         params.put(PARAMP_COD_GND, gnd);
         params.put(PARAMP_MES, month);
-
         return params;
     }
-
 }

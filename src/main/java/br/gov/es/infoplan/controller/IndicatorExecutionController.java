@@ -120,4 +120,12 @@ public class IndicatorExecutionController {
         CardIGOResponseDTO IGO = indicatorExecutionService.getCardIGO(request);
         return ResponseEntity.ok(IGO);
     }
+
+    @GetMapping("/dash/disponibilidade-por-uo")
+    public ResponseEntity<DashAvailabilityUoResponseDTO> getDashAvailabilityToUo(
+            @Validated @ModelAttribute FilterGeneralRequestDTO request
+    ) {
+        DashAvailabilityUoResponseDTO listAvailability = indicatorExecutionService.getDashAvailabilityToUo(request);
+        return ResponseEntity.ok(listAvailability);
+    }
 }

@@ -24,6 +24,9 @@ public class SPOPentahoConfigKey {
     public static final String VLR_PAGO = "vlr_pago";
     public static final String DT_FIM_EXTRACAO = "dt_fim_extracao";
     public static final String DISPONIVEL_SEM_RESERVA = "disponivel_sem_reserva";
+    public static final String DISPONIVEL = "disponivel";
+    public static final String DISPONIVEL_COM_RESERVA = "disponivel_com_reserva";
+    public static final String EMPENHADO_A_LIQUIDAR = "empenhado_a_liquidar";
     public static final String SUCCESS_PLANNED = "sucesso";
     public static final String COMPARATIVE = "comparativo";
     public static final String LIQUIDATED = "liquidado";
