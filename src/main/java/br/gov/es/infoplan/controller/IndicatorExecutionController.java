@@ -5,9 +5,9 @@ import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
-import com.nimbusds.oauth2.sdk.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import br.gov.es.infoplan.service.IndicatorExecutionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.Collections;
 import java.util.List;
 
 @Tag(name = "Indicadores Execução", description = "Consultas de receitas e despesas orçamentárias")
@@ -118,6 +119,10 @@ public class IndicatorExecutionController {
             @Validated @ModelAttribute FilterGeneralRequestDTO request
     ) {
         CardIGOResponseDTO IGO = indicatorExecutionService.getCardIGO(request);
+
+        if(IGO == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(IGO);
     }
 
@@ -126,6 +131,31 @@ public class IndicatorExecutionController {
             @Validated @ModelAttribute FilterGeneralRequestDTO request
     ) {
         DashAvailabilityUoResponseDTO listAvailability = indicatorExecutionService.getDashAvailabilityToUo(request);
+
+        if(listAvailability == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(listAvailability);
+    }
+
+
+    @GetMapping("/dash/grupo-de-despesas")
+    public ResponseEntity<List<DashSuccessPlannedResponseDTO>> getDashSuccessPlanned(
+            @Validated @ModelAttribute FilterGeneralRequestDTO request
+    ) {
+        List<DashSuccessPlannedResponseDTO> list = indicatorExecutionService.getDashSuccessPlanned(request);
+        if (list.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Status 204
+        }
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/dash/plano-orcamentario")
+    public ResponseEntity<List<DashPlannedBudgetaryResponseDTO>> getDashPlannedBudgetary(
+        @Validated @ModelAttribute FilterGeneralRequestDTO request
+    ) {
+        List<DashPlannedBudgetaryResponseDTO> listPlanned = indicatorExecutionService.getDashPlannedBudgetary(request);
+
+        return ResponseEntity.ok(listPlanned);
     }
 }

@@ -34,4 +34,11 @@ public class SPOPentahoConfigKey {
     public static final String MISSION = "missao";
     public static final String CHANGE = "alteracao";
     public static final String IGO = "IGO";
+    public static final String COMMITTED = "empenhado";
+    public static final String COMMITTED_BAR_AUTHORIZED = "empenhado/autorizado";
+    public static final String LIQUIDATED_BAR_AUTHORIZED = "liquidado/autorizado";
+    public static final String AUTHORIZED = "autorizado";
+    public static final String BUDGETED = "orcado";
+    public static final String COD_GND = "cod_gnd";
+    public static final String NAME_GND = "nome_gnd";
 }

@@ -17,4 +17,6 @@ public class PentahoBiConfigKeys {
     public static final String INDICATOR_EXECUTION_CARD_ALTERACAO = "indicadorExecucaoCardAlteracao";
     public static final String INDICATOR_EXECUTION_CARD_IGO = "indicadorExecucaoCardIGO";
     public static final String INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO = "indicadorExecucaoDashDisponivelPorUo";
+    public static final String INDICATOR_EXECUTION_DASH_SUCCESS_OF_PLANNED = "indicadorExecucaoDashSucessoDoPlanejado";
+    public static final String INDICATOR_EXECUTION_DASH_PLANNED_BUDGETARY = "indicadorExecucaoDashPlanejamentoOrcamentario";
 }

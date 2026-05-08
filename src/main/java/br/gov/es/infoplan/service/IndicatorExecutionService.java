@@ -12,13 +12,12 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys.*;
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigParams.*;
@@ -169,6 +168,25 @@ public class IndicatorExecutionService {
     }
 
 
+    public CardIGOResponseDTO getCardIGO(FilterGeneralRequestDTO request) {
+        List<CardIGOResponseDTO> list = apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_IGO,
+                pmoPath,
+                params(request),
+                rs -> new CardIGOResponseDTO(
+                        new BigDecimal(
+                                rs.get(IGO).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        );
+
+        if(list.isEmpty()) {
+            return null;
+        }
+
+        return list.get(0);
+    }
+
     public CardChangeResponseDTO getCardChange(FilterGeneralRequestDTO request) {
         return apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_ALTERACAO,
@@ -182,22 +200,9 @@ public class IndicatorExecutionService {
         ).get(0);
     }
 
-    public CardIGOResponseDTO getCardIGO(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
-                INDICATOR_EXECUTION_CARD_IGO,
-                pmoPath,
-                params(request),
-                rs -> new CardIGOResponseDTO(
-                        new BigDecimal(
-                                rs.get(IGO).asDouble(2)
-                        ).setScale(2, RoundingMode.HALF_UP)
-                )
-        ).get(0);
-    }
-
 
     public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<DashAvailabilityUoResponseDTO> list =  apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO,
                 pmoPath,
                 params(request),
@@ -216,7 +221,76 @@ public class IndicatorExecutionService {
                         ).setScale(2, RoundingMode.HALF_UP),
                         rs.get(ANO).asLong()
                 )
-        ).get(0);
+        );
+
+        if(list.isEmpty()) {
+            return null;
+        }
+
+        return list.get(0);
+    }
+
+
+    public List<DashSuccessPlannedResponseDTO> getDashSuccessPlanned(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_DASH_SUCCESS_OF_PLANNED,
+                pmoPath,
+                params(request),
+                rs -> new DashSuccessPlannedResponseDTO(
+                        rs.get(ANO).asLong(),
+                        rs.get(COD_GND).asText(),
+                        rs.get(NAME_GND).asText(),
+                        new BigDecimal(
+                                rs.get(BUDGETED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(AUTHORIZED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(COMMITTED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(LIQUIDATED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(COMMITTED_BAR_AUTHORIZED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(LIQUIDATED_BAR_AUTHORIZED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        );
+    }
+
+    public List<DashPlannedBudgetaryResponseDTO> getDashPlannedBudgetary(FilterGeneralRequestDTO request) {
+        return apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_DASH_PLANNED_BUDGETARY,
+                pmoPath,
+                params(request),
+                rs -> new DashPlannedBudgetaryResponseDTO(
+                        rs.get(ANO).asLong(),
+                        rs.get(COD_PO).asText(),
+                        rs.get(NOME_PO).asText(),
+                        new BigDecimal(
+                                rs.get(BUDGETED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(AUTHORIZED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(COMMITTED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(LIQUIDATED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(COMMITTED_BAR_AUTHORIZED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
+                                rs.get(LIQUIDATED_BAR_AUTHORIZED).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP)
+                )
+        );
     }
 
     private Map<String, Object> params(FilterBugataryUnitDTO request) {
