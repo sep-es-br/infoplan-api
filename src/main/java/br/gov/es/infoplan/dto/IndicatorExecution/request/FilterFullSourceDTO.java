@@ -13,12 +13,12 @@ public record FilterFullSourceDTO(
                 description = "Unidade Orçamentária separados por vírgula",
                 example = "27101"
         )
-        String uo,
+        String codUo,
 
         @Schema(
                 description = "Ação Orçamentária separados por vírgula",
                 example = "-1"
         )
-        String action
+        String codAction
 ) {
 }

@@ -309,7 +309,7 @@ public class IndicatorExecutionService {
         Map<String, Object> params = new HashMap<>();
 
         String year = request.year();
-        String uo = request.uo();
+        String uo = request.codUo();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
@@ -324,8 +324,8 @@ public class IndicatorExecutionService {
         Map<String, Object> params = new HashMap<>();
 
         String year = request.year();
-        String uo = request.uo();
-        String action = request.action();
+        String uo = request.codUo();
+        String action = request.codAction();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
