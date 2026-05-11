@@ -27,6 +27,7 @@ public class SecurityConfig {
         private final CustomAccessDeniedHandler customAccessDeniedHandler;
         private final TokenService tokenService;
         private final AutenticacaoService authSrv;
+        private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
         @Bean
         public SecurityFilter securityFilter() {
@@ -81,9 +82,7 @@ public class SecurityConfig {
                                                                                 "/oauth2/authorization"))))
                                 .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class)
                                 .exceptionHandling(exHandler -> exHandler
-                                                .authenticationEntryPoint(
-                                                                new org.springframework.security.web.authentication.HttpStatusEntryPoint(
-                                                                                org.springframework.http.HttpStatus.UNAUTHORIZED))
+                                                .authenticationEntryPoint(customAuthenticationEntryPoint)
                                                 .accessDeniedHandler(customAccessDeniedHandler))
                                 .build();
         }
