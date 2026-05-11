@@ -20,6 +20,7 @@ public class PentahoBiProperties {
     private PathConfig execucaoOrcamentaria = new PathConfig();
     private PathConfig planejamentoOrcamentario = new PathConfig();
     private PathConfig strategicProjects = new PathConfig();
+    private PathConfig indicatorExecution = new PathConfig();
 
     // Configs com target/dataAccessId (suporta múltiplos níveis)
     private Map<String, Object> target = new HashMap<>();
@@ -30,8 +31,7 @@ public class PentahoBiProperties {
         if (target.isEmpty() && dataAccessId.isEmpty()) {
             throw new IllegalStateException(
                     "Nenhuma configuração do Pentaho PMO foi encontrada. " +
-                            "Configure pelo menos pentaho-bi.pmo.target.* ou pentaho-bi.pmo.path"
-            );
+                            "Configure pelo menos pentaho-bi.pmo.target.* ou pentaho-bi.pmo.path");
         }
     }
 
@@ -42,8 +42,7 @@ public class PentahoBiProperties {
         public String getPathOrThrow(String nome) {
             if (path == null || path.isBlank()) {
                 throw new IllegalArgumentException(
-                        "Configuração obrigatória ausente: pentaho-bi.pmo." + nome + ".path"
-                );
+                        "Configuração obrigatória ausente: pentaho-bi.pmo." + nome + ".path");
             }
             return path;
         }
@@ -96,9 +95,7 @@ public class PentahoBiProperties {
                             "Configuração não encontrada: pentaho-bi.pmo.target.%s. " +
                                     "Chaves disponíveis: %s",
                             key,
-                            getAllTargetKeys()
-                    )
-            );
+                            getAllTargetKeys()));
         }
 
         return value;
@@ -148,9 +145,7 @@ public class PentahoBiProperties {
                             "Configuração não encontrada: pentaho-bi.pmo.dataAccessId.%s. " +
                                     "Chaves disponíveis: %s",
                             key,
-                            getAllDataAccessIdKeys()
-                    )
-            );
+                            getAllDataAccessIdKeys()));
         }
 
         return value;
@@ -174,10 +169,8 @@ public class PentahoBiProperties {
      * Verifica se existe config completa (target + dataAccessId)
      */
     public boolean hasConfig(String key) {
-        String targetValue = key.contains(".") ?
-                getTargetNested(key) : getTargetSimple(key);
-        String dataAccessIdValue = key.contains(".") ?
-                getDataAccessIdNested(key) : getDataAccessIdSimple(key);
+        String targetValue = key.contains(".") ? getTargetNested(key) : getTargetSimple(key);
+        String dataAccessIdValue = key.contains(".") ? getDataAccessIdNested(key) : getDataAccessIdSimple(key);
 
         return targetValue != null && !targetValue.isBlank() &&
                 dataAccessIdValue != null && !dataAccessIdValue.isBlank();

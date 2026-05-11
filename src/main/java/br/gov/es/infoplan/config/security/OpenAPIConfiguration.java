@@ -31,7 +31,8 @@ public class OpenAPIConfiguration {
                 .servers(List.of(server()))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new Components().addSecuritySchemes("Bearer Authentication", createAPIKeyScheme()))
-                .tags(List.of(
+                .tags(
+                    List.of(
                         new Tag().name("Autenticação").description("Endpoints para login e informações do usuário"),
                         new Tag().name("Execução Orçamentária")
                                 .description("Consultas de receitas e despesas orçamentárias"),
@@ -39,7 +40,9 @@ public class OpenAPIConfiguration {
                                 "O objetivo é gerenciar a captação de recursos do estado."),
                         new Tag().name("Sistema de Planejamento Orçamentário").description(
                                 "O objetivo é gerenciar o investimento do estado."),
-                        new Tag().name("Projetos Estratégicos").description("Acompanhamento de projetos da SEP")));
+                        new Tag().name("Projetos Estratégicos").description("Acompanhamento de projetos da SEP"),
+                        new Tag().name("Indicadores Execução").description("Consultas de receitas e despesas orçamentárias"))   
+                );
     }
 
     @Bean
