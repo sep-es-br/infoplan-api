@@ -21,8 +21,8 @@ public class PentahoBiProperties {
     private PathConfig planejamentoOrcamentario = new PathConfig();
     private PathConfig strategicProjects = new PathConfig();
     private PathConfig indicatorExecution = new PathConfig();
+    private PathConfig painelObras = new PathConfig();
 
-    // Configs com target/dataAccessId (suporta múltiplos níveis)
     private Map<String, Object> target = new HashMap<>();
     private Map<String, Object> dataAccessId = new HashMap<>();
 

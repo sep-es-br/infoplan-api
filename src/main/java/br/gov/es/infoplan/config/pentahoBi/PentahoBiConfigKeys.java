@@ -19,4 +19,15 @@ public class PentahoBiConfigKeys {
     public static final String INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO = "indicadorExecucaoDashDisponivelPorUo";
     public static final String INDICATOR_EXECUTION_DASH_SUCCESS_OF_PLANNED = "indicadorExecucaoDashSucessoDoPlanejado";
     public static final String INDICATOR_EXECUTION_DASH_PLANNED_BUDGETARY = "indicadorExecucaoDashPlanejamentoOrcamentario";
+    public static final String PAINEL_OBRAS_FILTRO_ORGAO = "painelObrasFiltroOrgao";
+    public static final String PAINEL_OBRAS_FILTRO_MUNICIPIO = "painelObrasFiltroMunicipio";
+    public static final String PAINEL_OBRAS_FILTRO_STATUS = "painelObrasFiltroStatus";
+    public static final String PAINEL_OBRAS_TOTAL_PROGRMAS = "painelObrasTotalProgramas";
+    public static final String PAINEL_OBRAS_TOTAL_PROJETOS = "painelObrasTotalProjetos";
+    public static final String PAINEL_OBRAS_TOTAL_REALIZADO = "painelObrasTotalRealizado";
+    public static final String PAINEL_OBRAS_TOTAL_PLANEJADO = "painelObrasTotalPlanejado";
+    public static final String PAINEL_OBRAS_TOTAL_CONTAGEM_PE = "painelObrasTotalContagemPE";
+    public static final String PAINEL_OBRAS_TOTAL_CONTAGEM_ENTREGAS = "painelObrasTotalContagemEntregas";
+    public static final String PAINEL_OBRAS_QUANTIDADE_POR_STATUS = "painelObrasQuantidadePorStatus";
+
 }

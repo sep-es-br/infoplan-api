@@ -41,7 +41,9 @@ public class OpenAPIConfiguration {
                         new Tag().name("Sistema de Planejamento Orçamentário").description(
                                 "O objetivo é gerenciar o investimento do estado."),
                         new Tag().name("Projetos Estratégicos").description("Acompanhamento de projetos da SEP"),
-                        new Tag().name("Indicadores Execução").description("Consultas de receitas e despesas orçamentárias"))   
+                        new Tag().name("Indicadores Execução").description("Consultas de receitas e despesas orçamentárias"),
+                        new Tag().name("Painel de Obras").description("Consultas de obras do estado")
+                    )
                 );
     }
 

@@ -26,9 +26,7 @@ public class ApiUtils extends PentahoBIService {
     @Autowired
     private PentahoBiProperties properties;
 
-    /**
-     * Executes a query on Pentaho BI using a configuration key from properties.
-     */
+
     public <T> List<T> executePentahoQuery(String configKey, String path, Map<String, Object> params,
             Function<Map<String, JsonNode>, T> mapper) {
         String target = properties.getTargetOrThrow(configKey);
@@ -36,9 +34,6 @@ public class ApiUtils extends PentahoBIService {
         return this.consult(target, dataAccessId, path, params, mapper);
     }
 
-    /**
-     * Safely parses a BigDecimal from a JsonNode result set field.
-     */
     public static BigDecimal parseBigDecimal(Map<String, JsonNode> rs, String field) {
         JsonNode node = rs.get(field);
         if (node == null || node.isNull()) {
@@ -47,9 +42,6 @@ public class ApiUtils extends PentahoBIService {
         return new BigDecimal(node.asDouble(0.0)).setScale(2, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Joins a string array into a comma-separated string, filtering nulls.
-     */
     public static String joinArray(String[] array) {
         if (array == null || array.length == 0) {
             return null;
@@ -74,7 +66,6 @@ public class ApiUtils extends PentahoBIService {
         try {
             String result = doRequest(buildEndpointUri(pmoPath, target, dataAccessId, params));
 
-            // Corrigir as entidades HTML
             result = StringEscapeUtils.unescapeHtml4(result);
 
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
