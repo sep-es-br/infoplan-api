@@ -32,4 +32,6 @@ public class PentahoBiConfigKeys {
     public static final String PAINEL_OBRAS_TOTAL_ENTREGAS_POR_ANO_E_STATUS = "painelObrasTotalEntregasPorAnoEStatus";
     public static final String PAINEL_OBRAS_TOTAL_ENTREGAS_ORGAO = "painelObrasTotalEntregasPorOrgao";
     public static final String PAINEL_OBRAS_TOTAL_ENTREGAS_ORGAO_EXECEUCAO = "painelObrasTotalEntregasPorOrgaoExecucao";
+    public static final String PAINEL_OBRAS_TOTAL_ENTREGAS_MUNICIPIO_STATUS = "painelObrasTotalMunicipioStatus";
+    public static final String PAINEL_OBRAS_NUMERO_ENTREGAS_POR_STATUS = "painelObrasNumeroEntregasPorStatus";
 }

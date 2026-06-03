@@ -266,6 +266,45 @@ public class PainelObrasService {
         return totalEntregasPorOrgaoExecucao;
     }
 
+    public List<TotalEntregasMunicipioStatusResponseDTO> totalEntregasPorMunicipioStatus(PainelObrasRequestDTO request) {
+        List<TotalEntregasMunicipioStatusResponseDTO> totalEntregasPorMunicipioStatus = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TOTAL_ENTREGAS_MUNICIPIO_STATUS,
+                pmoPath,
+                params(request),
+                rs -> new TotalEntregasMunicipioStatusResponseDTO(
+                        rs.get("municipio").asText(),
+                        rs.get("status").asText(),
+                        new BigDecimal(
+                                rs.get("planejado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        new BigDecimal(
+                                rs.get("realizado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                )
+        );
+
+        if (totalEntregasPorMunicipioStatus.isEmpty()) return null;
+
+        return totalEntregasPorMunicipioStatus;
+    }
+
+    public List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto(PainelObrasRequestDTO request) {
+        List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_NUMERO_ENTREGAS_POR_STATUS,
+                pmoPath,
+                params(request),
+                rs -> new NumeroEntregasStatusResponseDTO(
+                        rs.get("municipio").asText(),
+                        rs.get("status").asText(),
+                        rs.get("quantidade_entregas").asLong()
+                )
+        );
+
+        if (totalEntregasPorProjeto.isEmpty()) return null;
+
+        return totalEntregasPorProjeto;
+    }
+
     private Map<String, Object> params(String orgao) {
         Map<String, Object> params = new HashMap<>();
 

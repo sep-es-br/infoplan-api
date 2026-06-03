@@ -135,4 +135,21 @@ public class PainelObrasController {
         List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao = painelObrasService.totalEntregasPorOrgaoExecucao(request);
         return ResponseEntity.ok(totalEntregasPorOrgaoExecucao);
     }
+
+    @GetMapping("total-entregas-por-municipio-status")
+    @Operation(summary = "Total de entregas por município e status", description = "Busca o total de entregas agrupadas por município e status, com base nos filtros aplicados")
+    public ResponseEntity<List<TotalEntregasMunicipioStatusResponseDTO>> totalEntregasPorMunicipioStatus(
+            @Validated @ModelAttribute PainelObrasRequestDTO request) {
+        List<TotalEntregasMunicipioStatusResponseDTO> totalEntregasPorMunicipioStatus = painelObrasService.totalEntregasPorMunicipioStatus(request);
+        return ResponseEntity.ok(totalEntregasPorMunicipioStatus);
+    }
+
+    @Operation(summary = "Número de entregas por status", description = "Busca o número de entregas agrupadas por status, com base nos filtros aplicados")
+    @GetMapping("numero-entregas-por-status")
+    public ResponseEntity<List<NumeroEntregasStatusResponseDTO>> totalEntregasPorProjeto(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto = painelObrasService.totalEntregasPorProjeto(request);
+        return ResponseEntity.ok(totalEntregasPorProjeto);
+     }
 }
