@@ -43,6 +43,9 @@ public class AutenticacaoService {
     
     @Value("${papel.projEstrategico}")
     private String papelProjEstrategico;
+
+    @Value("${papel.painelObras}")
+    private String papelPainelObras;
     
 //    @Value("${papel.gestaoFiscal}")
 //    private String papelGestaoFiscal;
@@ -61,6 +64,7 @@ public class AutenticacaoService {
         moduloPermissao.put("/execucaoOrcamentaria", papelSigefes);
         moduloPermissao.put("/strategicProjects", papelProjEstrategico);
         moduloPermissao.put("/planejamentoOrcamentario", papelPlanejamentoOrcamentario);
+        moduloPermissao.put("/painel-obras", papelPainelObras);
     }
 
 

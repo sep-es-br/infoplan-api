@@ -107,4 +107,32 @@ public class PainelObrasController {
         List<QuantidadeStatusResponseDTO> quantidadePorStatus = painelObrasService.quantidadePorStatus(request);
         return ResponseEntity.ok(quantidadePorStatus);
     }
+
+    @Operation(summary = "Total de entregas por ano e status", description = "Busca o total de entregas agrupadas por ano e status, com base nos filtros aplicados")
+    @GetMapping("total-entregas-por-ano-e-status")
+    public ResponseEntity<List<TotalEntregasAnoStatusResponseDTO>> totalEntregasPorAnoEStatus(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<TotalEntregasAnoStatusResponseDTO> totalEntregasPorAnoEStatus = painelObrasService.totalEntregasPorAnoEStatus(request);
+        return ResponseEntity.ok(totalEntregasPorAnoEStatus);
+    }
+
+
+    @Operation(summary = "Total de entregas por órgão", description = "Busca o total de entregas agrupadas por órgão, com base nos filtros aplicados")
+    @GetMapping("total-entregas-por-orgao")
+    public ResponseEntity<List<TotalEntregasOrgaoResponseDTO>> totalEntregasPorOrgao(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<TotalEntregasOrgaoResponseDTO> totalEntregasPorOrgao = painelObrasService.totalEntregasPorOrgao(request);
+        return ResponseEntity.ok(totalEntregasPorOrgao);
+    }
+
+    @Operation(summary = "Total de entregas por órgão de execução", description = "Busca o total de entregas agrupadas por órgão de execução, com base nos filtros aplicados")
+    @GetMapping("total-entregas-orgao-execucao")
+    public ResponseEntity<List<TotalEntregasOrgaoExeResponseDTO>> totalEntregasPorOrgaoExecucao(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao = painelObrasService.totalEntregasPorOrgaoExecucao(request);
+        return ResponseEntity.ok(totalEntregasPorOrgaoExecucao);
+    }
 }

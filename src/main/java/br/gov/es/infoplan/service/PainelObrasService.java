@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(listOrgao.isEmpty()) return null;
+        if (listOrgao.isEmpty()) return null;
 
         return listOrgao;
     }
@@ -62,7 +63,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(listMunicipio.isEmpty()) return null;
+        if (listMunicipio.isEmpty()) return null;
 
         return listMunicipio;
     }
@@ -79,7 +80,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(listStatus.isEmpty()) return null;
+        if (listStatus.isEmpty()) return null;
 
         return listStatus;
     }
@@ -95,7 +96,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(total.isEmpty()) return null;
+        if (total.isEmpty()) return null;
 
         return total.get(0);
     }
@@ -117,7 +118,6 @@ public class PainelObrasService {
     }
 
 
-
     public TotalContagemEntregasResponseDTO totalContagemEntrega(PainelObrasRequestDTO request) {
         List<TotalContagemEntregasResponseDTO> contagemEntregas = apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_TOTAL_CONTAGEM_ENTREGAS,
@@ -128,7 +128,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(contagemEntregas == null || contagemEntregas.isEmpty() || contagemEntregas.get(0) == null) {
+        if (contagemEntregas == null || contagemEntregas.isEmpty() || contagemEntregas.get(0) == null) {
             return new TotalContagemEntregasResponseDTO(0L);
         }
 
@@ -145,7 +145,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(contagemPE == null || contagemPE.isEmpty() || contagemPE.get(0) == null) {
+        if (contagemPE == null || contagemPE.isEmpty() || contagemPE.get(0) == null) {
             return new TotalContagemPEResponseDTO(0L);
         }
 
@@ -162,7 +162,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(totalRealizado == null || totalRealizado.isEmpty() || totalRealizado.get(0) == null) {
+        if (totalRealizado == null || totalRealizado.isEmpty() || totalRealizado.get(0) == null) {
             return new TotalRealizadoResponseDTO(ApiUtils.parseBigDecimal(new HashMap<>(), "total_realizado"));
         }
 
@@ -179,7 +179,7 @@ public class PainelObrasService {
                 )
         );
 
-        if(totalPlanejado == null || totalPlanejado.isEmpty() || totalPlanejado.get(0) == null) {
+        if (totalPlanejado == null || totalPlanejado.isEmpty() || totalPlanejado.get(0) == null) {
             return new TotalPlanejadoResponseDTO(ApiUtils.parseBigDecimal(new HashMap<>(), "total_planejado"));
         }
 
@@ -198,11 +198,73 @@ public class PainelObrasService {
                 )
         );
 
-        if(quantidadePorStatus.isEmpty()) return null;
+        if (quantidadePorStatus.isEmpty()) return null;
 
         return quantidadePorStatus;
     }
 
+
+    public List<TotalEntregasAnoStatusResponseDTO> totalEntregasPorAnoEStatus(PainelObrasRequestDTO request) {
+        List<TotalEntregasAnoStatusResponseDTO> totalEntregasPorAnoEStatus = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TOTAL_ENTREGAS_POR_ANO_E_STATUS,
+                pmoPath,
+                params(request),
+                rs -> new TotalEntregasAnoStatusResponseDTO(
+                        rs.get("ano").asText(),
+                        rs.get("status").asText(),
+                        ApiUtils.parseBigDecimal(rs, "planejado"),
+                        ApiUtils.parseBigDecimal(rs, "realizado")
+                )
+        );
+
+        if (totalEntregasPorAnoEStatus.isEmpty()) return null;
+
+        return totalEntregasPorAnoEStatus;
+
+    }
+
+    public List<TotalEntregasOrgaoResponseDTO> totalEntregasPorOrgao(PainelObrasRequestDTO request) {
+        List<TotalEntregasOrgaoResponseDTO> totalEntregasPorOrgao = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TOTAL_ENTREGAS_ORGAO,
+                pmoPath,
+                params(request),
+                rs -> new TotalEntregasOrgaoResponseDTO(
+                        rs.get("orgao").asText(),
+                        new BigDecimal(
+                                rs.get("planejado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        new BigDecimal(
+                                rs.get("realizado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                )
+        );
+
+        if (totalEntregasPorOrgao.isEmpty()) return null;
+
+        return totalEntregasPorOrgao;
+    }
+
+    public List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao(PainelObrasRequestDTO request) {
+        List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TOTAL_ENTREGAS_ORGAO_EXECEUCAO,
+                pmoPath,
+                params(request),
+                rs -> new TotalEntregasOrgaoExeResponseDTO(
+                        rs.get("orgao").asText(),
+                        rs.get("quantidade_entregas").asLong(),
+                        new BigDecimal(
+                                rs.get("planejado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        new BigDecimal(
+                                rs.get("realizado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                )
+        );
+
+        if (totalEntregasPorOrgaoExecucao.isEmpty()) return null;
+
+        return totalEntregasPorOrgaoExecucao;
+    }
 
     private Map<String, Object> params(String orgao) {
         Map<String, Object> params = new HashMap<>();
