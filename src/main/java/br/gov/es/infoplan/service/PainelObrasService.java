@@ -305,6 +305,85 @@ public class PainelObrasService {
         return totalEntregasPorProjeto;
     }
 
+
+    public List<QuantidadeMaiorEntregaResponseDTO> quantidadeMaiorEntrega(PainelObrasRequestDTO request) {
+        List<QuantidadeMaiorEntregaResponseDTO> quantidadeMaiorEntrega = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_QUANTIDADE_MAIOR_MUNICIPIO_CARTEIRA,
+                pmoPath,
+                params(request),
+                rs -> new QuantidadeMaiorEntregaResponseDTO(
+                        rs.get("municipio").asText(),
+                        new BigDecimal(
+                                rs.get("planejado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        rs.get("quantidade_entrega").asLong(),
+                        rs.get("nome_maior_entrega").asText(),
+                        rs.get("orgao").asText(),
+                        rs.get("data").asText(),
+                        new BigDecimal(
+                                rs.get("total_maior_municipio").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                )
+        );
+
+        if (quantidadeMaiorEntrega.isEmpty()) return null;
+
+        return quantidadeMaiorEntrega;
+    }
+
+    public List<QuantidadeMaiorPrevistaResponseDTO> quantidadeMaiorPrevista(PainelObrasRequestDTO request) {
+        List<QuantidadeMaiorPrevistaResponseDTO> quantidadePrevista = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_QUANTIDADE_MAIOR_PREVISTA_CARTEIRA,
+                pmoPath,
+                params(request),
+                rs -> new QuantidadeMaiorPrevistaResponseDTO(
+                        rs.get("orgao").asText(),
+                        new BigDecimal(
+                                rs.get("planejado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        rs.get("quantidade_entregas").asLong(),
+                        rs.get("nome_maior_entrega").asText(),
+                        rs.get("municipio").asText(),
+                        rs.get("data_conclusao").asText(),
+                        new BigDecimal(
+                                rs.get("maior_total_orgao").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                )
+        );
+
+        if (quantidadePrevista.isEmpty()) return null;
+
+        return quantidadePrevista;
+    }
+
+    public List<TotalEntregaPorMesResponseDTO> totalEntregaPorMes(PainelObrasRequestDTO request) {
+        List<TotalEntregaPorMesResponseDTO> quantidadePrevista = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TOTAL_ENTREGAS_POR_MES_CARTEIRA,
+                pmoPath,
+                params(request),
+                rs -> new TotalEntregaPorMesResponseDTO(
+                        rs.get("mes_nome").asText(),
+                        new BigDecimal(
+                                rs.get("planejado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        rs.get("entrega_nome").asText(),
+                        rs.get("municipio").asText(),
+                        rs.get("quantidade_entregas").asLong(),
+                            new BigDecimal(
+                                rs.get("maior_valor_no_mes").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        rs.get("data_conclusao_maior_entrega").asText(),
+                        new BigDecimal(
+                                rs.get("valor_medio_por_acao").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                )
+        );
+
+        if (quantidadePrevista.isEmpty()) return null;
+
+        return quantidadePrevista;
+    }
+
     private Map<String, Object> params(String orgao) {
         Map<String, Object> params = new HashMap<>();
 

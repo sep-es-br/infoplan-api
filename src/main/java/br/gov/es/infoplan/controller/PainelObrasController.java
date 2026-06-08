@@ -3,6 +3,7 @@ package br.gov.es.infoplan.controller;
 import br.gov.es.infoplan.dto.painelObras.request.PainelObrasRequestDTO;
 import br.gov.es.infoplan.dto.painelObras.response.*;
 import br.gov.es.infoplan.service.PainelObrasService;
+import feign.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,5 +152,30 @@ public class PainelObrasController {
     ) {
         List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto = painelObrasService.totalEntregasPorProjeto(request);
         return ResponseEntity.ok(totalEntregasPorProjeto);
-     }
+    }
+
+    @GetMapping("quantidade-maior-entrega")
+    public ResponseEntity<List<QuantidadeMaiorEntregaResponseDTO>> quantidadeMaiorEntrega(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<QuantidadeMaiorEntregaResponseDTO> quantidadeMaiorEntrega = painelObrasService.quantidadeMaiorEntrega(request);
+
+        return ResponseEntity.ok(quantidadeMaiorEntrega);
+    }
+
+    @GetMapping("quantidade-maior-prevista")
+    public ResponseEntity<List<QuantidadeMaiorPrevistaResponseDTO>> quantidadeMaiorPrevista(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<QuantidadeMaiorPrevistaResponseDTO> quantidadeMaiorPrevista = painelObrasService.quantidadeMaiorPrevista(request);
+        return ResponseEntity.ok(quantidadeMaiorPrevista);
+    }
+
+    @GetMapping("total-entrega-por-mes")
+    public ResponseEntity<List<TotalEntregaPorMesResponseDTO>> totalEntregaPorMes(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        List<TotalEntregaPorMesResponseDTO> entregaPorMesList = painelObrasService.totalEntregaPorMes(request);
+        return ResponseEntity.ok(entregaPorMesList);
+    }
 }
