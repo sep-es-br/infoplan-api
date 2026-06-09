@@ -10,6 +10,7 @@ public record DashSuccessPlannedResponseDTO(
         BigDecimal authorized,
         BigDecimal committed,
         BigDecimal liquidated,
+        BigDecimal paid,
         BigDecimal committedBarAuthorized,
         BigDecimal liquidatedBarAuthorized
 ) {

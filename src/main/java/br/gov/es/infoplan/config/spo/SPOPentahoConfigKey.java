@@ -30,6 +30,7 @@ public class SPOPentahoConfigKey {
     public static final String SUCCESS_PLANNED = "sucesso";
     public static final String COMPARATIVE = "comparativo";
     public static final String LIQUIDATED = "liquidado";
+    public static final String PAID = "pago";
     public static final String FEASIBILITY = "exequibilidade";
     public static final String MISSION = "missao";
     public static final String CHANGE = "alteracao";
