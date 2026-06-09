@@ -253,6 +253,9 @@ public class IndicatorExecutionService {
                                 rs.get(LIQUIDATED).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(
+                                rs.get(PAID).asDouble(2)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        new BigDecimal(
                                 rs.get(COMMITTED_BAR_AUTHORIZED).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP),
                         new BigDecimal(
