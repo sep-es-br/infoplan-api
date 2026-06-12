@@ -6,5 +6,6 @@ import java.math.BigDecimal;
 
 public record CardIGOResponseDTO(
         @JsonProperty("IGO")
-        BigDecimal Igo
+        BigDecimal Igo,
+        String nota
 ) { }

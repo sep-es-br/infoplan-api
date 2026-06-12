@@ -6,6 +6,7 @@ import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
+import br.gov.es.infoplan.enums.QuadrimestreEnum;
 import br.gov.es.infoplan.utils.ApiUtils;
 import com.nimbusds.oauth2.sdk.SuccessResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLOutput;
 import java.util.*;
 
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys.*;
@@ -83,7 +85,7 @@ public class IndicatorExecutionService {
 
 
     public WithoutReversationResponseDTO getCardAvailableWithoutReversation(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<WithoutReversationResponseDTO> list =  apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_SEM_RESERVA,
                 pmoPath,
                 params(request),
@@ -93,12 +95,19 @@ public class IndicatorExecutionService {
                                         .asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP)
                 )
-        ).get(0);
+        );
+
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        WithoutReversationResponseDTO dto = list.get(0);
+        return dto;
     }
 
 
     public CardSuccessResponseDTO getCardSuccessPlanned(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<CardSuccessResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_SUCESSO,
                 pmoPath,
                 params(request),
@@ -107,12 +116,20 @@ public class IndicatorExecutionService {
                                 rs.get(SUCCESS_PLANNED).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP)
                 )
-        ).get(0);
+        );
+
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        CardSuccessResponseDTO dto = list.get(0);
+
+        return dto;
     }
 
 
     public CardPOLiquidatedResponseDTO getCardPOLiquidated(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<CardPOLiquidatedResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_PO_COM_MAIOR_LIQUIDADO,
                 pmoPath,
                 params(request),
@@ -123,11 +140,18 @@ public class IndicatorExecutionService {
                                 rs.get(LIQUIDATED).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP)
                 )
-        ).get(0);
+        );
+
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        CardPOLiquidatedResponseDTO dto = list.get(0);
+        return dto;
     }
 
     public CardComparativeResponseDTO getCardComparative(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<CardComparativeResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_COMPARATIVO,
                 pmoPath,
                 params(request),
@@ -136,12 +160,19 @@ public class IndicatorExecutionService {
                                 rs.get(COMPARATIVE).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP)
                 )
-        ).get(0);
+        );
+
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        CardComparativeResponseDTO dto = list.get(0);
+        return dto;
     }
 
 
     public CardFeasibilityResponseDTO getCardFeasibility(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<CardFeasibilityResponseDTO> list =  apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_EXEQUIBILIDADE,
                 pmoPath,
                 params(request),
@@ -150,12 +181,20 @@ public class IndicatorExecutionService {
                                 rs.get(FEASIBILITY).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP)
                 )
-        ).get(0);
+        );
+
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        CardFeasibilityResponseDTO dto = list.get(0);
+
+        return dto;
     }
 
 
     public CardMissionResponseDTO getCardMission(FilterGeneralRequestDTO request) {
-        return apiUtils.executePentahoQuery(
+        List<CardMissionResponseDTO> list =  apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_MISSAO,
                 pmoPath,
                 params(request),
@@ -164,11 +203,20 @@ public class IndicatorExecutionService {
                                 rs.get(MISSION).asDouble(2)
                         ).setScale(2, RoundingMode.HALF_UP)
                 )
-        ).get(0);
+        );
+
+        if (list.isEmpty()) {
+            return null;
+        }
+
+        CardMissionResponseDTO dto = list.get(0);
+
+        return dto;
     }
 
 
     public CardIGOResponseDTO getCardIGO(FilterGeneralRequestDTO request) {
+
         List<CardIGOResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_IGO,
                 pmoPath,
@@ -176,15 +224,38 @@ public class IndicatorExecutionService {
                 rs -> new CardIGOResponseDTO(
                         new BigDecimal(
                                 rs.get(IGO).asDouble(2)
-                        ).setScale(2, RoundingMode.HALF_UP)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        null
                 )
         );
 
-        if(list.isEmpty()) {
+        if (list.isEmpty()) {
             return null;
         }
 
-        return list.get(0);
+        CardIGOResponseDTO dto = list.get(0);
+
+        String nota = null;
+
+        if (!"-1".equals(request.month())) {
+
+            int[] meses = Arrays.stream(request.month().split(","))
+                    .mapToInt(Integer::parseInt)
+                    .toArray();
+
+            QuadrimestreEnum quadrimestre =
+                    QuadrimestreEnum.obterQuadrimestre(meses);
+
+            nota = QuadrimestreEnum.calcularNotaIGO(
+                    dto.Igo().doubleValue(),
+                    quadrimestre
+            );
+        }
+
+        return new CardIGOResponseDTO(
+                dto.Igo(),
+                nota
+        );
     }
 
     public CardChangeResponseDTO getCardChange(FilterGeneralRequestDTO request) {
