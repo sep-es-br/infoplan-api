@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLOutput;
+import java.time.LocalDate;
 import java.util.*;
 
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys.*;
@@ -235,22 +236,24 @@ public class IndicatorExecutionService {
 
         CardIGOResponseDTO dto = list.get(0);
 
-        String nota = null;
+        QuadrimestreEnum quadrimestre;
 
-        if (!"-1".equals(request.month())) {
-
+        if ("-1".equals(request.month())) {
+            quadrimestre = QuadrimestreEnum.obterQuadrimestre(
+                    new int[]{LocalDate.now().getMonthValue()}
+            );
+        } else {
             int[] meses = Arrays.stream(request.month().split(","))
                     .mapToInt(Integer::parseInt)
                     .toArray();
 
-            QuadrimestreEnum quadrimestre =
-                    QuadrimestreEnum.obterQuadrimestre(meses);
-
-            nota = QuadrimestreEnum.calcularNotaIGO(
-                    dto.Igo().doubleValue(),
-                    quadrimestre
-            );
+            quadrimestre = QuadrimestreEnum.obterQuadrimestre(meses);
         }
+
+        String nota = QuadrimestreEnum.calcularNotaIGO(
+                dto.Igo().doubleValue(),
+                quadrimestre
+        );
 
         return new CardIGOResponseDTO(
                 dto.Igo(),
