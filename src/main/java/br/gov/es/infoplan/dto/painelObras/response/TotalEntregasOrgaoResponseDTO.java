@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public record TotalEntregasOrgaoResponseDTO(
         String orgao,
         BigDecimal planejado,
-        BigDecimal realizado
+        BigDecimal realizado,
+        Long quantidadeEntregas
 ) {
 }

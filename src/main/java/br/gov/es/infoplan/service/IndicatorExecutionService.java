@@ -115,7 +115,8 @@ public class IndicatorExecutionService {
                 rs -> new CardSuccessResponseDTO(
                         new BigDecimal(
                                 rs.get(SUCCESS_PLANNED).asDouble(2)
-                        ).setScale(2, RoundingMode.HALF_UP)
+                        ).setScale(2, RoundingMode.HALF_UP),
+                        rs.get("dt_fim_extracao").asText()
                 )
         );
 

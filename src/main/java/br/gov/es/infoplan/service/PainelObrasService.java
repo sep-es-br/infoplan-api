@@ -235,7 +235,8 @@ public class PainelObrasService {
                         ).setScale(2, BigDecimal.ROUND_HALF_UP),
                         new BigDecimal(
                                 rs.get("realizado").asDouble(2)
-                        ).setScale(2, BigDecimal.ROUND_HALF_UP)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        rs.get("quantidade_entregas").asLong()
                 )
         );
 
