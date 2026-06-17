@@ -27,6 +27,7 @@ public class SecurityConfig {
         private final CustomAccessDeniedHandler customAccessDeniedHandler;
         private final TokenService tokenService;
         private final AutenticacaoService authSrv;
+        private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
         @Bean
         public SecurityFilter securityFilter() {
@@ -44,7 +45,6 @@ public class SecurityConfig {
         }
 
         @Bean
-        @Order(1)
         SecurityFilterChain publicSecurityFilterChain(HttpSecurity http) throws Exception {
                 return http
                                 .securityMatchers(matchers -> matchers
@@ -52,8 +52,8 @@ public class SecurityConfig {
                                                                 antMatcher("/**/swagger-ui/**"),
                                                                 antMatcher("/**/v1/api-docs/**"),
                                                                 antMatcher("/**/swagger-ui.html"),
-                                                                antMatcher("/**/signin/**"),
-                                                                antMatcher("/**/acesso-cidadao-response.html")))
+                                                                antMatcher("/signin/*"),
+                                                                antMatcher("/acesso-cidadao-response.html")))
                                 .csrf(AbstractHttpConfigurer::disable)
                                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
@@ -61,7 +61,6 @@ public class SecurityConfig {
         }
 
         @Bean
-        @Order(2)
         SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 return http
                                 .csrf(AbstractHttpConfigurer::disable)
@@ -71,7 +70,7 @@ public class SecurityConfig {
                                                         antMatcher("/**/swagger-ui/**"),
                                                         antMatcher("/**/v1/api-docs/**"),
                                                         antMatcher("/**/swagger-ui.html"),
-                                                        antMatcher("/**/signin/**")).permitAll();
+                                                        antMatcher("/signin/*")).permitAll();
                                         authConfig.anyRequest().authenticated();
                                 })
                                 .oauth2Login(oAuth2LoginConfig -> oAuth2LoginConfig.authorizationEndpoint(
@@ -81,9 +80,6 @@ public class SecurityConfig {
                                                                                 "/oauth2/authorization"))))
                                 .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class)
                                 .exceptionHandling(exHandler -> exHandler
-                                                .authenticationEntryPoint(
-                                                                new org.springframework.security.web.authentication.HttpStatusEntryPoint(
-                                                                                org.springframework.http.HttpStatus.UNAUTHORIZED))
                                                 .accessDeniedHandler(customAccessDeniedHandler))
                                 .build();
         }

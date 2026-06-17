@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static br.gov.es.infoplan.utils.ApiUtils.joinArray;
+import static br.gov.es.infoplan.utils.ApiUtils.parseBigDecimal;
 
 @Service
 @Slf4j
@@ -31,364 +33,169 @@ public class PlanejamentoOrcamentarioService {
         @PostConstruct
         public void init() {
                 this.pmoPath = properties.getPlanejamentoOrcamentario().getPath();
-                // log.info("PMO Path inicializado: {}", pmoPath);
         }
 
-        public List<SPOTotalPrevistoDTO> getTotalPrevisto(
-                        SPOFiltroDTO dto) {
-                List<SPOTotalPrevistoDTO> totalPrevistoList = consultarTotalPrevisto(dto);
-                return totalPrevistoList;
+        public List<SPOTotalPrevistoDTO> getTotalPrevisto(SPOFiltroDTO dto) {
+                return apiUtils.executePentahoQuery("planejamentoOrcamentarioTotalPrevisto", pmoPath,
+                                paramsTotalPrevisto(dto),
+                                rs -> new SPOTotalPrevistoDTO(
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PREVISTO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_CONTRATADO),
+                                                rs.get(SPOPentahoConfigKey.DT_FIM_EXTRACAO).asText()));
         }
 
-        public List<SPOTotalAutorizadoDTO> getTotalAutorizado(
-                        SPOFiltroDTO request) {
-                List<SPOTotalAutorizadoDTO> totalAutorizadoList = consultarTotalAutorizado(request);
-                return totalAutorizadoList;
+        public List<SPOTotalAutorizadoDTO> getTotalAutorizado(SPOFiltroDTO request) {
+                return apiUtils.executePentahoQuery("planejamentoOrcamentarioTotalAutorizado", pmoPath,
+                                paramsTotalAutorizado(request),
+                                rs -> new SPOTotalAutorizadoDTO(
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_AUTORIZADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_EMPENHADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_LIQUIDADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PAGO_COM_RAP),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_SEM_RAP)));
         }
 
         public List<SPOFiltroUosDTO> getListUos() {
-                List<SPOFiltroUosDTO> list = consultarUos();
-                return list;
+                return apiUtils.executePentahoQuery("planejamentoOrcamentarioFiltroUos", pmoPath, new HashMap<>(),
+                                rs -> new SPOFiltroUosDTO(
+                                                rs.get("cod_uo").asText(),
+                                                rs.get("nome_uo").asText()));
         }
 
         public List<SPOFiltroPosDTO> getListPos(String[] codUos, String ano) {
-                List<SPOFiltroPosDTO> list = consultarPos(codUos, ano);
-                return list;
+                Map<String, Object> params = new HashMap<>();
+                params.put("parampCodUo", joinArray(codUos));
+                params.put("parampAno", ano);
+
+                return apiUtils.executePentahoQuery("planejamentoOrcamentarioFiltroPos", pmoPath, params,
+                                rs -> new SPOFiltroPosDTO(
+                                                rs.get("cod_po").asText(),
+                                                rs.get("nome_po").asText()));
         }
 
         public List<SPODashboardUoDTO> getListDashboardUo(SPOFiltroDTO filtro) {
-                List<SPODashboardUoDTO> listDashboard = consultarDashboardUo(filtro);
-                return listDashboard;
+                return apiUtils.executePentahoQuery("planejamentoOrcamentarioDashboardUo", pmoPath,
+                                paramsTotalAutorizado(filtro),
+                                rs -> new SPODashboardUoDTO(
+                                                rs.get(SPOPentahoConfigKey.UO).asText(),
+                                                rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                                                rs.get(SPOPentahoConfigKey.NOME).asText(),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PREVISTO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_CONTRATADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_AUTORIZADO)));
         }
 
         public List<SPODashboardPoDTO> getListDashboardPo(SPOFiltroDTO filtro) {
-                List<SPODashboardPoDTO> list = consultarDashboardPo(filtro);
-                return list;
-        }
-
-        public List<SPOTotalAutorizadoUoDTO> getTotalAutorizadoUoList(SPOFiltroDTO filtro) {
-                List<SPOTotalAutorizadoUoDTO> list = consultarTotalAutorizadoUo(filtro);
-
-                if (list == null || list.isEmpty()) {
-                        return new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoUoDTO()));
-                }
-
-                list.forEach(res -> {
-                        BigDecimal pctE = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(),
-                                        res.getPorcentagemEmpenhado());
-                        BigDecimal pctL = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(),
-                                        res.getPorcentagemLiquidado());
-                        BigDecimal pctP = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(),
-                                        res.getPorcentagemPagoSemRap());
-
-                        res.setPorcentagemEmpenhado(pctE);
-                        res.setPorcentagemLiquidado(pctL);
-                        res.setPorcentagemPagoSemRap(pctP);
-                });
-
-                return list;
-        }
-
-        public List<SPOTotalAutorizadoPoDTO> getTotalAutorizadoPoList(SPOFiltroDTO filtro) {
-                List<SPOTotalAutorizadoPoDTO> list = consultarTotalAutorizadoPo(filtro);
-
-                if (list == null || list.isEmpty()) {
-                        return new ArrayList<>(Arrays.asList(new SPOTotalAutorizadoPoDTO()));
-                }
-
-                list.forEach(res -> {
-                        BigDecimal pctE = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(),
-                                        res.getPorcentagemEmpenhado());
-                        BigDecimal pctL = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(),
-                                        res.getPorcentagemLiquidado());
-                        BigDecimal pctP = SPOTotalAutorizadoUoDTO.calcularPorcentagem(res.getPorcentagemAutorizado(),
-                                        res.getPorcentagemPagoSemRap());
-
-                        res.setPorcentagemEmpenhado(pctE);
-                        res.setPorcentagemLiquidado(pctL);
-                        res.setPorcentagemPagoSemRap(pctP);
-                });
-
-                return list;
-        }
-
-        public List<SPOTotalAnoDTO> getTotalAno(SPOFiltroDTO filtro) {
-                List<SPOTotalAnoDTO> list = consultarTotalAno(filtro);
-                return list;
-        }
-
-        public List<SPOTotalAnoSigefes> getTotalAnoSigefes(SPOFiltroDTO filtro) {
-                List<SPOTotalAnoSigefes> list = consultarTotalAnoSigefes(filtro);
-                return list;
-        }
-
-        private List<SPOTotalAnoSigefes> consultarTotalAnoSigefes(SPOFiltroDTO filtro) {
-                HashMap<String, Object> params = paramsTotalAutorizado(filtro);
-
-                String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO_SIGEFES);
-                String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO_SIGEFES);
-
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOTotalAnoSigefes(
-                                                rs.get(SPOPentahoConfigKey.ANO).asText(),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO_COM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
-
-                                ));
-        }
-
-        private List<SPOTotalAnoDTO> consultarTotalAno(SPOFiltroDTO filtro) {
-                HashMap<String, Object> params = paramsTotalAutorizado(filtro);
-
-                String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO);
-                String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_ANO);
-
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOTotalAnoDTO(
-                                                rs.get(SPOPentahoConfigKey.ANO).asText(),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_CONTRATADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO_COM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
-
-                                ));
-        }
-
-        private List<SPOTotalAutorizadoPoDTO> consultarTotalAutorizadoPo(SPOFiltroDTO filtro) {
-                HashMap<String, Object> params = paramsTotalAutorizado(filtro);
-
-                String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_PO);
-                String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_PO);
-
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOTotalAutorizadoPoDTO(
-                                                rs.get(SPOPentahoConfigKey.UO).asText(),
-                                                rs.get(SPOPentahoConfigKey.SIGLA).asText(),
-                                                rs.get(SPOPentahoConfigKey.PO).asText(),
-                                                rs.get(SPOPentahoConfigKey.NOME).asText(),
-                                                rs.get(SPOPentahoConfigKey.NOME_PO).asText(),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
-
-                                ));
-        }
-
-        private List<SPOTotalAutorizadoUoDTO> consultarTotalAutorizadoUo(SPOFiltroDTO filtro) {
-                HashMap<String, Object> params = paramsTotalAutorizado(filtro);
-
-                String target = properties.getTargetOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_UO);
-                String dataAccessId = properties.getDataAccessIdOrThrow(PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_UO);
-
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOTotalAutorizadoUoDTO(
-                                                rs.get(SPOPentahoConfigKey.UO).asText(),
-                                                rs.get(SPOPentahoConfigKey.SIGLA).asText(),
-                                                rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)
-
-                                ));
-        }
-
-        private List<SPODashboardPoDTO> consultarDashboardPo(SPOFiltroDTO filtro) {
-                HashMap<String, Object> params = paramsTotalAutorizado(filtro);
-                String target = properties.getTargetOrThrow("planejamentoOrcamentarioDashboardPo");
-                String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioDashboardPo");
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
+                return apiUtils.executePentahoQuery("planejamentoOrcamentarioDashboardPo", pmoPath,
+                                paramsTotalAutorizado(filtro),
                                 rs -> new SPODashboardPoDTO(
                                                 rs.get(SPOPentahoConfigKey.UO).asText(),
                                                 rs.get(SPOPentahoConfigKey.SIGLA).asText(),
                                                 rs.get(SPOPentahoConfigKey.PO).asText(),
                                                 rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
                                                 rs.get(SPOPentahoConfigKey.NOME_PO).asText(),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_CONTRATADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)));
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PREVISTO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_CONTRATADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_AUTORIZADO)));
         }
 
-        private List<SPODashboardUoDTO> consultarDashboardUo(SPOFiltroDTO filtro) {
-                HashMap<String, Object> params = paramsTotalAutorizado(filtro);
-
-                String target = properties.getTargetOrThrow("planejamentoOrcamentarioDashboardUo");
-                String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioDashboardUo");
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPODashboardUoDTO(
+        public List<SPOTotalAutorizadoUoDTO> getTotalAutorizadoUoList(SPOFiltroDTO filtro) {
+                List<SPOTotalAutorizadoUoDTO> list = apiUtils.executePentahoQuery(
+                                PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_UO, pmoPath, paramsTotalAutorizado(filtro),
+                                rs -> new SPOTotalAutorizadoUoDTO(
                                                 rs.get(SPOPentahoConfigKey.UO).asText(),
                                                 rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                                                rs.get(SPOPentahoConfigKey.NOME_UO).asText(),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_EMPENHADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_AUTORIZADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_LIQUIDADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_SEM_RAP),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PREVISTO)));
+
+                if (list.isEmpty())
+                        return List.of(new SPOTotalAutorizadoUoDTO());
+                list.forEach(this::calcularPorcentagensUo);
+                return list;
+        }
+
+        public List<SPOTotalAutorizadoPoDTO> getTotalAutorizadoPoList(SPOFiltroDTO filtro) {
+                List<SPOTotalAutorizadoPoDTO> list = apiUtils.executePentahoQuery(
+                                PentahoBiConfigKeys.SPO_TOTAL_AUTORIZADO_PO, pmoPath, paramsTotalAutorizado(filtro),
+                                rs -> new SPOTotalAutorizadoPoDTO(
+                                                rs.get(SPOPentahoConfigKey.UO).asText(),
+                                                rs.get(SPOPentahoConfigKey.SIGLA).asText(),
+                                                rs.get(SPOPentahoConfigKey.PO).asText(),
                                                 rs.get(SPOPentahoConfigKey.NOME).asText(),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_CONTRATADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)));
+                                                rs.get(SPOPentahoConfigKey.NOME_PO).asText(),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_EMPENHADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_AUTORIZADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_LIQUIDADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_SEM_RAP),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PREVISTO)));
+
+                if (list.isEmpty())
+                        return List.of(new SPOTotalAutorizadoPoDTO());
+                list.forEach(this::calcularPorcentagensPo);
+                return list;
         }
 
-        private List<SPOFiltroPosDTO> consultarPos(String[] codUos, String ano) {
-                String codUosList = Arrays.stream(codUos).collect(Collectors.joining(","));
-                HashMap params = new HashMap<>();
-                params.put("parampCodUo", codUosList);
-                params.put("parampAno", ano);
-
-                String target = properties.getTargetOrThrow("planejamentoOrcamentarioFiltroPos");
-                String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioFiltroPos");
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOFiltroPosDTO(
-                                                rs.get("cod_po").asText(),
-                                                rs.get("nome_po").asText()));
+        public List<SPOTotalAnoDTO> getTotalAno(SPOFiltroDTO filtro) {
+                return apiUtils.executePentahoQuery(PentahoBiConfigKeys.SPO_TOTAL_ANO, pmoPath,
+                                paramsTotalAutorizado(filtro),
+                                rs -> new SPOTotalAnoDTO(
+                                                rs.get(SPOPentahoConfigKey.ANO).asText(),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PREVISTO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_CONTRATADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_AUTORIZADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_EMPENHADO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PAGO),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PAGO_COM_RAP)));
         }
 
-        private List<SPOFiltroUosDTO> consultarUos() {
-                String target = properties.getTargetOrThrow("planejamentoOrcamentarioFiltroUos");
-                String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioFiltroUos");
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                new HashMap<>(),
-                                rs -> new SPOFiltroUosDTO(
-                                                rs.get("cod_uo").asText(),
-                                                rs.get("nome_uo").asText())
-
-                );
+        public List<SPOTotalAnoSigefes> getTotalAnoSigefes(SPOFiltroDTO filtro) {
+                return apiUtils.executePentahoQuery(PentahoBiConfigKeys.SPO_TOTAL_ANO_SIGEFES, pmoPath,
+                                paramsTotalAutorizado(filtro),
+                                rs -> new SPOTotalAnoSigefes(
+                                                rs.get(SPOPentahoConfigKey.ANO).asText(),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_PAGO_COM_RAP),
+                                                parseBigDecimal(rs, SPOPentahoConfigKey.VLR_SEM_RAP)));
         }
 
-        private List<SPOTotalAutorizadoDTO> consultarTotalAutorizado(SPOFiltroDTO request) {
-                HashMap<String, Object> params = paramsTotalAutorizado(request);
-                String target = properties.getTargetOrThrow("planejamentoOrcamentarioTotalAutorizado");
-                String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioTotalAutorizado");
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOTotalAutorizadoDTO(
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_AUTORIZADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_EMPENHADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_LIQUIDADO)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PAGO_COM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_SEM_RAP)
-                                                                .asDouble(0)).setScale(2, RoundingMode.HALF_UP)));
-        }
-
-        private List<SPOTotalPrevistoDTO> consultarTotalPrevisto(
-                        SPOFiltroDTO request) {
-                HashMap<String, Object> params = paramsTotalPrevisto(request);
-                String target = properties.getTargetOrThrow("planejamentoOrcamentarioTotalPrevisto");
-                String dataAccessId = properties.getDataAccessIdOrThrow("planejamentoOrcamentarioTotalPrevisto");
-                return apiUtils.consult(
-                                target,
-                                dataAccessId,
-                                pmoPath,
-                                params,
-                                rs -> new SPOTotalPrevistoDTO(
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_PREVISTO)
-                                                                .asDouble(0))
-                                                                .setScale(2, RoundingMode.HALF_UP),
-                                                new BigDecimal(rs.get(SPOPentahoConfigKey.VLR_CONTRATADO)
-                                                                .asDouble(0))
-                                                                .setScale(2, RoundingMode.HALF_UP),
-                                                rs.get(SPOPentahoConfigKey.DT_FIM_EXTRACAO).asText()));
-        }
-
-        public static String joinArray(String[] array) {
-                if (array == null || array.length == 0) {
-                        return "";
-                }
-                return Arrays.stream(array)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.joining(","));
-        }
-
-        private HashMap<String, Object> paramsTotalPrevisto(SPOFiltroDTO request) {
-                HashMap<String, Object> params = new HashMap<>();
-
+        private Map<String, Object> paramsTotalPrevisto(SPOFiltroDTO request) {
+                Map<String, Object> params = new HashMap<>();
                 params.put(PentahoBiConfigParams.PARAMP_ANO, request.getAno());
                 params.put(PentahoBiConfigParams.PARAMP_FONTE, joinArray(request.getTipoFonte()));
-
-                // Correção direta para UO e PO
                 params.put(PentahoBiConfigParams.PARAMP_UO, joinArray(request.getUo()));
                 params.put(PentahoBiConfigParams.PARAMP_PO, joinArray(request.getPo()));
-
                 params.put(PentahoBiConfigParams.PARAMP_GND, joinArray(request.getGnd()));
-
                 return params;
         }
 
-        private HashMap<String, Object> paramsTotalAutorizado(SPOFiltroDTO request) {
-                HashMap<String, Object> params = new HashMap<>();
-
-                params.put(PentahoBiConfigParams.PARAMP_ANO, request.getAno());
+        private Map<String, Object> paramsTotalAutorizado(SPOFiltroDTO request) {
+                Map<String, Object> params = paramsTotalPrevisto(request);
                 params.put(PentahoBiConfigParams.PARAMP_MESSES, joinArray(request.getMes()));
-                params.put(PentahoBiConfigParams.PARAMP_FONTE, joinArray(request.getTipoFonte()));
-
-                // Correção direta para UO e PO
-                params.put(PentahoBiConfigParams.PARAMP_UO, joinArray(request.getUo()));
-                params.put(PentahoBiConfigParams.PARAMP_PO, joinArray(request.getPo()));
-
-                params.put(PentahoBiConfigParams.PARAMP_GND, joinArray(request.getGnd()));
-
                 return params;
+        }
+
+        private void calcularPorcentagensUo(SPOTotalAutorizadoUoDTO uo) {
+                BigDecimal autorizado = uo.getPorcentagemAutorizado();
+                uo.setPorcentagemEmpenhado(calcularPorcentagem(autorizado, uo.getPorcentagemEmpenhado()));
+                uo.setPorcentagemLiquidado(calcularPorcentagem(autorizado, uo.getPorcentagemLiquidado()));
+                uo.setPorcentagemPagoSemRap(calcularPorcentagem(autorizado, uo.getPorcentagemPagoSemRap()));
+        }
+
+        private void calcularPorcentagensPo(SPOTotalAutorizadoPoDTO po) {
+                BigDecimal autorizado = po.getPorcentagemAutorizado();
+                po.setPorcentagemEmpenhado(calcularPorcentagem(autorizado, po.getPorcentagemEmpenhado()));
+                po.setPorcentagemLiquidado(calcularPorcentagem(autorizado, po.getPorcentagemLiquidado()));
+                po.setPorcentagemPagoSemRap(calcularPorcentagem(autorizado, po.getPorcentagemPagoSemRap()));
+        }
+
+        private BigDecimal calcularPorcentagem(BigDecimal autorizado, BigDecimal value) {
+                if (value == null || autorizado == null || autorizado.compareTo(BigDecimal.ZERO) == 0) {
+                        return BigDecimal.ZERO;
+                }
+                return value.multiply(new BigDecimal(100))
+                                .divide(autorizado, 2, RoundingMode.HALF_UP);
         }
 }
