@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 public record CardSuccessResponseDTO(
         @JsonProperty("sucesso")
-        BigDecimal success
+        BigDecimal success,
+        String timesTamp
 ) {
 }
