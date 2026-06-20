@@ -86,7 +86,7 @@ public class IndicatorExecutionService {
 
 
     public WithoutReversationResponseDTO getCardAvailableWithoutReversation(FilterGeneralRequestDTO request) {
-        List<WithoutReversationResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<WithoutReversationResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_SEM_RESERVA,
                 pmoPath,
                 params(request),
@@ -174,7 +174,7 @@ public class IndicatorExecutionService {
 
 
     public CardFeasibilityResponseDTO getCardFeasibility(FilterGeneralRequestDTO request) {
-        List<CardFeasibilityResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<CardFeasibilityResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_EXEQUIBILIDADE,
                 pmoPath,
                 params(request),
@@ -196,7 +196,7 @@ public class IndicatorExecutionService {
 
 
     public CardMissionResponseDTO getCardMission(FilterGeneralRequestDTO request) {
-        List<CardMissionResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<CardMissionResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_MISSAO,
                 pmoPath,
                 params(request),
@@ -216,40 +216,15 @@ public class IndicatorExecutionService {
         return dto;
     }
 
-
     public CardIGOResponseDTO getCardIGO(FilterGeneralRequestDTO request) {
 
-        List<CardIGOResponseDTO> list = apiUtils.executePentahoQuery(
-                INDICATOR_EXECUTION_CARD_IGO,
-                pmoPath,
-                params(request),
-                rs -> new CardIGOResponseDTO(
-                        new BigDecimal(
-                                rs.get(IGO).asDouble(2)
-                        ).setScale(2, RoundingMode.HALF_UP),
-                        null
-                )
-        );
+        CardIGOResponseDTO dto = obterIGO(request);
 
-        if (list.isEmpty()) {
+        if (dto == null) {
             return null;
         }
 
-        CardIGOResponseDTO dto = list.get(0);
-
-        QuadrimestreEnum quadrimestre;
-
-        if ("-1".equals(request.month())) {
-            quadrimestre = QuadrimestreEnum.obterQuadrimestre(
-                    new int[]{LocalDate.now().getMonthValue()}
-            );
-        } else {
-            int[] meses = Arrays.stream(request.month().split(","))
-                    .mapToInt(Integer::parseInt)
-                    .toArray();
-
-            quadrimestre = QuadrimestreEnum.obterQuadrimestre(meses);
-        }
+        QuadrimestreEnum quadrimestre = obterQuadrimestreParaCalculoNota(request);
 
         String nota = QuadrimestreEnum.calcularNotaIGO(
                 dto.Igo().doubleValue(),
@@ -260,6 +235,52 @@ public class IndicatorExecutionService {
                 dto.Igo(),
                 nota
         );
+    }
+
+    private CardIGOResponseDTO obterIGO(FilterGeneralRequestDTO request) {
+
+        List<CardIGOResponseDTO> result = apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_IGO,
+                pmoPath,
+                params(request),
+                rs -> new CardIGOResponseDTO(
+                        BigDecimal.valueOf(rs.get(IGO).asDouble(2))
+                                .setScale(2, RoundingMode.HALF_UP),
+                        null
+                )
+        );
+
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    private QuadrimestreEnum obterQuadrimestreParaCalculoNota(FilterGeneralRequestDTO request) {
+
+        if (!"-1".equals(request.month())) {
+            return obterQuadrimestrePorMeses(request.month());
+        }
+
+        return isAnoEncerrado(request.year())
+                ? QuadrimestreEnum.TERCEIRO
+                : obterQuadrimestreAtual();
+    }
+
+    private QuadrimestreEnum obterQuadrimestreAtual() {
+        return QuadrimestreEnum.obterQuadrimestre(
+                new int[]{LocalDate.now().getMonthValue()}
+        );
+    }
+
+    private QuadrimestreEnum obterQuadrimestrePorMeses(String month) {
+
+        int[] meses = Arrays.stream(month.split(","))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+
+        return QuadrimestreEnum.obterQuadrimestre(meses);
+    }
+
+    private boolean isAnoEncerrado(String year) {
+        return Integer.parseInt(year) < LocalDate.now().getYear();
     }
 
     public CardChangeResponseDTO getCardChange(FilterGeneralRequestDTO request) {
@@ -277,7 +298,7 @@ public class IndicatorExecutionService {
 
 
     public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request) {
-        List<DashAvailabilityUoResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<DashAvailabilityUoResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO,
                 pmoPath,
                 params(request),
@@ -298,7 +319,7 @@ public class IndicatorExecutionService {
                 )
         );
 
-        if(list.isEmpty()) {
+        if (list.isEmpty()) {
             return null;
         }
 
