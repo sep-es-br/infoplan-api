@@ -178,4 +178,13 @@ public class PainelObrasController {
         List<TotalEntregaPorMesResponseDTO> entregaPorMesList = painelObrasService.totalEntregaPorMes(request);
         return ResponseEntity.ok(entregaPorMesList);
     }
+
+    @GetMapping("total-totalizador")
+    public ResponseEntity<TotalizadorResponseDTO> totalTotalizador(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        TotalizadorResponseDTO totalizador = painelObrasService.totalTotalizador(request);
+        return ResponseEntity.ok(totalizador);
+    }
+
 }
