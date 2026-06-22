@@ -280,14 +280,12 @@ public class IndicatorExecutionService {
             return false;
         }
 
-        // Separa os anos pela vírgula, converte para int e descobre o maior ano enviado
         int maiorAnoInformado = Arrays.stream(year.split(","))
                 .map(String::trim)
                 .mapToInt(Integer::parseInt)
                 .max()
-                .orElse(LocalDate.now().getYear()); // Caso a lista esteja vazia, assume o ano atual
+                .orElse(LocalDate.now().getYear());
 
-        // Compara o maior ano informado com o ano atual do sistema
         return maiorAnoInformado < LocalDate.now().getYear();
     }
 
