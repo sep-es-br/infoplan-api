@@ -8,17 +8,13 @@ import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
 import br.gov.es.infoplan.enums.QuadrimestreEnum;
 import br.gov.es.infoplan.utils.ApiUtils;
-import com.nimbusds.oauth2.sdk.SuccessResponse;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -280,7 +276,19 @@ public class IndicatorExecutionService {
     }
 
     private boolean isAnoEncerrado(String year) {
-        return Integer.parseInt(year) < LocalDate.now().getYear();
+        if (year == null || year.isEmpty()) {
+            return false;
+        }
+
+        // Separa os anos pela vírgula, converte para int e descobre o maior ano enviado
+        int maiorAnoInformado = Arrays.stream(year.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .max()
+                .orElse(LocalDate.now().getYear()); // Caso a lista esteja vazia, assume o ano atual
+
+        // Compara o maior ano informado com o ano atual do sistema
+        return maiorAnoInformado < LocalDate.now().getYear();
     }
 
     public CardChangeResponseDTO getCardChange(FilterGeneralRequestDTO request) {
