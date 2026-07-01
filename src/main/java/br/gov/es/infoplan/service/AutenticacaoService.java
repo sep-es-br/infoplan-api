@@ -1,8 +1,11 @@
 package br.gov.es.infoplan.service;
 
+import br.gov.es.infoplan.client.AcessoCidadaoUserInfoClient;
+import br.gov.es.infoplan.client.AcessoCidadaoWebClient;
 import br.gov.es.infoplan.dto.ACUserInfoDto;
 import br.gov.es.infoplan.dto.ACUserInfoDtoStringRole;
 import br.gov.es.infoplan.dto.UsuarioDto;
+import br.gov.es.infoplan.dto.acessocidadaoapi.ACAgentePublicoPapelDto;
 import br.gov.es.infoplan.exception.UsuarioSemPermissaoException;
 import br.gov.es.infoplan.exception.service.InfoplanServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,9 +16,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -57,6 +65,18 @@ public class AutenticacaoService {
     private final TokenService tokenService;
     public final HashMap<String, String> moduloPermissao = new HashMap<>();
 
+    @Autowired
+    private AcessoCidadaoWebClient ACWebClient;
+
+    @Autowired
+    private AcessoCidadaoUserInfoClient ACUserInfoClient;
+
+    @Autowired
+    private AcessoCidadaoAutorizacaoService ACAuthService;
+
+    @Autowired
+    private AcessoCidadaoService acessoCidadaoService;
+
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
         
@@ -68,9 +88,25 @@ public class AutenticacaoService {
     }
 
 
+//    public UsuarioDto autenticar(String accessToken) {
+//        logger.info("Autenticar usuário Infoplan.");
+//        ACUserInfoDto userInfo = getUserInfo(accessToken);
+//        String token = tokenService.gerarToken(userInfo);
+//        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role());
+//    }
+
+
     public UsuarioDto autenticar(String accessToken) {
         logger.info("Autenticar usuário Infoplan.");
+
         ACUserInfoDto userInfo = getUserInfo(accessToken);
+
+        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.sub());
+
+        // [Opcional] Se você precisar injetar esses novos papéis dentro do objeto userInfo antes de gerar o token:
+        // Exemplo: userInfo.setRoles(papeis.stream().map(ACAgentePublicoPapelDto::Nome).collect(Collectors.toList()));
+
+        // 3. Gera o token do sistema
         String token = tokenService.gerarToken(userInfo);
 
         return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role());
@@ -102,6 +138,25 @@ public class AutenticacaoService {
             Thread.currentThread().interrupt();
         }
         throw new InfoplanServiceException(List.of("Não foi possível identificar um usuário no acesso cidadão com esse token. Faça login novamente!"));
+    }
+
+    private List<ACAgentePublicoPapelDto> buscarPapeisAgentePublicoPorSub(String sub) {
+        return ACWebClient.buscarPapeisAgentePublicoPorSub(ACAuthService.getAuthorizationHeader(), sub);
+    }
+
+    public List<ACAgentePublicoPapelDto> listarPapeisAgentePublicoPorSub(String sub) {
+        return buscarPapeisAgentePublicoPorSub(sub);
+    }
+
+    private Set<Map<String, Object>> listarPapeisLotacaoGuid(String subNovo) {
+        return acessoCidadaoService.listarPapeisAgentePublicoPorSub(subNovo).stream()
+                .map(papel -> {
+                    Map<String, Object> orgInfo = new HashMap<>();
+                    orgInfo.put("lotacaoGuid", papel.LotacaoGuid() != null ? papel.LotacaoGuid().toLowerCase() : "");
+                    orgInfo.put("prioritario", papel.Prioritario() ? papel.Prioritario() : false);
+                    return orgInfo;
+                })
+                .collect(Collectors.toSet());
     }
 
     private static String getEmailUserInfo(ACUserInfoDto userInfo) {
