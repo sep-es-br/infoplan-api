@@ -2,6 +2,7 @@ package br.gov.es.infoplan.service;
 
 import br.gov.es.infoplan.client.OrganogramaWebClient;
 import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaOrganizacaoDto;
+import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaOrganizacaoInfo;
 import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaOrganizacaoInfoEssencialDto;
 import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaUnidadeInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,10 @@ public class OrganogramaService {
         return buscarUnidadeInfoPorGuid(lotacaoGuid);
     }
 
+    public OrganogramaOrganizacaoInfo listarUnidadeInfoPorOrganizacao(String organizacao) {
+        return buscarPorOrganizacao(organizacao);
+    }
+
     public List<OrganogramaOrganizacaoInfoEssencialDto> listarOrganizacoesFilhasGOVES() {
         return OrganogramaWebClient.buscarOrganizacoesFilhasGOVES(ACAuthService.getAuthorizationHeader(), GUID_GOVES)
                 .stream()
@@ -42,6 +47,10 @@ public class OrganogramaService {
 
     private OrganogramaUnidadeInfoDto buscarUnidadeInfoPorGuid(String guid) {
         return OrganogramaWebClient.buscarUnidadeInfoPorGuid(ACAuthService.getAuthorizationHeader(), guid);
+    }
+
+    private OrganogramaOrganizacaoInfo buscarPorOrganizacao(String guid) {
+        return OrganogramaWebClient.buscarPorOrganizacao(ACAuthService.getAuthorizationHeader(), guid);
     }
 
     private boolean validarOrganizacaoAPIOrganograma(OrganogramaOrganizacaoInfoEssencialDto organogramaOrganizacaoInfoEssencialDto) {

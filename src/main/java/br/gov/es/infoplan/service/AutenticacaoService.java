@@ -9,6 +9,7 @@ import br.gov.es.infoplan.dto.acessocidadaoapi.ACAgentePublicoPapelDto;
 import br.gov.es.infoplan.exception.UsuarioSemPermissaoException;
 import br.gov.es.infoplan.exception.service.InfoplanServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -33,53 +34,52 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AutenticacaoService {
 
-    
+
     @Value("${papel.geral}")
     private String papelGeral;
-    
+
     @Value("${papel.capitacao}")
     private String papelCapitacao;
-    
+
     @Value("${papel.indicadores}")
     private String papelIndicadores;
-    
+
     @Value("${papel.indicadoresAdmin}")
     private String papelIndicadoresAdmin;
-    
+
     @Value("${papel.sigefes}")
     private String papelSigefes;
-    
+
     @Value("${papel.projEstrategico}")
     private String papelProjEstrategico;
 
     @Value("${papel.painelObras}")
     private String papelPainelObras;
-    
+
 //    @Value("${papel.gestaoFiscal}")
 //    private String papelGestaoFiscal;
 
     @Value("${papel.planejamentoOrcamentario}")
     private String papelPlanejamentoOrcamentario;
-    
+
     private final Logger logger = LogManager.getLogger(AutenticacaoService.class);
     private final TokenService tokenService;
     public final HashMap<String, String> moduloPermissao = new HashMap<>();
 
-    @Autowired
-    private AcessoCidadaoWebClient ACWebClient;
+    private final AcessoCidadaoWebClient ACWebClient;
+
+    private final AcessoCidadaoUserInfoClient ACUserInfoClient;
+
+    private final AcessoCidadaoAutorizacaoService ACAuthService;
+
+    private final AcessoCidadaoService acessoCidadaoService;
 
     @Autowired
-    private AcessoCidadaoUserInfoClient ACUserInfoClient;
-
-    @Autowired
-    private AcessoCidadaoAutorizacaoService ACAuthService;
-
-    @Autowired
-    private AcessoCidadaoService acessoCidadaoService;
+    private OrganogramaService organogramaService;
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        
+
         moduloPermissao.put("/capitation", papelCapitacao);
         moduloPermissao.put("/execucaoOrcamentaria", papelSigefes);
         moduloPermissao.put("/strategicProjects", papelProjEstrategico);
@@ -101,22 +101,26 @@ public class AutenticacaoService {
 
         ACUserInfoDto userInfo = getUserInfo(accessToken);
 
-        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.sub());
+        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
 
-        // [Opcional] Se você precisar injetar esses novos papéis dentro do objeto userInfo antes de gerar o token:
-        // Exemplo: userInfo.setRoles(papeis.stream().map(ACAgentePublicoPapelDto::Nome).collect(Collectors.toList()));
+        Set<String> organizacaoGuid = papeis.stream().map(r -> {
+            String organizacao = organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao();
+            return organizacao;
+        }).collect(Collectors.toSet());
 
-        // 3. Gera o token do sistema
+        String siglaLotacao = organizacaoGuid.stream()
+                .findFirst()
+                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
+                .map(unidade -> unidade.sigla())
+                .orElse("");
+
         String token = tokenService.gerarToken(userInfo);
 
-        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role());
+        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
     }
 
     protected ACUserInfoDto getUserInfo(String accessToken) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://acessocidadao.es.gov.br/is/connect/userinfo"))
-                .header("Authorization", "Bearer " + accessToken)
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://acessocidadao.es.gov.br/is/connect/userinfo")).header("Authorization", "Bearer " + accessToken).build();
 
         HttpClient client = HttpClient.newHttpClient();
         try {
@@ -149,14 +153,12 @@ public class AutenticacaoService {
     }
 
     private Set<Map<String, Object>> listarPapeisLotacaoGuid(String subNovo) {
-        return acessoCidadaoService.listarPapeisAgentePublicoPorSub(subNovo).stream()
-                .map(papel -> {
-                    Map<String, Object> orgInfo = new HashMap<>();
-                    orgInfo.put("lotacaoGuid", papel.LotacaoGuid() != null ? papel.LotacaoGuid().toLowerCase() : "");
-                    orgInfo.put("prioritario", papel.Prioritario() ? papel.Prioritario() : false);
-                    return orgInfo;
-                })
-                .collect(Collectors.toSet());
+        return acessoCidadaoService.listarPapeisAgentePublicoPorSub(subNovo).stream().map(papel -> {
+            Map<String, Object> orgInfo = new HashMap<>();
+            orgInfo.put("lotacaoGuid", papel.LotacaoGuid() != null ? papel.LotacaoGuid().toLowerCase() : "");
+            orgInfo.put("prioritario", papel.Prioritario() ? papel.Prioritario() : false);
+            return orgInfo;
+        }).collect(Collectors.toSet());
     }
 
     private static String getEmailUserInfo(ACUserInfoDto userInfo) {

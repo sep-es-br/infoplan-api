@@ -139,6 +139,7 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
             <version>4.1.2</version>
         </dependency>
+
     </dependencies>
 
     <build>

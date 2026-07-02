@@ -15,13 +15,14 @@ public record ACUserInfoDto(
         String email,
         String emailCorporativo,
         String sub,
-        Set<String> role
+        Set<String> role,
+        String sigla
 ) {
 
     public ACUserInfoDto(ACUserInfoDtoStringRole userInfo) {
         this(userInfo.apelido(), userInfo.cpfValidado(), userInfo.verificada(), userInfo.verificacaoTipo(), userInfo.subNovo(),
                 userInfo.agentepublico(), userInfo.email(), userInfo.emailCorporativo(), userInfo.sub(),
-                new HashSet<>(List.of(userInfo.role())));
+                new HashSet<>(List.of(userInfo.role())), userInfo.sigla());
     }
 
     public ACUserInfoDto(LinkedHashMap<String, Object> userInfoHashMap) {
@@ -35,7 +36,8 @@ public record ACUserInfoDto(
                 (String) userInfoHashMap.get("email"),
                 (String) userInfoHashMap.get("emailCorporativo"),
                 (String) userInfoHashMap.get("sub"),
-                converterRole(userInfoHashMap.get("role"))
+                converterRole(userInfoHashMap.get("role")),
+                (String) userInfoHashMap.get("sigla")
         );
     }
 

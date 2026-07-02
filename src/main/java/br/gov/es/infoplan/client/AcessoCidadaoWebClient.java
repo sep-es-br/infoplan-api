@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "acessoCidadaoWeb")
+@FeignClient(name = "acessoCidadaoWeb",  url = "${api.acessocidadao.uri.webapi}")
 public interface AcessoCidadaoWebClient {
     @PutMapping("/api/cidadao/{cpf}/pesquisaSub")
     SubResponseDto buscarSubPorCpf(@RequestHeader Map<String, Object> headers, @PathVariable String cpf);

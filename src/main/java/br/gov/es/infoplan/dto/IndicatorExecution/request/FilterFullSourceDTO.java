@@ -19,6 +19,7 @@ public record FilterFullSourceDTO(
                 description = "Ação Orçamentária separados por vírgula",
                 example = "-1"
         )
-        String codAction
+        String codAction,
+        String sigla
 ) {
 }

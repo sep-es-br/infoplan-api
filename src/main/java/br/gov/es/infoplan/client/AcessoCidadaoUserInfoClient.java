@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@FeignClient(name = "acessoCidadaoUserInfo")
+@FeignClient(name = "acessoCidadaoUserInfo", url = "${api.acessocidadao.uri.userinfo}")
 public interface AcessoCidadaoUserInfoClient {
     @GetMapping
     LinkedHashMap<String, Object> buscarUserInfoAcessoCidadao(@RequestHeader Map<String, Object> headers);

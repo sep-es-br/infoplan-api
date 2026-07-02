@@ -50,6 +50,7 @@ public record FilterGeneralRequestDTO(
                 description = "Código da emenda seprado por vírgula",
                 example = "-1"
         )
-        String codAmendment
+        String codAmendment,
+        String sigla
 )
 { }
