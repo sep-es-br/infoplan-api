@@ -6,19 +6,17 @@ import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
+import br.gov.es.infoplan.dto.UsuarioDto;
 import br.gov.es.infoplan.enums.QuadrimestreEnum;
 import br.gov.es.infoplan.utils.ApiUtils;
-import com.nimbusds.oauth2.sdk.SuccessResponse;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -29,6 +27,11 @@ import static br.gov.es.infoplan.config.spo.SPOPentahoConfigKey.*;
 @Service
 @Slf4j
 public class IndicatorExecutionService {
+
+
+    @Value("${infoplan.security.siglas-master}")
+    private Set<String> siglasMaster;
+
 
     @Autowired
     private ApiUtils apiUtils;
@@ -86,7 +89,7 @@ public class IndicatorExecutionService {
 
 
     public WithoutReversationResponseDTO getCardAvailableWithoutReversation(FilterGeneralRequestDTO request) {
-        List<WithoutReversationResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<WithoutReversationResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_SEM_RESERVA,
                 pmoPath,
                 params(request),
@@ -174,7 +177,7 @@ public class IndicatorExecutionService {
 
 
     public CardFeasibilityResponseDTO getCardFeasibility(FilterGeneralRequestDTO request) {
-        List<CardFeasibilityResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<CardFeasibilityResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_EXEQUIBILIDADE,
                 pmoPath,
                 params(request),
@@ -196,7 +199,7 @@ public class IndicatorExecutionService {
 
 
     public CardMissionResponseDTO getCardMission(FilterGeneralRequestDTO request) {
-        List<CardMissionResponseDTO> list =  apiUtils.executePentahoQuery(
+        List<CardMissionResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_MISSAO,
                 pmoPath,
                 params(request),
@@ -216,40 +219,15 @@ public class IndicatorExecutionService {
         return dto;
     }
 
-
     public CardIGOResponseDTO getCardIGO(FilterGeneralRequestDTO request) {
 
-        List<CardIGOResponseDTO> list = apiUtils.executePentahoQuery(
-                INDICATOR_EXECUTION_CARD_IGO,
-                pmoPath,
-                params(request),
-                rs -> new CardIGOResponseDTO(
-                        new BigDecimal(
-                                rs.get(IGO).asDouble(2)
-                        ).setScale(2, RoundingMode.HALF_UP),
-                        null
-                )
-        );
+        CardIGOResponseDTO dto = obterIGO(request);
 
-        if (list.isEmpty()) {
+        if (dto == null) {
             return null;
         }
 
-        CardIGOResponseDTO dto = list.get(0);
-
-        QuadrimestreEnum quadrimestre;
-
-        if ("-1".equals(request.month())) {
-            quadrimestre = QuadrimestreEnum.obterQuadrimestre(
-                    new int[]{LocalDate.now().getMonthValue()}
-            );
-        } else {
-            int[] meses = Arrays.stream(request.month().split(","))
-                    .mapToInt(Integer::parseInt)
-                    .toArray();
-
-            quadrimestre = QuadrimestreEnum.obterQuadrimestre(meses);
-        }
+        QuadrimestreEnum quadrimestre = obterQuadrimestreParaCalculoNota(request);
 
         String nota = QuadrimestreEnum.calcularNotaIGO(
                 dto.Igo().doubleValue(),
@@ -260,6 +238,62 @@ public class IndicatorExecutionService {
                 dto.Igo(),
                 nota
         );
+    }
+
+    private CardIGOResponseDTO obterIGO(FilterGeneralRequestDTO request) {
+
+        List<CardIGOResponseDTO> result = apiUtils.executePentahoQuery(
+                INDICATOR_EXECUTION_CARD_IGO,
+                pmoPath,
+                params(request),
+                rs -> new CardIGOResponseDTO(
+                        BigDecimal.valueOf(rs.get(IGO).asDouble(2))
+                                .setScale(2, RoundingMode.HALF_UP),
+                        null
+                )
+        );
+
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    private QuadrimestreEnum obterQuadrimestreParaCalculoNota(FilterGeneralRequestDTO request) {
+
+        if (!"-1".equals(request.month())) {
+            return obterQuadrimestrePorMeses(request.month());
+        }
+
+        return isAnoEncerrado(request.year())
+                ? QuadrimestreEnum.TERCEIRO
+                : obterQuadrimestreAtual();
+    }
+
+    private QuadrimestreEnum obterQuadrimestreAtual() {
+        return QuadrimestreEnum.obterQuadrimestre(
+                new int[]{LocalDate.now().getMonthValue()}
+        );
+    }
+
+    private QuadrimestreEnum obterQuadrimestrePorMeses(String month) {
+
+        int[] meses = Arrays.stream(month.split(","))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+
+        return QuadrimestreEnum.obterQuadrimestre(meses);
+    }
+
+    private boolean isAnoEncerrado(String year) {
+        if (year == null || year.isEmpty()) {
+            return false;
+        }
+
+        int maiorAnoInformado = Arrays.stream(year.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .max()
+                .orElse(LocalDate.now().getYear());
+
+        return maiorAnoInformado < LocalDate.now().getYear();
     }
 
     public CardChangeResponseDTO getCardChange(FilterGeneralRequestDTO request) {
@@ -275,12 +309,28 @@ public class IndicatorExecutionService {
         ).get(0);
     }
 
+    public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request, UsuarioDto usuario) {
+        boolean temRoleAdmin = usuario.role() != null && usuario.role().contains("ADMIN");
+        boolean pertenceAoOrgaoMaster = siglasMaster.contains(usuario.Sigla());
 
-    public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request) {
-        List<DashAvailabilityUoResponseDTO> list =  apiUtils.executePentahoQuery(
+        String orgaoDefinitivo = (temRoleAdmin || pertenceAoOrgaoMaster) ? "-1" : usuario.Sigla();
+
+        FilterGeneralRequestDTO requestBlindado = new FilterGeneralRequestDTO(
+                request.year(),
+                request.codUo(),
+                request.codAction(),
+                request.month(),
+                request.typeSource(),
+                request.codGnd(),
+                request.codSource(),
+                request.codAmendment(),
+                orgaoDefinitivo
+        );
+
+        List<DashAvailabilityUoResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO,
                 pmoPath,
-                params(request),
+                params(requestBlindado),
                 rs -> new DashAvailabilityUoResponseDTO(
                         new BigDecimal(
                                 rs.get(DISPONIVEL).asDouble(2)
@@ -298,13 +348,12 @@ public class IndicatorExecutionService {
                 )
         );
 
-        if(list.isEmpty()) {
+        if (list.isEmpty()) {
             return null;
         }
 
         return list.get(0);
     }
-
 
     public List<DashSuccessPlannedResponseDTO> getDashSuccessPlanned(FilterGeneralRequestDTO request) {
         return apiUtils.executePentahoQuery(
@@ -375,11 +424,12 @@ public class IndicatorExecutionService {
         Map<String, Object> params = new HashMap<>();
 
         String year = request.year();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
         }
-
+        params.put(PARAMP_ORGAO, orgao);
         return params;
     }
 
@@ -388,12 +438,14 @@ public class IndicatorExecutionService {
 
         String year = request.year();
         String uo = request.codUo();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
         }
 
         params.put(PARAMP_COD_UO, uo);
+        params.put(PARAMP_ORGAO, orgao);
 
         return params;
     }
@@ -404,6 +456,7 @@ public class IndicatorExecutionService {
         String year = request.year();
         String uo = request.codUo();
         String action = request.codAction();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
@@ -411,7 +464,7 @@ public class IndicatorExecutionService {
 
         params.put(PARAMP_COD_UO, uo);
         params.put(PARAMP_COD_ACAO, action);
-
+        params.put(PARAMP_ORGAO, orgao);
         return params;
     }
 
@@ -426,6 +479,7 @@ public class IndicatorExecutionService {
         String codSource = request.codSource();
         String codAmendment = request.codAmendment();
         String action = request.codAction();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
@@ -439,6 +493,7 @@ public class IndicatorExecutionService {
         params.put(PARAMP_TIPO_FONTE, typeSource);
         params.put(PARAMP_COD_GND, gnd);
         params.put(PARAMP_MES, month);
+        params.put(PARAMP_ORGAO, orgao);
         return params;
     }
 }

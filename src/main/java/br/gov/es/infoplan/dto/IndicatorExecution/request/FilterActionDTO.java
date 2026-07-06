@@ -12,6 +12,7 @@ public record FilterActionDTO(
                 description = "Unidade Orçamentária separados por vírgula",
                 example = "27101"
         )
-        String codUo
+        String codUo,
+        String orgao
 ) {
 }
