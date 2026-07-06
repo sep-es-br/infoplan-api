@@ -51,6 +51,6 @@ public record FilterGeneralRequestDTO(
                 example = "-1"
         )
         String codAmendment,
-        String sigla
+        String orgao
 )
 { }

@@ -13,6 +13,6 @@ public record FilterActionDTO(
                 example = "27101"
         )
         String codUo,
-        String sigla
+        String orgao
 ) {
 }

@@ -20,6 +20,6 @@ public record FilterFullSourceDTO(
                 example = "-1"
         )
         String codAction,
-        String sigla
+        String orgao
 ) {
 }

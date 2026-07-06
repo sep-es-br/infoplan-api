@@ -8,5 +8,5 @@ public record FilterBugataryUnitDTO(
                 example = "2025,2026"
         )
         String year,
-        String sigla
+        String orgao
 ) { }
