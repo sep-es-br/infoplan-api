@@ -402,11 +402,12 @@ public class IndicatorExecutionService {
         Map<String, Object> params = new HashMap<>();
 
         String year = request.year();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
         }
-
+        params.put(PARAMP_ORGAO,orgao);
         return params;
     }
 
@@ -415,12 +416,14 @@ public class IndicatorExecutionService {
 
         String year = request.year();
         String uo = request.codUo();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
         }
 
         params.put(PARAMP_COD_UO, uo);
+        params.put(PARAMP_ORGAO,orgao);
 
         return params;
     }
@@ -431,6 +434,7 @@ public class IndicatorExecutionService {
         String year = request.year();
         String uo = request.codUo();
         String action = request.codAction();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
@@ -438,7 +442,7 @@ public class IndicatorExecutionService {
 
         params.put(PARAMP_COD_UO, uo);
         params.put(PARAMP_COD_ACAO, action);
-
+        params.put(PARAMP_ORGAO,orgao);
         return params;
     }
 
@@ -453,6 +457,7 @@ public class IndicatorExecutionService {
         String codSource = request.codSource();
         String codAmendment = request.codAmendment();
         String action = request.codAction();
+        String orgao = request.orgao();
 
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
@@ -466,6 +471,7 @@ public class IndicatorExecutionService {
         params.put(PARAMP_TIPO_FONTE, typeSource);
         params.put(PARAMP_COD_GND, gnd);
         params.put(PARAMP_MES, month);
+        params.put(PARAMP_ORGAO,orgao);
         return params;
     }
 }

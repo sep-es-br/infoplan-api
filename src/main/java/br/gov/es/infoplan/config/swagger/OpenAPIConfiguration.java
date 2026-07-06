@@ -1,4 +1,4 @@
-package br.gov.es.infoplan.config.security;
+package br.gov.es.infoplan.config.swagger;
 
 import java.util.List;
 

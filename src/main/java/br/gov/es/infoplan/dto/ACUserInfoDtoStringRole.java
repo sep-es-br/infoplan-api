@@ -13,6 +13,8 @@ public record ACUserInfoDtoStringRole(
         String email,
         String sub,
         String role,
-        String emailCorporativo) {
+        String emailCorporativo,
+        String sigla
+) {
 
 }

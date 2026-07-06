@@ -7,5 +7,6 @@ public record FilterBugataryUnitDTO(
                 description = "Anos separados por vírgula",
                 example = "2025,2026"
         )
-        String year
+        String year,
+        String orgao
 ) { }
