@@ -99,56 +99,56 @@ public class AutenticacaoService {
 //    }
 
 
-//    public UsuarioDto autenticar(String accessToken) {
-//        logger.info("Autenticar usuário Infoplan.");
-//
-//        ACUserInfoDto userInfo = getUserInfo(accessToken);
-//
-//        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
-//
-//        Set<String> organizacaoGuid = papeis.stream().map(r -> {
-//            String organizacao = organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao();
-//            return organizacao;
-//        }).collect(Collectors.toSet());
-//
-//        String siglaLotacao = organizacaoGuid.stream()
-//                .findFirst()
-//                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
-//                .map(unidade -> unidade.sigla())
-//                .orElse("-1");
-//
-//        String token = tokenService.gerarToken(userInfo);
-//
-//        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
-//    }
-
     public UsuarioDto autenticar(String accessToken) {
         logger.info("Autenticar usuário Infoplan.");
 
         ACUserInfoDto userInfo = getUserInfo(accessToken);
+
         List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
 
-        Set<String> siglasPossiveis = papeis.stream()
-                .map(r -> organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao())
+        Set<String> organizacaoGuid = papeis.stream().map(r -> {
+            String organizacao = organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao();
+            return organizacao;
+        }).collect(Collectors.toSet());
+
+        String siglaLotacao = organizacaoGuid.stream()
+                .findFirst()
                 .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
                 .map(unidade -> unidade.sigla())
-                .collect(Collectors.toSet());
-
-        String siglaFinal = "-1";
-        if (!siglasPossiveis.isEmpty()) {
-
-            boolean possuiAcessoTotal = siglasPossiveis.stream().anyMatch(siglasMaster::contains);
-
-            if (possuiAcessoTotal) {
-                siglaFinal = "-1";
-            } else {
-                siglaFinal = siglasPossiveis.iterator().next();
-            }
-        }
+                .orElse("-1");
 
         String token = tokenService.gerarToken(userInfo);
-        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaFinal);
+
+        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
     }
+
+//    public UsuarioDto autenticar(String accessToken) {
+//        logger.info("Autenticar usuário Infoplan.");
+//
+//        ACUserInfoDto userInfo = getUserInfo(accessToken);
+//        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
+//
+//        Set<String> siglasPossiveis = papeis.stream()
+//                .map(r -> organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao())
+//                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
+//                .map(unidade -> unidade.sigla())
+//                .collect(Collectors.toSet());
+//
+//        String siglaFinal = "-1";
+//        if (!siglasPossiveis.isEmpty()) {
+//
+//            boolean possuiAcessoTotal = siglasPossiveis.stream().anyMatch(siglasMaster::contains);
+//
+//            if (possuiAcessoTotal) {
+//                siglaFinal = "-1";
+//            } else {
+//                siglaFinal = siglasPossiveis.iterator().next();
+//            }
+//        }
+//
+//        String token = tokenService.gerarToken(userInfo);
+//        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaFinal);
+//    }
 
     protected ACUserInfoDto getUserInfo(String accessToken) {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://acessocidadao.es.gov.br/is/connect/userinfo"))

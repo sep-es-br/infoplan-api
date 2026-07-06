@@ -5,11 +5,14 @@ import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
+import br.gov.es.infoplan.dto.UsuarioDto;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Tag(name = "Indicadores Execução", description = "Consultas de receitas e despesas orçamentárias")
 @RestController
@@ -25,6 +29,9 @@ import java.util.List;
 @CrossOrigin(origins = "${frontend.host}")
 @RequiredArgsConstructor
 public class IndicatorExecutionController {
+
+    @Value("${infoplan.security.siglas-master}")
+    private Set<String> siglasMaster;
 
     @Autowired
     private IndicatorExecutionService indicatorExecutionService;
@@ -140,14 +147,21 @@ public class IndicatorExecutionController {
     @Operation(summary = "Dash disponibilidade por UO", description = "Retona o detalhamento das despesas do gráfico disponibilidade por UO ")
     @GetMapping("/dash/disponibilidade-por-uo")
     public ResponseEntity<DashAvailabilityUoResponseDTO> getDashAvailabilityToUo(
-            @Validated @ModelAttribute FilterGeneralRequestDTO request
+            @Validated @ModelAttribute FilterGeneralRequestDTO request,
+            @AuthenticationPrincipal UsuarioDto usuario
     ) {
-        DashAvailabilityUoResponseDTO listAvailability = indicatorExecutionService.getDashAvailabilityToUo(request);
+        DashAvailabilityUoResponseDTO listAvailability = indicatorExecutionService.getDashAvailabilityToUo(request, usuario);
 
-        if(listAvailability == null) {
+        if (listAvailability == null) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(listAvailability);
+//        DashAvailabilityUoResponseDTO listAvailability = indicatorExecutionService.getDashAvailabilityToUo(request);
+//
+//        if(listAvailability == null) {
+//            return ResponseEntity.noContent().build();
+//        }
+//        return ResponseEntity.ok(listAvailability);
     }
 
     @Operation(summary = "Dash grupo despesas", description = "Retorna o detalhamento das despesas do gráfico comparativo e sucesso do planejado")

@@ -6,11 +6,13 @@ import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
+import br.gov.es.infoplan.dto.UsuarioDto;
 import br.gov.es.infoplan.enums.QuadrimestreEnum;
 import br.gov.es.infoplan.utils.ApiUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +27,11 @@ import static br.gov.es.infoplan.config.spo.SPOPentahoConfigKey.*;
 @Service
 @Slf4j
 public class IndicatorExecutionService {
+
+
+    @Value("${infoplan.security.siglas-master}")
+    private Set<String> siglasMaster;
+
 
     @Autowired
     private ApiUtils apiUtils;
@@ -302,12 +309,28 @@ public class IndicatorExecutionService {
         ).get(0);
     }
 
+    public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request, UsuarioDto usuario) {
+        boolean temRoleAdmin = usuario.role() != null && usuario.role().contains("ADMIN");
+        boolean pertenceAoOrgaoMaster = siglasMaster.contains(usuario.Sigla());
 
-    public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request) {
+        String orgaoDefinitivo = (temRoleAdmin || pertenceAoOrgaoMaster) ? "-1" : usuario.Sigla();
+
+        FilterGeneralRequestDTO requestBlindado = new FilterGeneralRequestDTO(
+                request.year(),
+                request.codUo(),
+                request.codAction(),
+                request.month(),
+                request.typeSource(),
+                request.codGnd(),
+                request.codSource(),
+                request.codAmendment(),
+                orgaoDefinitivo
+        );
+
         List<DashAvailabilityUoResponseDTO> list = apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO,
                 pmoPath,
-                params(request),
+                params(requestBlindado),
                 rs -> new DashAvailabilityUoResponseDTO(
                         new BigDecimal(
                                 rs.get(DISPONIVEL).asDouble(2)
@@ -331,7 +354,6 @@ public class IndicatorExecutionService {
 
         return list.get(0);
     }
-
 
     public List<DashSuccessPlannedResponseDTO> getDashSuccessPlanned(FilterGeneralRequestDTO request) {
         return apiUtils.executePentahoQuery(
@@ -407,7 +429,7 @@ public class IndicatorExecutionService {
         if (year != null && !year.isEmpty()) {
             params.put(PARAMP_ANO_M, year);
         }
-        params.put(PARAMP_ORGAO,orgao);
+        params.put(PARAMP_ORGAO, orgao);
         return params;
     }
 
@@ -423,7 +445,7 @@ public class IndicatorExecutionService {
         }
 
         params.put(PARAMP_COD_UO, uo);
-        params.put(PARAMP_ORGAO,orgao);
+        params.put(PARAMP_ORGAO, orgao);
 
         return params;
     }
@@ -442,7 +464,7 @@ public class IndicatorExecutionService {
 
         params.put(PARAMP_COD_UO, uo);
         params.put(PARAMP_COD_ACAO, action);
-        params.put(PARAMP_ORGAO,orgao);
+        params.put(PARAMP_ORGAO, orgao);
         return params;
     }
 
@@ -471,7 +493,7 @@ public class IndicatorExecutionService {
         params.put(PARAMP_TIPO_FONTE, typeSource);
         params.put(PARAMP_COD_GND, gnd);
         params.put(PARAMP_MES, month);
-        params.put(PARAMP_ORGAO,orgao);
+        params.put(PARAMP_ORGAO, orgao);
         return params;
     }
 }
