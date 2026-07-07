@@ -30,32 +30,10 @@ import static br.gov.es.infoplan.config.spo.SPOPentahoConfigKey.*;
 @Slf4j
 public class IndicatorExecutionService {
 
-    @Value("${papel.geral}")
-    private String papelGeral;
 
-    @Value("${papel.capitacao}")
-    private String papelCapitacao;
-
-    @Value("${papel.indicadores}")
-    private String papelIndicadores;
-
-    @Value("${papel.indicadoresAdmin}")
-    private String papelIndicadoresAdmin;
 
     @Value("${papel.sigefes}")
     private String papelSigefes;
-
-    @Value("${papel.projEstrategico}")
-    private String papelProjEstrategico;
-
-    @Value("${papel.painelObras}")
-    private String papelPainelObras;
-
-//    @Value("${papel.gestaoFiscal}")
-//    private String papelGestaoFiscal;
-
-    @Value("${papel.planejamentoOrcamentario}")
-    private String papelPlanejamentoOrcamentario;
 
     @Autowired
     private ApiUtils apiUtils;
@@ -272,19 +250,14 @@ public class IndicatorExecutionService {
 
     private String determinarOrgaoDefinitivo(UsuarioDto usuario) {
         if (usuario == null) {
-            return "-1";
+            return "";
         }
 
-        boolean hasAcessoTotal = false;
-
-        if (usuario.role() != null && !usuario.role().isEmpty()) {
-            List<String> papeisPermitidos = obterTodosOsPapeisDeAcessoTotal();
-
-            hasAcessoTotal = usuario.role().stream()
-                    .anyMatch(userRole -> papeisPermitidos.stream()
-                            .anyMatch(papelPermitido -> papelPermitido.equalsIgnoreCase(userRole.trim()))
-                    );
-        }
+        boolean hasAcessoTotal = usuario.role() != null && usuario.role().stream()
+                .anyMatch(role -> {
+                    String r = role.toUpperCase();
+                    return r.contains(papelSigefes);
+                });
 
         if (hasAcessoTotal) {
             return "-1";
@@ -292,7 +265,7 @@ public class IndicatorExecutionService {
 
         String sigla = usuario.sigla() != null ? usuario.sigla().trim() : "";
 
-        return sigla.isEmpty() ? "-1" : sigla;
+        return sigla;
     }
 
     private FilterBugataryUnitDTO blindarRequest(FilterBugataryUnitDTO request, UsuarioDto usuario) {

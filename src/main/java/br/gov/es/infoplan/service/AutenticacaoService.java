@@ -118,7 +118,7 @@ public class AutenticacaoService {
                 .map(unidade -> unidade.guidOrganizacao())
                 .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
                 .map(org -> org.sigla())
-                .orElse("-1");
+                .orElse("");
 
         String token = tokenService.gerarToken(userInfo, siglaLotacao);
 
