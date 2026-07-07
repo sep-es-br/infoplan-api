@@ -15,10 +15,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -104,59 +101,29 @@ public class AutenticacaoService {
 
         ACUserInfoDto userInfo = getUserInfo(accessToken);
 
+
         List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
 
-        Set<String> organizacaoGuid = papeis.stream().map(r -> {
-            String organizacao = organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao();
-            return organizacao;
-        }).collect(Collectors.toSet());
-
-        String siglaLotacao = papeis.stream()
+        ACAgentePublicoPapelDto papelPrioritario = papeis.stream()
                 .filter(papel -> Boolean.TRUE.equals(papel.Prioritario()))
                 .findFirst()
+                .orElse(null);
 
+        if (papelPrioritario == null) {
+            throw new UsuarioSemPermissaoException();
+        }
+
+        String siglaLotacao = Optional.ofNullable(papelPrioritario)
                 .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
-
                 .map(unidade -> unidade.guidOrganizacao())
-
                 .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
-
                 .map(org -> org.sigla())
-
                 .orElse("-1");
 
         String token = tokenService.gerarToken(userInfo, siglaLotacao);
 
         return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
     }
-
-//    public UsuarioDto autenticar(String accessToken) {
-//        logger.info("Autenticar usuário Infoplan.");
-//
-//        ACUserInfoDto userInfo = getUserInfo(accessToken);
-//        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
-//
-//        Set<String> siglasPossiveis = papeis.stream()
-//                .map(r -> organogramaService.listarUnidadeInfoPorLotacaoGuid(r.LotacaoGuid()).guidOrganizacao())
-//                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
-//                .map(unidade -> unidade.sigla())
-//                .collect(Collectors.toSet());
-//
-//        String siglaFinal = "-1";
-//        if (!siglasPossiveis.isEmpty()) {
-//
-//            boolean possuiAcessoTotal = siglasPossiveis.stream().anyMatch(siglasMaster::contains);
-//
-//            if (possuiAcessoTotal) {
-//                siglaFinal = "-1";
-//            } else {
-//                siglaFinal = siglasPossiveis.iterator().next();
-//            }
-//        }
-//
-//        String token = tokenService.gerarToken(userInfo);
-//        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaFinal);
-//    }
 
     protected ACUserInfoDto getUserInfo(String accessToken) {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://acessocidadao.es.gov.br/is/connect/userinfo"))
@@ -172,9 +139,9 @@ public class AutenticacaoService {
                 userInfoDto = new ObjectMapper().readValue(response.body(), ACUserInfoDto.class);
             }
 
-            if (userInfoDto.role() == null || userInfoDto.role().isEmpty()) {
-                throw new UsuarioSemPermissaoException();
-            }
+//            if (userInfoDto.role() == null || userInfoDto.role().isEmpty()) {
+//                throw new UsuarioSemPermissaoException();
+//            }
 
             return userInfoDto;
         } catch (InterruptedException | IOException e) {
