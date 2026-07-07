@@ -262,8 +262,7 @@ public class IndicatorExecutionService {
 
     private List<String> obterTodosOsPapeisDeAcessoTotal() {
         return Stream.of(
-                        papelGeral, papelCapitacao, papelIndicadores, papelIndicadoresAdmin,
-                        papelSigefes, papelProjEstrategico, papelPainelObras, papelPlanejamentoOrcamentario
+                        papelSigefes
                 )
                 .filter(Objects::nonNull)
                 .flatMap(papel -> Arrays.stream(papel.split(",")))
