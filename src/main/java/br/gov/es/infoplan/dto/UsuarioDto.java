@@ -7,6 +7,6 @@ public record UsuarioDto(
         String name,
         String email,
         Set<String> role,
-        String Sigla
+        String sigla
 ) {
 }

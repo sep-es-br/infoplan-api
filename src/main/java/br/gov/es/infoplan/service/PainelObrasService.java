@@ -385,6 +385,35 @@ public class PainelObrasService {
         return quantidadePrevista;
     }
 
+    public TotalizadorResponseDTO totalTotalizador(PainelObrasRequestDTO request) {
+        List<TotalizadorResponseDTO> listTotal = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TOTALIZADORES,
+                pmoPath,
+                params(request),
+                rs -> new TotalizadorResponseDTO(
+                        rs.get("pfId").asLong(),
+                        rs.get("qdeEntregas").asLong(),
+                        rs.get("qdeProjetos").asLong(),
+                        rs.get("qdeProgramas").asLong(),
+                        new BigDecimal(
+                                rs.get("totalPrevisto").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        new BigDecimal(
+                                rs.get("totalRealizado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        new BigDecimal(
+                                rs.get("totalProgramado").asDouble(2)
+                        ).setScale(2, BigDecimal.ROUND_HALF_UP),
+                        rs.get("totalEntregasPE").asLong()
+                )
+        );
+
+
+        if(listTotal.isEmpty()) return null;
+
+        return listTotal.get(0);
+    }
+
     private Map<String, Object> params(String orgao) {
         Map<String, Object> params = new HashMap<>();
 
