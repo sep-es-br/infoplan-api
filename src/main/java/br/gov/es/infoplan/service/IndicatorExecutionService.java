@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys.*;
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigParams.*;
@@ -28,8 +30,32 @@ import static br.gov.es.infoplan.config.spo.SPOPentahoConfigKey.*;
 @Slf4j
 public class IndicatorExecutionService {
 
-    @Value("${infoplan.security.siglas-master}")
-    private Set<String> siglasMaster;
+    @Value("${papel.geral}")
+    private String papelGeral;
+
+    @Value("${papel.capitacao}")
+    private String papelCapitacao;
+
+    @Value("${papel.indicadores}")
+    private String papelIndicadores;
+
+    @Value("${papel.indicadoresAdmin}")
+    private String papelIndicadoresAdmin;
+
+    @Value("${papel.sigefes}")
+    private String papelSigefes;
+
+    @Value("${papel.projEstrategico}")
+    private String papelProjEstrategico;
+
+    @Value("${papel.painelObras}")
+    private String papelPainelObras;
+
+//    @Value("${papel.gestaoFiscal}")
+//    private String papelGestaoFiscal;
+
+    @Value("${papel.planejamentoOrcamentario}")
+    private String papelPlanejamentoOrcamentario;
 
     @Autowired
     private ApiUtils apiUtils;
@@ -234,29 +260,38 @@ public class IndicatorExecutionService {
         );
     }
 
-    // ============================================================================================
-    // MÉTODOS PRIVADOS - LÓGICA DE NEGÓCIO E SEGURANÇA (CLEAN CODE)
-    // ============================================================================================
+    private List<String> obterTodosOsPapeisDeAcessoTotal() {
+        return Stream.of(
+                        papelGeral, papelCapitacao, papelIndicadores, papelIndicadoresAdmin,
+                        papelSigefes, papelProjEstrategico, papelPainelObras, papelPlanejamentoOrcamentario
+                )
+                .filter(Objects::nonNull)
+                .flatMap(papel -> Arrays.stream(papel.split(",")))
+                .map(String::trim)
+                .collect(Collectors.toList());
+    }
 
-    /**
-     * Aplica a regra de negócio para definir qual sigla de órgão será enviada na Query.
-     */
     private String determinarOrgaoDefinitivo(UsuarioDto usuario) {
         if (usuario == null) {
             return "-1";
         }
 
-        boolean isAdmin = usuario.role() != null && !usuario.role().isEmpty() &&
-                usuario.role().stream().anyMatch(role -> role.toUpperCase().contains("ADMIN"));
+        boolean hasAcessoTotal = false;
 
-        if (isAdmin) {
+        if (usuario.role() != null && !usuario.role().isEmpty()) {
+            List<String> papeisPermitidos = obterTodosOsPapeisDeAcessoTotal();
+
+            hasAcessoTotal = usuario.role().stream()
+                    .anyMatch(userRole -> papeisPermitidos.stream()
+                            .anyMatch(papelPermitido -> papelPermitido.equalsIgnoreCase(userRole.trim()))
+                    );
+        }
+
+        if (hasAcessoTotal) {
             return "-1";
         }
 
         String sigla = usuario.sigla() != null ? usuario.sigla().trim() : "";
-        if (!sigla.isEmpty() && siglasMaster.contains(sigla)) {
-            return "-1";
-        }
 
         return sigla.isEmpty() ? "-1" : sigla;
     }
@@ -280,10 +315,6 @@ public class IndicatorExecutionService {
                 determinarOrgaoDefinitivo(usuario)
         );
     }
-
-    // ============================================================================================
-    // MÉTODOS PRIVADOS - UTILITÁRIOS E MAPERS
-    // ============================================================================================
 
     private CardIGOResponseDTO obterIGO(FilterGeneralRequestDTO requestBlindado) {
         return getFirstOrNull(apiUtils.executePentahoQuery(
@@ -332,10 +363,6 @@ public class IndicatorExecutionService {
 
         return maiorAnoInformado < LocalDate.now().getYear();
     }
-
-    // ============================================================================================
-    // MÉTODOS PRIVADOS - MONTAGEM DE PARÂMETROS
-    // ============================================================================================
 
     private Map<String, Object> params(FilterBugataryUnitDTO request) {
         Map<String, Object> params = new HashMap<>();
