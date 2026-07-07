@@ -109,9 +109,9 @@ public class AutenticacaoService {
                 .findFirst()
                 .orElse(null);
 
-        if (papelPrioritario == null) {
-            throw new UsuarioSemPermissaoException();
-        }
+//        if (papelPrioritario == null) {
+//            throw new UsuarioSemPermissaoException();
+//        }
 
         String siglaLotacao = Optional.ofNullable(papelPrioritario)
                 .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
