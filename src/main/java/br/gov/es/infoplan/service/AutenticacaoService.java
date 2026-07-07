@@ -111,10 +111,18 @@ public class AutenticacaoService {
             return organizacao;
         }).collect(Collectors.toSet());
 
-        String siglaLotacao = organizacaoGuid.stream()
+        String siglaLotacao = papeis.stream()
+                .filter(papel -> Boolean.TRUE.equals(papel.Prioritario()))
                 .findFirst()
+
+                .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
+
+                .map(unidade -> unidade.guidOrganizacao())
+
                 .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
-                .map(unidade -> unidade.sigla())
+
+                .map(org -> org.sigla())
+
                 .orElse("-1");
 
         String token = tokenService.gerarToken(userInfo, siglaLotacao);
