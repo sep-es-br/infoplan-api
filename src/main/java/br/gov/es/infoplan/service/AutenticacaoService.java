@@ -117,7 +117,7 @@ public class AutenticacaoService {
                 .map(unidade -> unidade.sigla())
                 .orElse("-1");
 
-        String token = tokenService.gerarToken(userInfo);
+        String token = tokenService.gerarToken(userInfo, siglaLotacao);
 
         return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
     }

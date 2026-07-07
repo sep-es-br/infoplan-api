@@ -23,7 +23,7 @@ public class TokenService {
     @Value("${token.secret}")
     private String secret;
 
-    public String gerarToken(ACUserInfoDto userInfo) {
+    public String gerarToken(ACUserInfoDto userInfo, String siglaLotacaoCalculada ) {
         try {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
@@ -32,6 +32,7 @@ public class TokenService {
                     .withClaim("name", userInfo.apelido())
                     .withClaim("email", userInfo.email())
                     .withClaim("roles", new ArrayList<>(userInfo.role()))
+                    .withClaim("sigla", siglaLotacaoCalculada)
                     .withExpiresAt(getDataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception) {
@@ -46,6 +47,13 @@ public class TokenService {
                 .build()
                 .verify(token)
                 .getSubject();
+    }
+
+    public String getSiglaFromToken(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        var claim = decodedJWT.getClaim("sigla");
+
+        return claim.isNull() ? null : claim.asString();
     }
 
     private Instant getDataExpiracao() {

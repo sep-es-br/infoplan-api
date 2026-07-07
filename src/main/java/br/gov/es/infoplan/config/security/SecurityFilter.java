@@ -1,5 +1,6 @@
 package br.gov.es.infoplan.config.security;
 
+import br.gov.es.infoplan.dto.UsuarioDto;
 import br.gov.es.infoplan.exception.mensagens.MensagemErroRest;
 import br.gov.es.infoplan.service.AutenticacaoService;
 import br.gov.es.infoplan.service.TokenService;
@@ -17,6 +18,7 @@ import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -43,10 +45,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // if (request.getRequestURI().endsWith("/user-info") || ) {
-        // filterChain.doFilter(request, response);
-        // return;
-        // }
+
         String uri = request.getRequestURI();
 
         if (uri.contains("/user-info") || uri.contains("swagger") || uri.contains("api-docs")) {
@@ -58,7 +57,6 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 String subject = tokenService.validarToken(token);
-
                 List<String> roles = tokenService.getRoleFromToken(token);
 
                 if (!checarPermissao(papelGeral, roles)) {
@@ -72,12 +70,24 @@ public class SecurityFilter extends OncePerRequestFilter {
                     }
                 }
 
+                String siglaLotacao = tokenService.getSiglaFromToken(token);
+
+                UsuarioDto usuarioPrincipal = new UsuarioDto(
+                        token,
+                        subject,
+                        null,
+                        Set.copyOf(roles),
+                        siglaLotacao
+                );
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        subject, null,
+                        usuarioPrincipal,
+                        null,
                         roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                                 .collect(Collectors.toList()));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
             } catch (JWTVerificationException e) {
                 var expiresAt = LocalDateTime.ofInstant(JWT.decode(token).getExpiresAt().toInstant(),
                         ZoneOffset.of("-03:00"));
@@ -92,6 +102,53 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+//            throws ServletException, IOException {
+//        String uri = request.getRequestURI();
+//
+//        if (uri.contains("/user-info") || uri.contains("swagger") || uri.contains("api-docs")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+//
+//        String token = recuperarToken(request);
+//        if (token != null) {
+//            try {
+//                String subject = tokenService.validarToken(token);
+//
+//                List<String> roles = tokenService.getRoleFromToken(token);
+//
+//                if (!checarPermissao(papelGeral, roles)) {
+//                    for (Map.Entry<String, String> entry : this.authSrv.moduloPermissao.entrySet()) {
+//                        if (request.getRequestURI().contains(entry.getKey()) &&
+//                                !checarPermissao(entry.getValue(), roles)) {
+//                            enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey()
+//                                    + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
+//                            return;
+//                        }
+//                    }
+//                }
+//
+//                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+//                        subject, null,
+//                        roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+//                                .collect(Collectors.toList()));
+//
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//            } catch (JWTVerificationException e) {
+//                var expiresAt = LocalDateTime.ofInstant(JWT.decode(token).getExpiresAt().toInstant(),
+//                        ZoneOffset.of("-03:00"));
+//                List<String> erros = new ArrayList<>();
+//                erros.add("Por favor, faça o login novamente.");
+//                if (LocalDateTime.now().isAfter((ChronoLocalDateTime<?>) expiresAt))
+//                    erros.add("Token expirado em " + expiresAt);
+//                enviarMensagemErro(erros, response, HttpStatus.FORBIDDEN);
+//                return;
+//            }
+//        }
+//
+//        filterChain.doFilter(request, response);
+//    }
 
     private boolean checarPermissao(String permissoes, List<String> roles) {
         for (String permissao : permissoes.split(",")) {
