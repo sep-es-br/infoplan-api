@@ -3,7 +3,6 @@ package br.gov.es.infoplan.controller;
 import br.gov.es.infoplan.dto.painelObras.request.PainelObrasRequestDTO;
 import br.gov.es.infoplan.dto.painelObras.response.*;
 import br.gov.es.infoplan.service.PainelObrasService;
-import feign.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,8 @@ import java.util.List;
 
 @Tag(name = "Painel de Obras", description = "Endpoints relacionados ao painel de obras")
 @RestController
-@CrossOrigin(origins = "${frontend.host}")
 @RequestMapping("/painel-obras")
+@CrossOrigin(origins = "${frontend.host}")
 public class PainelObrasController {
 
     @Autowired
@@ -30,17 +29,17 @@ public class PainelObrasController {
     }
 
     @Operation(summary = "Lista de municípios", description = "Busca os municípios relacionados às obras de um órgão específico")
-    @GetMapping("/filtros/municipios/{orgao}")
-    public ResponseEntity<List<FiltroMunicipioResponseDTO>> filtroListaMunicipio(@PathVariable String orgao) {
+    @GetMapping("/filtros/municipios")
+    public ResponseEntity<List<FiltroMunicipioResponseDTO>> filtroListaMunicipio(@RequestParam(required = false) String orgao) {
         List<FiltroMunicipioResponseDTO> list = painelObrasService.filtroListaMunicipio(orgao);
         return ResponseEntity.ok(list);
     }
 
     @Operation(summary = "Lista de status", description = "Busca os status relacionados às obras de um órgão e município específicos")
-    @GetMapping("/filtros/status/{orgao}/{municipio}")
+    @GetMapping("/filtros/status")
     public ResponseEntity<List<FiltroStatusResponseDTO>> filtroListaStatus(
-            @PathVariable String orgao,
-            @PathVariable String municipio
+            @RequestParam(required = false) String orgao,
+            @RequestParam(required = false) String municipio
     ) {
         List<FiltroStatusResponseDTO> list = painelObrasService.filtroListaStatus(orgao, municipio);
         return ResponseEntity.ok(list);
@@ -178,4 +177,13 @@ public class PainelObrasController {
         List<TotalEntregaPorMesResponseDTO> entregaPorMesList = painelObrasService.totalEntregaPorMes(request);
         return ResponseEntity.ok(entregaPorMesList);
     }
+
+    @GetMapping("total-totalizador")
+    public ResponseEntity<TotalizadorResponseDTO> totalTotalizador(
+            @Validated @ModelAttribute PainelObrasRequestDTO request
+    ) {
+        TotalizadorResponseDTO totalizador = painelObrasService.totalTotalizador(request);
+        return ResponseEntity.ok(totalizador);
+    }
+
 }

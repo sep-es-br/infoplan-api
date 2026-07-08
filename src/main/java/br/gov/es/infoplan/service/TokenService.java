@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TokenService {
@@ -23,7 +22,7 @@ public class TokenService {
     @Value("${token.secret}")
     private String secret;
 
-    public String gerarToken(ACUserInfoDto userInfo) {
+    public String gerarToken(ACUserInfoDto userInfo, String siglaLotacaoCalculada ) {
         try {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
@@ -31,7 +30,8 @@ public class TokenService {
                     .withSubject(userInfo.sub())
                     .withClaim("name", userInfo.apelido())
                     .withClaim("email", userInfo.email())
-                    .withClaim("roles", new ArrayList<>(userInfo.role()))
+                    .withClaim("roles", userInfo.role() != null ? new ArrayList<>(userInfo.role()) : Collections.emptyList())
+                    .withClaim("sigla", siglaLotacaoCalculada)
                     .withExpiresAt(getDataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception) {
@@ -46,6 +46,13 @@ public class TokenService {
                 .build()
                 .verify(token)
                 .getSubject();
+    }
+
+    public String getSiglaFromToken(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        var claim = decodedJWT.getClaim("sigla");
+
+        return claim.isNull() ? null : claim.asString();
     }
 
     private Instant getDataExpiracao() {

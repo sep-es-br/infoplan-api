@@ -6,5 +6,7 @@ public record UsuarioDto(
         String token,
         String name,
         String email,
-        Set<String> role) {
+        Set<String> role,
+        String sigla
+) {
 }

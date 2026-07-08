@@ -1,21 +1,27 @@
 package br.gov.es.infoplan.service;
 
+import br.gov.es.infoplan.client.AcessoCidadaoUserInfoClient;
+import br.gov.es.infoplan.client.AcessoCidadaoWebClient;
 import br.gov.es.infoplan.dto.ACUserInfoDto;
 import br.gov.es.infoplan.dto.ACUserInfoDtoStringRole;
 import br.gov.es.infoplan.dto.UsuarioDto;
+import br.gov.es.infoplan.dto.acessocidadaoapi.ACAgentePublicoPapelDto;
 import br.gov.es.infoplan.exception.UsuarioSemPermissaoException;
 import br.gov.es.infoplan.exception.service.InfoplanServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -25,41 +31,55 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AutenticacaoService {
 
-    
+
     @Value("${papel.geral}")
     private String papelGeral;
-    
+
     @Value("${papel.capitacao}")
     private String papelCapitacao;
-    
+
     @Value("${papel.indicadores}")
     private String papelIndicadores;
-    
+
     @Value("${papel.indicadoresAdmin}")
     private String papelIndicadoresAdmin;
-    
+
     @Value("${papel.sigefes}")
     private String papelSigefes;
-    
+
     @Value("${papel.projEstrategico}")
     private String papelProjEstrategico;
 
     @Value("${papel.painelObras}")
     private String papelPainelObras;
-    
+
 //    @Value("${papel.gestaoFiscal}")
 //    private String papelGestaoFiscal;
 
     @Value("${papel.planejamentoOrcamentario}")
     private String papelPlanejamentoOrcamentario;
-    
+
+    @Value("${infoplan.security.siglas-master}")
+    private Set<String> siglasMaster;
+
     private final Logger logger = LogManager.getLogger(AutenticacaoService.class);
     private final TokenService tokenService;
     public final HashMap<String, String> moduloPermissao = new HashMap<>();
 
+    private final AcessoCidadaoWebClient ACWebClient;
+
+    private final AcessoCidadaoUserInfoClient ACUserInfoClient;
+
+    private final AcessoCidadaoAutorizacaoService ACAuthService;
+
+    private final AcessoCidadaoService acessoCidadaoService;
+
+    @Autowired
+    private OrganogramaService organogramaService;
+
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        
+
         moduloPermissao.put("/capitation", papelCapitacao);
         moduloPermissao.put("/execucaoOrcamentaria", papelSigefes);
         moduloPermissao.put("/strategicProjects", papelProjEstrategico);
@@ -68,19 +88,46 @@ public class AutenticacaoService {
     }
 
 
+//    public UsuarioDto autenticar(String accessToken) {
+//        logger.info("Autenticar usuário Infoplan.");
+//        ACUserInfoDto userInfo = getUserInfo(accessToken);
+//        String token = tokenService.gerarToken(userInfo);
+//        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role());
+//    }
+
+
     public UsuarioDto autenticar(String accessToken) {
         logger.info("Autenticar usuário Infoplan.");
-        ACUserInfoDto userInfo = getUserInfo(accessToken);
-        String token = tokenService.gerarToken(userInfo);
 
-        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role());
+        ACUserInfoDto userInfo = getUserInfo(accessToken);
+
+
+        List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
+
+        ACAgentePublicoPapelDto papelPrioritario = papeis.stream()
+                .filter(papel -> Boolean.TRUE.equals(papel.Prioritario()))
+                .findFirst()
+                .orElse(null);
+
+//        if (papelPrioritario == null) {
+//            throw new UsuarioSemPermissaoException();
+//        }
+
+        String siglaLotacao = Optional.ofNullable(papelPrioritario)
+                .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
+                .map(unidade -> unidade.guidOrganizacao())
+                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
+                .map(org -> org.sigla())
+                .orElse("");
+
+        String token = tokenService.gerarToken(userInfo, siglaLotacao);
+
+        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
     }
 
     protected ACUserInfoDto getUserInfo(String accessToken) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://acessocidadao.es.gov.br/is/connect/userinfo"))
-                .header("Authorization", "Bearer " + accessToken)
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://acessocidadao.es.gov.br/is/connect/userinfo"))
+                .header("Authorization", "Bearer " + accessToken).build();
 
         HttpClient client = HttpClient.newHttpClient();
         try {
@@ -92,9 +139,9 @@ public class AutenticacaoService {
                 userInfoDto = new ObjectMapper().readValue(response.body(), ACUserInfoDto.class);
             }
 
-            if (userInfoDto.role() == null || userInfoDto.role().isEmpty()) {
-                throw new UsuarioSemPermissaoException();
-            }
+//            if (userInfoDto.role() == null || userInfoDto.role().isEmpty()) {
+//                throw new UsuarioSemPermissaoException();
+//            }
 
             return userInfoDto;
         } catch (InterruptedException | IOException e) {
@@ -102,6 +149,23 @@ public class AutenticacaoService {
             Thread.currentThread().interrupt();
         }
         throw new InfoplanServiceException(List.of("Não foi possível identificar um usuário no acesso cidadão com esse token. Faça login novamente!"));
+    }
+
+    private List<ACAgentePublicoPapelDto> buscarPapeisAgentePublicoPorSub(String sub) {
+        return ACWebClient.buscarPapeisAgentePublicoPorSub(ACAuthService.getAuthorizationHeader(), sub);
+    }
+
+    public List<ACAgentePublicoPapelDto> listarPapeisAgentePublicoPorSub(String sub) {
+        return buscarPapeisAgentePublicoPorSub(sub);
+    }
+
+    private Set<Map<String, Object>> listarPapeisLotacaoGuid(String subNovo) {
+        return acessoCidadaoService.listarPapeisAgentePublicoPorSub(subNovo).stream().map(papel -> {
+            Map<String, Object> orgInfo = new HashMap<>();
+            orgInfo.put("lotacaoGuid", papel.LotacaoGuid() != null ? papel.LotacaoGuid().toLowerCase() : "");
+            orgInfo.put("prioritario", papel.Prioritario() ? papel.Prioritario() : false);
+            return orgInfo;
+        }).collect(Collectors.toSet());
     }
 
     private static String getEmailUserInfo(ACUserInfoDto userInfo) {
