@@ -59,9 +59,6 @@ public class AutenticacaoService {
     @Value("${papel.planejamentoOrcamentario}")
     private String papelPlanejamentoOrcamentario;
 
-    @Value("${infoplan.security.siglas-master}")
-    private Set<String> siglasMaster;
-
     private final Logger logger = LogManager.getLogger(AutenticacaoService.class);
     private final TokenService tokenService;
     public final HashMap<String, String> moduloPermissao = new HashMap<>();
