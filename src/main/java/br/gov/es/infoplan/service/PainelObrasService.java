@@ -7,9 +7,11 @@ import br.gov.es.infoplan.utils.ApiUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (listOrgao.isEmpty()) return null;
+        if (listOrgao.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         return listOrgao;
     }
@@ -63,7 +67,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (listMunicipio.isEmpty()) return null;
+        if (listMunicipio.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         return listMunicipio;
     }
@@ -80,7 +86,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (listStatus.isEmpty()) return null;
+        if (listStatus.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         return listStatus;
     }
@@ -96,7 +104,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (total.isEmpty()) return null;
+        if (total.isEmpty()) {
+            return (TotalProgramaResponseDTO) ResponseEntity.noContent().build().getBody();
+        }
 
         return total.get(0);
     }
@@ -110,11 +120,16 @@ public class PainelObrasService {
                 rs -> rs.get("total_projetos").asLong()
         );
 
-        if (total == null || total.isEmpty() || total.get(0) == null) {
-            return new TotalProjetosResponseDTO(0L);
+
+        if (total.isEmpty()) {
+            return (TotalProjetosResponseDTO) ResponseEntity.noContent().build().getBody();
         }
 
-        return new TotalProjetosResponseDTO(total.get(0));
+//        if (total == null || total.isEmpty() || total.get(0) == null) {
+//            return new TotalProjetosResponseDTO(0L);
+//        }
+
+        return total.get(0) == null ? new TotalProjetosResponseDTO(0L) : new TotalProjetosResponseDTO(total.get(0));
     }
 
 
@@ -158,12 +173,12 @@ public class PainelObrasService {
                 pmoPath,
                 params(request),
                 rs -> new TotalRealizadoResponseDTO(
-                        ApiUtils.parseBigDecimal(rs, "total_realizado")
+                        new BigDecimal(rs.get("total_realizado").asDouble(2)).setScale(2, BigDecimal.ROUND_HALF_UP)
                 )
         );
 
-        if (totalRealizado == null || totalRealizado.isEmpty() || totalRealizado.get(0) == null) {
-            return new TotalRealizadoResponseDTO(ApiUtils.parseBigDecimal(new HashMap<>(), "total_realizado"));
+        if (totalRealizado.isEmpty()) {
+            return (TotalRealizadoResponseDTO) ResponseEntity.noContent().build().getBody();
         }
 
         return totalRealizado.get(0);
@@ -175,12 +190,16 @@ public class PainelObrasService {
                 pmoPath,
                 params(request),
                 rs -> new TotalPlanejadoResponseDTO(
-                        ApiUtils.parseBigDecimal(rs, "total_planejado")
+                        new BigDecimal(rs.get("total_planejado").asDouble(2)).setScale(2, BigDecimal.ROUND_HALF_UP)
                 )
         );
 
-        if (totalPlanejado == null || totalPlanejado.isEmpty() || totalPlanejado.get(0) == null) {
-            return new TotalPlanejadoResponseDTO(ApiUtils.parseBigDecimal(new HashMap<>(), "total_planejado"));
+//        if (totalPlanejado == null || totalPlanejado.isEmpty() || totalPlanejado.get(0) == null) {
+//            return new TotalPlanejadoResponseDTO(ApiUtils.parseBigDecimal(new HashMap<>(), "total_planejado"));
+//        }
+
+        if (totalPlanejado.isEmpty()) {
+            return (TotalPlanejadoResponseDTO) ResponseEntity.noContent().build().getBody();
         }
 
         return totalPlanejado.get(0);
@@ -198,7 +217,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (quantidadePorStatus.isEmpty()) return null;
+        if (quantidadePorStatus.isEmpty()) {
+            return (List<QuantidadeStatusResponseDTO>) ResponseEntity.noContent().build();
+        }
 
         return quantidadePorStatus;
     }
@@ -217,7 +238,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (totalEntregasPorAnoEStatus.isEmpty()) return null;
+        if (totalEntregasPorAnoEStatus.isEmpty()) {
+            return (List<TotalEntregasAnoStatusResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return totalEntregasPorAnoEStatus;
 
@@ -240,7 +263,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (totalEntregasPorOrgao.isEmpty()) return null;
+        if (totalEntregasPorOrgao.isEmpty()) {
+            return (List<TotalEntregasOrgaoResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return totalEntregasPorOrgao;
     }
@@ -262,7 +287,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (totalEntregasPorOrgaoExecucao.isEmpty()) return null;
+        if (totalEntregasPorOrgaoExecucao.isEmpty()) {
+            return (List<TotalEntregasOrgaoExeResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return totalEntregasPorOrgaoExecucao;
     }
@@ -284,7 +311,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (totalEntregasPorMunicipioStatus.isEmpty()) return null;
+        if (totalEntregasPorMunicipioStatus.isEmpty()) {
+            return (List<TotalEntregasMunicipioStatusResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return totalEntregasPorMunicipioStatus;
     }
@@ -301,7 +330,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (totalEntregasPorProjeto.isEmpty()) return null;
+        if (totalEntregasPorProjeto.isEmpty()) {
+            return (List<NumeroEntregasStatusResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return totalEntregasPorProjeto;
     }
@@ -327,7 +358,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (quantidadeMaiorEntrega.isEmpty()) return null;
+        if (quantidadeMaiorEntrega.isEmpty()) {
+            return (List<QuantidadeMaiorEntregaResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return quantidadeMaiorEntrega;
     }
@@ -352,7 +385,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (quantidadePrevista.isEmpty()) return null;
+        if (quantidadePrevista.isEmpty()) {
+            return (List<QuantidadeMaiorPrevistaResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return quantidadePrevista;
     }
@@ -380,7 +415,9 @@ public class PainelObrasService {
                 )
         );
 
-        if (quantidadePrevista.isEmpty()) return null;
+        if (quantidadePrevista.isEmpty()) {
+            return (List<TotalEntregaPorMesResponseDTO>) ResponseEntity.noContent().build().getBody();
+        }
 
         return quantidadePrevista;
     }
@@ -409,7 +446,9 @@ public class PainelObrasService {
         );
 
 
-        if(listTotal.isEmpty()) return null;
+        if(listTotal.isEmpty()) {
+            return (TotalizadorResponseDTO) ResponseEntity.noContent().build().getBody();
+        }
 
         return listTotal.get(0);
     }
