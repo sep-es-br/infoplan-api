@@ -19,4 +19,5 @@ public class PentahoBiConfigParams {
     public static final String PARAMP_ORGAO = "paramp_orgao";
     public static final String PARAMP_MUNICIPIO = "paramp_municipio";
     public static final String PARAMP_STATUS = "paramp_status";
+    public static final String PARAMP_ACAO = "paramp_cod_acao";
 }

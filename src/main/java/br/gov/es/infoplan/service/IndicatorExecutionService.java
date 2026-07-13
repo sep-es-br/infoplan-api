@@ -1,10 +1,7 @@
 package br.gov.es.infoplan.service;
 
 import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterActionDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
+import br.gov.es.infoplan.dto.IndicatorExecution.request.*;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
 import br.gov.es.infoplan.dto.UsuarioDto;
 import br.gov.es.infoplan.enums.QuadrimestreEnum;
@@ -238,6 +235,18 @@ public class IndicatorExecutionService {
         );
     }
 
+    public List<POResponseDTO> searchPO(FilterPODTO request, UsuarioDto usuarioDto) {
+        return apiUtils.executePentahoQuery(
+                PAINEL_INDICADOR_EXECUCAO,
+                pmoPath,
+                params(blindarRequest(request, usuarioDto)),
+                rs -> new POResponseDTO(
+                        rs.get(COD_PO).asText(),
+                        rs.get(NOME_PO).asText()
+                )
+        );
+    }
+
     private List<String> obterTodosOsPapeisDeAcessoTotal() {
         return Stream.of(
                         papelSigefes
@@ -268,12 +277,17 @@ public class IndicatorExecutionService {
         return sigla;
     }
 
+
     private FilterBugataryUnitDTO blindarRequest(FilterBugataryUnitDTO request, UsuarioDto usuario) {
         return new FilterBugataryUnitDTO(request.year(), determinarOrgaoDefinitivo(usuario));
     }
 
     private FilterActionDTO blindarRequest(FilterActionDTO request, UsuarioDto usuario) {
         return new FilterActionDTO(request.year(), request.codUo(), determinarOrgaoDefinitivo(usuario));
+    }
+
+    private FilterPODTO blindarRequest(FilterPODTO request, UsuarioDto usuario) {
+        return new FilterPODTO(request.year(), request.codAction(), determinarOrgaoDefinitivo(usuario));
     }
 
     private FilterFullSourceDTO blindarRequest(FilterFullSourceDTO request, UsuarioDto usuario) {
@@ -284,9 +298,10 @@ public class IndicatorExecutionService {
         return new FilterGeneralRequestDTO(
                 request.year(), request.codUo(), request.codAction(), request.month(),
                 request.typeSource(), request.codGnd(), request.codSource(), request.codAmendment(),
-                determinarOrgaoDefinitivo(usuario)
+                determinarOrgaoDefinitivo(usuario), request.codPo()
         );
     }
+
 
     private CardIGOResponseDTO obterIGO(FilterGeneralRequestDTO requestBlindado) {
         return getFirstOrNull(apiUtils.executePentahoQuery(
@@ -345,6 +360,17 @@ public class IndicatorExecutionService {
         return params;
     }
 
+    private Map<String, Object> params (FilterPODTO request) {
+        Map<String, Object> params = new HashMap<>();
+
+        if (request.year() != null && !request.year().isEmpty()) {
+            params.put(PARAMP_ANO_M, request.year());
+        }
+        params.put(PARAMP_ACAO, request.codAction());
+        params.put(PARAMP_ORGAO, request.orgao());
+        return params;
+    }
+
     private Map<String, Object> params(FilterActionDTO request) {
         Map<String, Object> params = new HashMap<>();
         if (request.year() != null && !request.year().isEmpty()) {
@@ -379,6 +405,7 @@ public class IndicatorExecutionService {
         params.put(PARAMP_COD_GND, request.codGnd());
         params.put(PARAMP_MES, request.month());
         params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_PO, request.codPo());
         return params;
     }
 }
