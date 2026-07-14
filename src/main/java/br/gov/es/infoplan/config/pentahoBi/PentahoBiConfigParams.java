@@ -5,6 +5,7 @@ public class PentahoBiConfigParams {
     public static final String PARAMP_GND = "parampGnd";
     public static final String PARAMP_FONTE = "parampFonte";
     public static final String PARAMP_PO = "parampPo";
+    public static final String PARAMP_COD_PO = "paramp_cod_po";
     public static final String PARAMP_UO = "parampUo";
     public static final String PARAMP_MESSES = "parampMes";
     public static final String PARAMP_COD_PODER = "parampCodPoder";

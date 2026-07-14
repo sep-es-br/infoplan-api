@@ -405,7 +405,7 @@ public class IndicatorExecutionService {
         params.put(PARAMP_COD_GND, request.codGnd());
         params.put(PARAMP_MES, request.month());
         params.put(PARAMP_ORGAO, request.orgao());
-        params.put(PARAMP_PO, request.codPo());
+        params.put(PARAMP_COD_PO, request.codPo());
         return params;
     }
 }
