@@ -287,7 +287,7 @@ public class IndicatorExecutionService {
     }
 
     private FilterPODTO blindarRequest(FilterPODTO request, UsuarioDto usuario) {
-        return new FilterPODTO(request.year(), request.codAction(), determinarOrgaoDefinitivo(usuario));
+        return new FilterPODTO(request.year(), request.codUo(), request.codAction(), determinarOrgaoDefinitivo(usuario));
     }
 
     private FilterFullSourceDTO blindarRequest(FilterFullSourceDTO request, UsuarioDto usuario) {
@@ -360,7 +360,7 @@ public class IndicatorExecutionService {
         return params;
     }
 
-    private Map<String, Object> params (FilterPODTO request) {
+    private Map<String, Object> params(FilterPODTO request) {
         Map<String, Object> params = new HashMap<>();
 
         if (request.year() != null && !request.year().isEmpty()) {
@@ -368,6 +368,7 @@ public class IndicatorExecutionService {
         }
         params.put(PARAMP_ACAO, request.codAction());
         params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_COD_UO, request.codUo());
         return params;
     }
 
