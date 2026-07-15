@@ -67,7 +67,7 @@ public class ApiUtils extends PentahoBIService {
             String result = doRequest(buildEndpointUri(pmoPath, target, dataAccessId, params));
 
             result = StringEscapeUtils.unescapeHtml4(result);
-
+            result = result.replace("MarÃ§o", "Março");
             List<Map<String, JsonNode>> resultset = extractDataFromResponse(result);
             return resultset.stream().map(mapper).toList();
 
