@@ -39,7 +39,7 @@ public class PainelObrasService {
 
 
     public List<FiltroOrgaoResponseDTO> filtroListaOrgao() {
-        List<FiltroOrgaoResponseDTO> listOrgao = apiUtils.executePentahoQuery(
+       return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_FILTRO_ORGAO,
                 pmoPath,
                 null,
@@ -48,16 +48,10 @@ public class PainelObrasService {
                         rs.get("nome").asText()
                 )
         );
-
-        if (listOrgao.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return listOrgao;
     }
 
     public List<FiltroMunicipioResponseDTO> filtroListaMunicipio(String orgao) {
-        List<FiltroMunicipioResponseDTO> listMunicipio = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_FILTRO_MUNICIPIO,
                 pmoPath,
                 params(orgao),
@@ -66,17 +60,11 @@ public class PainelObrasService {
                         rs.get("nome").asText()
                 )
         );
-
-        if (listMunicipio.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return listMunicipio;
     }
 
 
     public List<FiltroStatusResponseDTO> filtroListaStatus(String orgao, String municipio) {
-        List<FiltroStatusResponseDTO> listStatus = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_FILTRO_STATUS,
                 pmoPath,
                 params(orgao, municipio),
@@ -85,12 +73,6 @@ public class PainelObrasService {
                         rs.get("fase").asText()
                 )
         );
-
-        if (listStatus.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return listStatus;
     }
 
 
@@ -105,7 +87,7 @@ public class PainelObrasService {
         );
 
         if (total.isEmpty()) {
-            return (TotalProgramaResponseDTO) ResponseEntity.noContent().build().getBody();
+            return null;
         }
 
         return total.get(0);
@@ -122,12 +104,8 @@ public class PainelObrasService {
 
 
         if (total.isEmpty()) {
-            return (TotalProjetosResponseDTO) ResponseEntity.noContent().build().getBody();
+            return null;
         }
-
-//        if (total == null || total.isEmpty() || total.get(0) == null) {
-//            return new TotalProjetosResponseDTO(0L);
-//        }
 
         return total.get(0) == null ? new TotalProjetosResponseDTO(0L) : new TotalProjetosResponseDTO(total.get(0));
     }
@@ -178,7 +156,7 @@ public class PainelObrasService {
         );
 
         if (totalRealizado.isEmpty()) {
-            return (TotalRealizadoResponseDTO) ResponseEntity.noContent().build().getBody();
+            return null;
         }
 
         return totalRealizado.get(0);
@@ -194,12 +172,8 @@ public class PainelObrasService {
                 )
         );
 
-//        if (totalPlanejado == null || totalPlanejado.isEmpty() || totalPlanejado.get(0) == null) {
-//            return new TotalPlanejadoResponseDTO(ApiUtils.parseBigDecimal(new HashMap<>(), "total_planejado"));
-//        }
-
         if (totalPlanejado.isEmpty()) {
-            return (TotalPlanejadoResponseDTO) ResponseEntity.noContent().build().getBody();
+            return null;
         }
 
         return totalPlanejado.get(0);
@@ -207,7 +181,7 @@ public class PainelObrasService {
 
 
     public List<QuantidadeStatusResponseDTO> quantidadePorStatus(PainelObrasRequestDTO request) {
-        List<QuantidadeStatusResponseDTO> quantidadePorStatus = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_QUANTIDADE_POR_STATUS,
                 pmoPath,
                 params(request),
@@ -216,17 +190,11 @@ public class PainelObrasService {
                         rs.get("status").asText()
                 )
         );
-
-        if (quantidadePorStatus.isEmpty()) {
-            return (List<QuantidadeStatusResponseDTO>) ResponseEntity.noContent().build();
-        }
-
-        return quantidadePorStatus;
     }
 
 
     public List<TotalEntregasAnoStatusResponseDTO> totalEntregasPorAnoEStatus(PainelObrasRequestDTO request) {
-        List<TotalEntregasAnoStatusResponseDTO> totalEntregasPorAnoEStatus = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_TOTAL_ENTREGAS_POR_ANO_E_STATUS,
                 pmoPath,
                 params(request),
@@ -237,17 +205,10 @@ public class PainelObrasService {
                         ApiUtils.parseBigDecimal(rs, "realizado")
                 )
         );
-
-        if (totalEntregasPorAnoEStatus.isEmpty()) {
-            return (List<TotalEntregasAnoStatusResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return totalEntregasPorAnoEStatus;
-
     }
 
     public List<TotalEntregasOrgaoResponseDTO> totalEntregasPorOrgao(PainelObrasRequestDTO request) {
-        List<TotalEntregasOrgaoResponseDTO> totalEntregasPorOrgao = apiUtils.executePentahoQuery(
+       return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_TOTAL_ENTREGAS_ORGAO,
                 pmoPath,
                 params(request),
@@ -262,16 +223,10 @@ public class PainelObrasService {
                         rs.get("quantidade_entregas").asLong()
                 )
         );
-
-        if (totalEntregasPorOrgao.isEmpty()) {
-            return (List<TotalEntregasOrgaoResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return totalEntregasPorOrgao;
     }
 
     public List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao(PainelObrasRequestDTO request) {
-        List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_TOTAL_ENTREGAS_ORGAO_EXECEUCAO,
                 pmoPath,
                 params(request),
@@ -287,15 +242,10 @@ public class PainelObrasService {
                 )
         );
 
-        if (totalEntregasPorOrgaoExecucao.isEmpty()) {
-            return (List<TotalEntregasOrgaoExeResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return totalEntregasPorOrgaoExecucao;
     }
 
     public List<TotalEntregasMunicipioStatusResponseDTO> totalEntregasPorMunicipioStatus(PainelObrasRequestDTO request) {
-        List<TotalEntregasMunicipioStatusResponseDTO> totalEntregasPorMunicipioStatus = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_TOTAL_ENTREGAS_MUNICIPIO_STATUS,
                 pmoPath,
                 params(request),
@@ -310,16 +260,10 @@ public class PainelObrasService {
                         ).setScale(2, BigDecimal.ROUND_HALF_UP)
                 )
         );
-
-        if (totalEntregasPorMunicipioStatus.isEmpty()) {
-            return (List<TotalEntregasMunicipioStatusResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return totalEntregasPorMunicipioStatus;
     }
 
     public List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto(PainelObrasRequestDTO request) {
-        List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_NUMERO_ENTREGAS_POR_STATUS,
                 pmoPath,
                 params(request),
@@ -329,17 +273,11 @@ public class PainelObrasService {
                         rs.get("quantidade_entregas").asLong()
                 )
         );
-
-        if (totalEntregasPorProjeto.isEmpty()) {
-            return (List<NumeroEntregasStatusResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return totalEntregasPorProjeto;
     }
 
 
     public List<QuantidadeMaiorEntregaResponseDTO> quantidadeMaiorEntrega(PainelObrasRequestDTO request) {
-        List<QuantidadeMaiorEntregaResponseDTO> quantidadeMaiorEntrega = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_QUANTIDADE_MAIOR_MUNICIPIO_CARTEIRA,
                 pmoPath,
                 params(request),
@@ -357,16 +295,10 @@ public class PainelObrasService {
                         ).setScale(2, BigDecimal.ROUND_HALF_UP)
                 )
         );
-
-        if (quantidadeMaiorEntrega.isEmpty()) {
-            return (List<QuantidadeMaiorEntregaResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return quantidadeMaiorEntrega;
     }
 
     public List<QuantidadeMaiorPrevistaResponseDTO> quantidadeMaiorPrevista(PainelObrasRequestDTO request) {
-        List<QuantidadeMaiorPrevistaResponseDTO> quantidadePrevista = apiUtils.executePentahoQuery(
+       return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_QUANTIDADE_MAIOR_PREVISTA_CARTEIRA,
                 pmoPath,
                 params(request),
@@ -384,16 +316,10 @@ public class PainelObrasService {
                         ).setScale(2, BigDecimal.ROUND_HALF_UP)
                 )
         );
-
-        if (quantidadePrevista.isEmpty()) {
-            return (List<QuantidadeMaiorPrevistaResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return quantidadePrevista;
     }
 
     public List<TotalEntregaPorMesResponseDTO> totalEntregaPorMes(PainelObrasRequestDTO request) {
-        List<TotalEntregaPorMesResponseDTO> quantidadePrevista = apiUtils.executePentahoQuery(
+        return apiUtils.executePentahoQuery(
                 PAINEL_OBRAS_TOTAL_ENTREGAS_POR_MES_CARTEIRA,
                 pmoPath,
                 params(request),
@@ -414,12 +340,6 @@ public class PainelObrasService {
                         ).setScale(2, BigDecimal.ROUND_HALF_UP)
                 )
         );
-
-        if (quantidadePrevista.isEmpty()) {
-            return (List<TotalEntregaPorMesResponseDTO>) ResponseEntity.noContent().build().getBody();
-        }
-
-        return quantidadePrevista;
     }
 
     public TotalizadorResponseDTO totalTotalizador(PainelObrasRequestDTO request) {
@@ -447,7 +367,7 @@ public class PainelObrasService {
 
 
         if(listTotal.isEmpty()) {
-            return (TotalizadorResponseDTO) ResponseEntity.noContent().build().getBody();
+            return null;
         }
 
         return listTotal.get(0);
