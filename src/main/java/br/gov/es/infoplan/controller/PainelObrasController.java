@@ -25,6 +25,10 @@ public class PainelObrasController {
     @GetMapping("/filtros/orgaos")
     public ResponseEntity<List<FiltroOrgaoResponseDTO>> filtroListaOrgao() {
         List<FiltroOrgaoResponseDTO> list = painelObrasService.filtroListaOrgao();
+
+        if(list.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(list);
     }
 
@@ -32,6 +36,10 @@ public class PainelObrasController {
     @GetMapping("/filtros/municipios")
     public ResponseEntity<List<FiltroMunicipioResponseDTO>> filtroListaMunicipio(@RequestParam(required = false) String orgao) {
         List<FiltroMunicipioResponseDTO> list = painelObrasService.filtroListaMunicipio(orgao);
+
+        if(list.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(list);
     }
 
@@ -42,6 +50,10 @@ public class PainelObrasController {
             @RequestParam(required = false) String municipio
     ) {
         List<FiltroStatusResponseDTO> list = painelObrasService.filtroListaStatus(orgao, municipio);
+
+        if(list.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(list);
     }
 
@@ -51,6 +63,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalProgramaResponseDTO total = painelObrasService.totalPrograma(request);
+
+        if(total == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(total);
     }
 
@@ -60,6 +76,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalProjetosResponseDTO totalProjeto = painelObrasService.totalProjetos(request);
+
+        if(totalProjeto == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalProjeto);
     }
 
@@ -69,6 +89,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalContagemPEResponseDTO totalContagemPE = painelObrasService.totalContagemPE(request);
+
+        if(totalContagemPE == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalContagemPE);
     }
 
@@ -78,6 +102,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalContagemEntregasResponseDTO totalContagemEntregas = painelObrasService.totalContagemEntrega(request);
+        if(totalContagemEntregas == null) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(totalContagemEntregas);
     }
 
@@ -87,6 +115,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalPlanejadoResponseDTO totalPlanejado = painelObrasService.totalPlanejado(request);
+
+        if(totalPlanejado == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalPlanejado);
     }
 
@@ -96,6 +128,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalRealizadoResponseDTO totalRealizado = painelObrasService.totalRealizado(request);
+
+        if(totalRealizado == null) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalRealizado);
     }
 
@@ -105,6 +141,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<QuantidadeStatusResponseDTO> quantidadePorStatus = painelObrasService.quantidadePorStatus(request);
+
+        if(quantidadePorStatus.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(quantidadePorStatus);
     }
 
@@ -114,6 +154,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<TotalEntregasAnoStatusResponseDTO> totalEntregasPorAnoEStatus = painelObrasService.totalEntregasPorAnoEStatus(request);
+
+        if(totalEntregasPorAnoEStatus.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalEntregasPorAnoEStatus);
     }
 
@@ -124,6 +168,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<TotalEntregasOrgaoResponseDTO> totalEntregasPorOrgao = painelObrasService.totalEntregasPorOrgao(request);
+
+        if(totalEntregasPorOrgao.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalEntregasPorOrgao);
     }
 
@@ -133,6 +181,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<TotalEntregasOrgaoExeResponseDTO> totalEntregasPorOrgaoExecucao = painelObrasService.totalEntregasPorOrgaoExecucao(request);
+
+        if(totalEntregasPorOrgaoExecucao.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalEntregasPorOrgaoExecucao);
     }
 
@@ -141,6 +193,10 @@ public class PainelObrasController {
     public ResponseEntity<List<TotalEntregasMunicipioStatusResponseDTO>> totalEntregasPorMunicipioStatus(
             @Validated @ModelAttribute PainelObrasRequestDTO request) {
         List<TotalEntregasMunicipioStatusResponseDTO> totalEntregasPorMunicipioStatus = painelObrasService.totalEntregasPorMunicipioStatus(request);
+
+        if(totalEntregasPorMunicipioStatus.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalEntregasPorMunicipioStatus);
     }
 
@@ -150,6 +206,10 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<NumeroEntregasStatusResponseDTO> totalEntregasPorProjeto = painelObrasService.totalEntregasPorProjeto(request);
+
+        if(totalEntregasPorProjeto.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(totalEntregasPorProjeto);
     }
 
@@ -158,7 +218,9 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<QuantidadeMaiorEntregaResponseDTO> quantidadeMaiorEntrega = painelObrasService.quantidadeMaiorEntrega(request);
-
+        if(quantidadeMaiorEntrega.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(quantidadeMaiorEntrega);
     }
 
@@ -167,6 +229,11 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<QuantidadeMaiorPrevistaResponseDTO> quantidadeMaiorPrevista = painelObrasService.quantidadeMaiorPrevista(request);
+
+        if(quantidadeMaiorPrevista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(quantidadeMaiorPrevista);
     }
 
@@ -175,6 +242,11 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         List<TotalEntregaPorMesResponseDTO> entregaPorMesList = painelObrasService.totalEntregaPorMes(request);
+
+        if(entregaPorMesList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(entregaPorMesList);
     }
 
@@ -183,6 +255,11 @@ public class PainelObrasController {
             @Validated @ModelAttribute PainelObrasRequestDTO request
     ) {
         TotalizadorResponseDTO totalizador = painelObrasService.totalTotalizador(request);
+
+        if(totalizador == null) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(totalizador);
     }
 
