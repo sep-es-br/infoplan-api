@@ -1,9 +1,6 @@
 package br.gov.es.infoplan.controller;
 
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterActionDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterBugataryUnitDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterFullSourceDTO;
-import br.gov.es.infoplan.dto.IndicatorExecution.request.FilterGeneralRequestDTO;
+import br.gov.es.infoplan.dto.IndicatorExecution.request.*;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
 import br.gov.es.infoplan.dto.UsuarioDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -166,4 +163,16 @@ public class IndicatorExecutionController {
         List<DashPlannedBudgetaryResponseDTO> listPlanned = indicatorExecutionService.getDashPlannedBudgetary(request, usuario);
         return listPlanned == null || listPlanned.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(listPlanned);
     }
+
+    @Operation(summary = "Lista de PO", description = "Retorna a lista de PO")
+    @GetMapping("/buscar-po")
+    public ResponseEntity<List<POResponseDTO>> searchPO(
+            @Validated @ModelAttribute FilterPODTO request,
+            @AuthenticationPrincipal UsuarioDto usuarioDto
+            ) {
+        List<POResponseDTO> listPO = indicatorExecutionService.searchPO(request, usuarioDto);
+        return listPO == null || listPO.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(listPO);
+    }
+
+
 }
