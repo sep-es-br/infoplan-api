@@ -39,4 +39,5 @@ public class PentahoBiConfigKeys {
     public static final String PAINEL_OBRAS_QUANTIDADE_MAIOR_MUNICIPIO_CARTEIRA = "painelObrasQuantidadeMaiorMunicipioCarteira";
     public static final String PAINEL_OBRAS_TOTALIZADORES = "painelObrasTotalizadores";
     public static final String PAINEL_INDICADOR_EXECUCAO= "indicadorExecucaoBuscarPO";
+    public static final String PAINEL_OBRAS_TIMES_TAMP = "painelObrasTotalizadoresTimesTamp";
 }
