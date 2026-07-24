@@ -2,6 +2,7 @@ package br.gov.es.infoplan.controller;
 
 import br.gov.es.infoplan.dto.painelObras.request.PainelObrasRequestDTO;
 import br.gov.es.infoplan.dto.painelObras.response.*;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.service.PainelObrasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +21,14 @@ public class PainelObrasController {
 
     @Autowired
     private PainelObrasService painelObrasService;
+
+
+    @Operation(summary = "Timestamp de Atualização", description = "Retorna a data e hora da última atualização dos dados do painel de obras")
+    @GetMapping("/timestamp")
+    public TimesTempResponseDTO getTimestamp() {
+        TimesTempResponseDTO timestamp = painelObrasService.getTimestamp();
+        return timestamp;
+    }
 
     @Operation(summary = "Lista de órgãos", description = "Busca os órgãos relacionados às obras")
     @GetMapping("/filtros/orgaos")
