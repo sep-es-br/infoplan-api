@@ -32,141 +32,141 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/strategicProjects")
 @RequiredArgsConstructor
 public class StrategicProjectsController {
-  private final StrategicProjectsService service;
+    private final StrategicProjectsService service;
 
-  @Value("${frontend.host}")
-  private String frontHost;
+    @Value("${frontend.host}")
+    private String frontHost;
 
     @Operation(summary = "Timestamp de Atualização", description = "Retorna a data e hora da última atualização dos dados de projetos estratégicos")
     @GetMapping("/timestamp")
-  public StrategicProjectTimestampDto getTimestamp() {
-    StrategicProjectTimestampDto strategicProjectDto = service.getTimestamp();
-    return strategicProjectDto;
-  }
+    public StrategicProjectTimestampDto getTimestamp() {
+        StrategicProjectTimestampDto strategicProjectDto = service.getTimestamp();
+        return strategicProjectDto;
+    }
 
     @Operation(summary = "Listar todos os filtros", description = "Busca todos os valores disponíveis para os filtros de projetos")
     @GetMapping("/all")
-  public StrategicProjectFilterValuesDto getAll() {
-    StrategicProjectFilterValuesDto strategicProjectDto = service.getAllFilter();
-    return strategicProjectDto;
-  }
+    public StrategicProjectFilterValuesDto getAll() {
+        StrategicProjectFilterValuesDto strategicProjectDto = service.getAllFilter();
+        return strategicProjectDto;
+    }
 
-  @GetMapping("/programsProjectsDeliveries")
-  public StrategicProjectFilterValuesDto getProgramsProjectsDeliveries(@RequestParam String areaId) {
-    StrategicProjectFilterValuesDto strategicProjectDto = service.getProgramsProjectsDeliveries(areaId);
-    return strategicProjectDto;
-  }
+    @GetMapping("/programsProjectsDeliveries")
+    public StrategicProjectFilterValuesDto getProgramsProjectsDeliveries(@RequestParam String areaId) {
+        StrategicProjectFilterValuesDto strategicProjectDto = service.getProgramsProjectsDeliveries(areaId);
+        return strategicProjectDto;
+    }
 
-  @GetMapping("/projectsDeliveries")
-  public StrategicProjectFilterValuesDto getProjectsDeliveries(@RequestParam String areaId, String programId) {
-    StrategicProjectFilterValuesDto strategicProjectDto = service.getProjectsDeliveries(areaId, programId);
-    return strategicProjectDto;
-  }
+    @GetMapping("/projectsDeliveries")
+    public StrategicProjectFilterValuesDto getProjectsDeliveries(@RequestParam String areaId, String programId) {
+        StrategicProjectFilterValuesDto strategicProjectDto = service.getProjectsDeliveries(areaId, programId);
+        return strategicProjectDto;
+    }
 
-  @GetMapping("/deliveries")
-  public StrategicProjectFilterValuesDto getDeliveries(@RequestParam String areaId, String programId,
-      String projectId) {
-    StrategicProjectFilterValuesDto strategicProjectDto = service.getDeliveries(areaId, programId, projectId);
-    return strategicProjectDto;
-  }
+    @GetMapping("/deliveries")
+    public StrategicProjectFilterValuesDto getDeliveries(@RequestParam String areaId, String programId,
+                                                         String projectId) {
+        StrategicProjectFilterValuesDto strategicProjectDto = service.getDeliveries(areaId, programId, projectId);
+        return strategicProjectDto;
+    }
 
     @Operation(summary = "Resumo detalhado", description = "Busca os valores totais filtrados por JSON")
     @GetMapping("/totais")
-  public StrategicProjectTotaisDto getTotals(@RequestParam String filterJson) {
-    return service.getTotals(filterJson);
-  }
+    public StrategicProjectTotaisDto getTotals(@RequestParam String filterJson) {
+        return service.getTotals(filterJson);
+    }
 
     @Operation(summary = "Entregas por Status", description = "Lista as entregas dos projetos filtradas por status")
     @GetMapping("/deliveriesByStatus")
-  public List<StrategicProjectDeliveriesDto> getDeliveriesByStatus(@RequestParam String filterJson) {
-    return service.getDeliveriesByStatus(filterJson);
-  }
+    public List<StrategicProjectDeliveriesDto> getDeliveriesByStatus(@RequestParam String filterJson) {
+        return service.getDeliveriesByStatus(filterJson);
+    }
 
-  @GetMapping("/deliveriesByPerformace")
-  public List<StrategicProjectDeliveriesDto> getDeliveriesByPerformace(@RequestParam String filterJson) {
-    return service.getDeliveriesByPerformace(filterJson);
-  }
+    @GetMapping("/deliveriesByPerformace")
+    public List<StrategicProjectDeliveriesDto> getDeliveriesByPerformace(@RequestParam String filterJson) {
+        return service.getDeliveriesByPerformace(filterJson);
+    }
 
-  @GetMapping("/deliveriesByType")
-  public List<StrategicProjectDeliveriesDto> getDeliveriesByType(@RequestParam String filterJson) {
-    return service.getDeliveriesByType(filterJson);
-  }
+    @GetMapping("/deliveriesByType")
+    public List<StrategicProjectDeliveriesDto> getDeliveriesByType(@RequestParam String filterJson) {
+        return service.getDeliveriesByType(filterJson);
+    }
 
-  @GetMapping("/projectByStatus")
-  public List<StrategicProjectByStatusDto> getProjectByStatus(@RequestParam String filterJson) {
-    return service.getProjectByStatus(filterJson);
-  }
+    @GetMapping("/projectByStatus")
+    public List<StrategicProjectByStatusDto> getProjectByStatus(@RequestParam String filterJson) {
+        return service.getProjectByStatus(filterJson);
+    }
 
-  @GetMapping("/milestones")
-  public List<StrategicProjectMilestonesByPerformaceDto> getCriticalMilestonesForPerformace(
-      @RequestParam String filterJson) {
-    return service.getCriticalMilestonesForPerformace(filterJson);
-  }
+    @GetMapping("/milestones")
+    public List<StrategicProjectMilestonesByPerformaceDto> getCriticalMilestonesForPerformace(
+            @RequestParam String filterJson) {
+        return service.getCriticalMilestonesForPerformace(filterJson);
+    }
 
-  @GetMapping("/risksByClassification")
-  public List<StrategicProjectRisksByClassificationDto> getRisksByClassification(@RequestParam String filterJson) {
-    return service.getRisksByClassification(filterJson);
-  }
+    @GetMapping("/risksByClassification")
+    public List<StrategicProjectRisksByClassificationDto> getRisksByClassification(@RequestParam String filterJson) {
+        return service.getRisksByClassification(filterJson);
+    }
 
     @Operation(summary = "Investimento Acumulado", description = "Série histórica do investimento acumulado nos projetos")
     @GetMapping("/accumulatedInvestment")
-  public List<StrategicProjectAccumulatedInvestmentDto> getAccumulatedInvestment(@RequestParam String filterJson) {
-    return service.getAccumulatedInvestment(filterJson);
-  }
+    public List<StrategicProjectAccumulatedInvestmentDto> getAccumulatedInvestment(@RequestParam String filterJson) {
+        return service.getAccumulatedInvestment(filterJson);
+    }
 
-  @GetMapping("/investmentByArea")
-  public List<StrategicProjectInvestmentSelectedDto> getInvestmentByArea(@RequestParam String filterJson) {
-    return service.getInvestmentByArea(filterJson);
-  }
+    @GetMapping("/investmentByArea")
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByArea(@RequestParam String filterJson) {
+        return service.getInvestmentByArea(filterJson);
+    }
 
-  @GetMapping("/investmentByDelivery")
-  public List<StrategicProjectInvestmentSelectedDto> getInvestmentByDelivery(@RequestParam String filterJson) {
-    return service.getInvestmentByDelivery(filterJson);
-  }
+    @GetMapping("/investmentByDelivery")
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByDelivery(@RequestParam String filterJson) {
+        return service.getInvestmentByDelivery(filterJson);
+    }
 
-  @GetMapping("/investmentByProgram")
-  public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProgram(@RequestParam String filterJson) {
-    return service.getInvestmentByProgram(filterJson);
-  }
+    @GetMapping("/investmentByProgram")
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProgram(@RequestParam String filterJson) {
+        return service.getInvestmentByProgram(filterJson);
+    }
 
-  @GetMapping("/investmentByProgramAt")
-  public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProgramAt(@RequestParam String filterJson) {
-    return service.getInvestmentByProgramAt(filterJson);
-  }
+    @GetMapping("/investmentByProgramAt")
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProgramAt(@RequestParam String filterJson) {
+        return service.getInvestmentByProgramAt(filterJson);
+    }
 
-  @GetMapping("/investmentByProject")
-  public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProject(@RequestParam String filterJson) {
-    return service.getInvestmentByProject(filterJson);
-  }
+    @GetMapping("/investmentByProject")
+    public List<StrategicProjectInvestmentSelectedDto> getInvestmentByProject(@RequestParam String filterJson) {
+        return service.getInvestmentByProject(filterJson);
+    }
 
-  @GetMapping("/deliveriesByArea")
-  public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByArea(@RequestParam String filterJson) {
-    return service.getDeliveriesByArea(filterJson);
-  }
+    @GetMapping("/deliveriesByArea")
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByArea(@RequestParam String filterJson) {
+        return service.getDeliveriesByArea(filterJson);
+    }
 
-  @GetMapping("/deliveriesByProgram")
-  public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProgram(@RequestParam String filterJson) {
-    return service.getDeliveriesByProgram(filterJson);
-  }
+    @GetMapping("/deliveriesByProgram")
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProgram(@RequestParam String filterJson) {
+        return service.getDeliveriesByProgram(filterJson);
+    }
 
-  @GetMapping("/deliveriesByProgramAt")
-  public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProgramAt(@RequestParam String filterJson) {
-    return service.getDeliveriesByProgramAt(filterJson);
-  }
+    @GetMapping("/deliveriesByProgramAt")
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProgramAt(@RequestParam String filterJson) {
+        return service.getDeliveriesByProgramAt(filterJson);
+    }
 
-  @GetMapping("/deliveriesByProject")
-  public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProject(@RequestParam String filterJson) {
-    return service.getDeliveriesByProject(filterJson);
-  }
+    @GetMapping("/deliveriesByProject")
+    public List<StrategicProjectDeliveriesBySelectedDto> getDeliveriesByProject(@RequestParam String filterJson) {
+        return service.getDeliveriesByProject(filterJson);
+    }
 
-  @GetMapping("/programDetails")
-  public StrategicProjectProgramDetailsDto getProgramDetails(@RequestParam String filterJson) {
-    return service.getProgramDetails(filterJson);
-  }
+    @GetMapping("/programDetails")
+    public StrategicProjectProgramDetailsDto getProgramDetails(@RequestParam String filterJson) {
+        return service.getProgramDetails(filterJson);
+    }
 
     @Operation(summary = "Detalhes do Projeto", description = "Busca informações detalhadas de um projeto específico")
     @GetMapping("/projectDetails")
-  public StrategicProjectProjectDetailsDto getProjectDetails(@RequestParam String filterJson) {
-    return service.getProjectDetails(filterJson);
-  }
+    public StrategicProjectProjectDetailsDto getProjectDetails(@RequestParam String filterJson) {
+        return service.getProjectDetails(filterJson);
+    }
 }

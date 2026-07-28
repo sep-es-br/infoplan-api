@@ -3,6 +3,7 @@ package br.gov.es.infoplan.service;
 import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
 import br.gov.es.infoplan.dto.painelObras.request.PainelObrasRequestDTO;
 import br.gov.es.infoplan.dto.painelObras.response.*;
+import br.gov.es.infoplan.dto.strategicProject.StrategicProjectTimestampDto;
 import br.gov.es.infoplan.utils.ApiUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -371,6 +372,24 @@ public class PainelObrasService {
         }
 
         return listTotal.get(0);
+    }
+
+
+    public TimesTempResponseDTO getTimestamp() {
+        List<TimesTempResponseDTO> timesTempResponseDTOS = apiUtils.executePentahoQuery(
+                PAINEL_OBRAS_TIMES_TAMP,
+                pmoPath,
+                null,
+                rs -> new TimesTempResponseDTO(
+                        rs.get("timestamp").asText()
+                )
+        );
+
+        if (timesTempResponseDTOS.isEmpty()) {
+            return null;
+        }
+
+        return timesTempResponseDTOS.get(0);
     }
 
     private Map<String, Object> params(String orgao) {
