@@ -29,8 +29,8 @@ public class IndicatorExecutionService {
 
 
 
-    @Value("${papel.sigefes}")
-    private String papelSigefes;
+    @Value("${papel.indicadores}")
+    private String indicadores;
 
     @Autowired
     private ApiUtils apiUtils;
@@ -45,10 +45,6 @@ public class IndicatorExecutionService {
         this.pmoPath = properties.getIndicatorExecution().getPath();
         log.info("PMO Path initialized:: {} ", pmoPath);
     }
-
-    // ============================================================================================
-    // MÉTODOS PÚBLICOS - ENDPOINTS DE BUSCA COM SEGURANÇA APLICADA
-    // ============================================================================================
 
     public List<BudgetaryUnitResponseDTO> searchBudgetaryUnit(FilterBugataryUnitDTO request, UsuarioDto usuario) {
         return apiUtils.executePentahoQuery(
@@ -249,7 +245,7 @@ public class IndicatorExecutionService {
 
     private List<String> obterTodosOsPapeisDeAcessoTotal() {
         return Stream.of(
-                        papelSigefes
+                        indicadores
                 )
                 .filter(Objects::nonNull)
                 .flatMap(papel -> Arrays.stream(papel.split(",")))
@@ -265,7 +261,7 @@ public class IndicatorExecutionService {
         boolean hasAcessoTotal = usuario.role() != null && usuario.role().stream()
                 .anyMatch(role -> {
                     String r = role.toUpperCase();
-                    return r.contains(papelSigefes);
+                    return r.contains(indicadores);
                 });
 
         if (hasAcessoTotal) {

@@ -11,12 +11,14 @@ import br.gov.es.infoplan.exception.service.InfoplanServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import feign.FeignException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -53,8 +55,8 @@ public class AutenticacaoService {
     @Value("${papel.painelObras}")
     private String papelPainelObras;
 
-//    @Value("${papel.gestaoFiscal}")
-//    private String papelGestaoFiscal;
+    @Value("${papel.indicadoresOrgaoPrefixo}")
+    private String indicadoresOrgaoPrefixo;
 
     @Value("${papel.planejamentoOrcamentario}")
     private String papelPlanejamentoOrcamentario;
@@ -82,6 +84,7 @@ public class AutenticacaoService {
         moduloPermissao.put("/strategicProjects", papelProjEstrategico);
         moduloPermissao.put("/planejamentoOrcamentario", papelPlanejamentoOrcamentario);
         moduloPermissao.put("/painel-obras", papelPainelObras);
+        moduloPermissao.put("/indicador", papelIndicadores);
     }
 
 
@@ -101,7 +104,7 @@ public class AutenticacaoService {
 
         List<ACAgentePublicoPapelDto> papeis = buscarPapeisAgentePublicoPorSub(userInfo.subNovo());
 
-        ACAgentePublicoPapelDto papelPrioritario = papeis.stream()
+        ACAgentePublicoPapelDto papelPrioritario = (papeis == null ? Stream.<ACAgentePublicoPapelDto>empty() : papeis.stream())
                 .filter(papel -> Boolean.TRUE.equals(papel.Prioritario()))
                 .findFirst()
                 .orElse(null);
@@ -110,16 +113,51 @@ public class AutenticacaoService {
 //            throw new UsuarioSemPermissaoException();
 //        }
 
-        String siglaLotacao = Optional.ofNullable(papelPrioritario)
-                .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
-                .map(unidade -> unidade.guidOrganizacao())
-                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
-                .map(org -> org.sigla())
-                .orElse("");
+        String siglaLotacao = obterSiglaPrioritaria(papelPrioritario);
+        if (siglaLotacao.isBlank()) {
+            List<String> siglas = obterSiglasIndicadores(userInfo.role());
+            if (siglas.size() > 1) {
+                throw new UsuarioSemPermissaoException();
+            }
+            siglaLotacao = siglas.stream().findFirst().orElse("");
+        }
 
         String token = tokenService.gerarToken(userInfo, siglaLotacao);
 
         return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
+    }
+
+    private String obterSiglaPrioritaria(ACAgentePublicoPapelDto papelPrioritario) {
+        try {
+            return Optional.ofNullable(papelPrioritario)
+                .filter(papel -> papel.LotacaoGuid() != null && !papel.LotacaoGuid().isBlank())
+                .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
+                .map(unidade -> unidade.guidOrganizacao())
+                .filter(guid -> !guid.isBlank())
+                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
+                .map(org -> org.sigla())
+                .map(String::trim)
+                .orElse("");
+        } catch (FeignException.NotFound e) {
+            return "";
+        }
+    }
+
+    public boolean possuiPapelOrgaoIndicadores(Collection<String> roles) {
+        return obterSiglasIndicadores(roles).size() == 1;
+    }
+
+    private List<String> obterSiglasIndicadores(Collection<String> roles) {
+        if (roles == null || indicadoresOrgaoPrefixo == null || indicadoresOrgaoPrefixo.isBlank()) {
+            return List.of();
+        }
+        return roles.stream()
+                .filter(Objects::nonNull)
+                .filter(role -> role.startsWith(indicadoresOrgaoPrefixo))
+                .map(role -> role.substring(indicadoresOrgaoPrefixo.length()))
+                .filter(sigla -> sigla.matches("[A-Za-z0-9][A-Za-z0-9_-]*"))
+                .distinct()
+                .toList();
     }
 
     protected ACUserInfoDto getUserInfo(String accessToken) {
