@@ -62,7 +62,9 @@ public class SecurityFilter extends OncePerRequestFilter {
                 if (!checarPermissao(papelGeral, roles)) {
                     for (Map.Entry<String, String> entry : this.authSrv.moduloPermissao.entrySet()) {
                         if (request.getRequestURI().contains(entry.getKey()) &&
-                                !checarPermissao(entry.getValue(), roles)) {
+                                !checarPermissao(entry.getValue(), roles) &&
+                                !("/indicador".equals(entry.getKey())
+                                        && authSrv.possuiPapelOrgaoIndicadores(roles))) {
                             enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey()
                                     + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
                             return;
