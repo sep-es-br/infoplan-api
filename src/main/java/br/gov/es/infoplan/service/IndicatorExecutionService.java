@@ -1,6 +1,7 @@
 package br.gov.es.infoplan.service;
 
 import br.gov.es.infoplan.config.pentahoBi.PentahoBiProperties;
+import br.gov.es.infoplan.config.PapelProperties;
 import br.gov.es.infoplan.dto.IndicatorExecution.request.*;
 import br.gov.es.infoplan.dto.IndicatorExecution.response.*;
 import br.gov.es.infoplan.dto.UsuarioDto;
@@ -9,15 +10,12 @@ import br.gov.es.infoplan.utils.ApiUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigKeys.*;
 import static br.gov.es.infoplan.config.pentahoBi.PentahoBiConfigParams.*;
@@ -27,10 +25,14 @@ import static br.gov.es.infoplan.config.spo.SPOPentahoConfigKey.*;
 @Slf4j
 public class IndicatorExecutionService {
 
+    private static final String TODOS_OS_ORGAOS = "-1";
+    private static final String ORGAO_NAO_INFORMADO = "";
 
+    private final PapelProperties papelProperties;
 
-    @Value("${papel.indicadores}")
-    private String indicadores;
+    public IndicatorExecutionService(PapelProperties papelProperties) {
+        this.papelProperties = papelProperties;
+    }
 
     @Autowired
     private ApiUtils apiUtils;
@@ -243,34 +245,55 @@ public class IndicatorExecutionService {
         );
     }
 
-    private List<String> obterTodosOsPapeisDeAcessoTotal() {
-        return Stream.of(
-                        indicadores
-                )
-                .filter(Objects::nonNull)
-                .flatMap(papel -> Arrays.stream(papel.split(",")))
-                .map(String::trim)
-                .collect(Collectors.toList());
-    }
-
     private String determinarOrgaoDefinitivo(UsuarioDto usuario) {
         if (usuario == null) {
-            return "";
+            return ORGAO_NAO_INFORMADO;
         }
 
-        boolean hasAcessoTotal = usuario.role() != null && usuario.role().stream()
-                .anyMatch(role -> {
-                    String r = role.toUpperCase();
-                    return r.contains(indicadores);
-                });
-
-        if (hasAcessoTotal) {
-            return "-1";
+        if (possuiAcessoTotal(usuario.role())) {
+            return TODOS_OS_ORGAOS;
         }
 
-        String sigla = usuario.sigla() != null ? usuario.sigla().trim() : "";
+        String orgaoDoPapel = extrairOrgaoDoPapel(usuario.role());
+        if (!orgaoDoPapel.isEmpty()) {
+            return orgaoDoPapel;
+        }
 
-        return sigla;
+        return normalizar(usuario.sigla());
+    }
+
+    private boolean possuiAcessoTotal(Collection<String> papeis) {
+        if (papeis == null || papeis.isEmpty()) {
+            return false;
+        }
+
+        return papeis.stream()
+                .filter(Objects::nonNull)
+                .map(this::normalizar)
+                .anyMatch(papel -> papel.equals(normalizar(papelProperties.sigefes()))
+                        || papel.equals(normalizar(papelProperties.indicadores())));
+    }
+
+    private String extrairOrgaoDoPapel(Collection<String> papeis) {
+        String prefixo = normalizar(papelProperties.indicadoresOrgaoPrefixo());
+        if (papeis == null || papeis.isEmpty() || prefixo.isEmpty()) {
+            return ORGAO_NAO_INFORMADO;
+        }
+
+        return papeis.stream()
+                .filter(Objects::nonNull)
+                .map(this::normalizar)
+                .filter(papel -> papel.startsWith(prefixo))
+                .map(papel -> papel.substring(prefixo.length()))
+                .filter(orgao -> !orgao.isEmpty())
+                .findFirst()
+                .orElse(ORGAO_NAO_INFORMADO);
+    }
+
+    private String normalizar(String valor) {
+        return valor == null
+                ? ORGAO_NAO_INFORMADO
+                : valor.trim().toUpperCase(Locale.ROOT);
     }
 
 
