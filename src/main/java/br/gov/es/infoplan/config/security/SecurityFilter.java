@@ -58,21 +58,18 @@ public class SecurityFilter extends OncePerRequestFilter {
             try {
                 String subject = tokenService.validarToken(token);
                 List<String> roles = tokenService.getRoleFromToken(token);
+                String siglaLotacao = tokenService.getSiglaFromToken(token);
 
                 if (!checarPermissao(papelGeral, roles)) {
                     for (Map.Entry<String, String> entry : this.authSrv.moduloPermissao.entrySet()) {
                         if (request.getRequestURI().contains(entry.getKey()) &&
-                                !checarPermissao(entry.getValue(), roles) &&
-                                !("/indicador".equals(entry.getKey())
-                                        && authSrv.possuiPapelOrgaoIndicadores(roles))) {
+                                !checarPermissaoModulo(entry, roles, siglaLotacao)) {
                             enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey()
                                     + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
                             return;
                         }
                     }
                 }
-
-                String siglaLotacao = tokenService.getSiglaFromToken(token);
 
                 UsuarioDto usuarioPrincipal = new UsuarioDto(
                         token,
@@ -158,6 +155,19 @@ public class SecurityFilter extends OncePerRequestFilter {
                 return true;
         }
         return false;
+    }
+
+    private boolean possuiSigla(String sigla) {
+        return sigla != null && !sigla.isBlank();
+    }
+
+    private boolean checarPermissaoModulo(Map.Entry<String, String> modulo, List<String> roles, String sigla) {
+        if (checarPermissao(modulo.getValue(), roles)) {
+            return true;
+        }
+
+        return "/indicador".equals(modulo.getKey())
+                && (possuiSigla(sigla) || authSrv.possuiPapelOrgaoIndicadores(roles));
     }
 
     private String recuperarToken(HttpServletRequest request) {

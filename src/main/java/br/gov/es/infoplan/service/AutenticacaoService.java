@@ -84,7 +84,7 @@ public class AutenticacaoService {
         moduloPermissao.put("/strategicProjects", papelProjEstrategico);
         moduloPermissao.put("/planejamentoOrcamentario", papelPlanejamentoOrcamentario);
         moduloPermissao.put("/painel-obras", papelPainelObras);
-        moduloPermissao.put("/indicador", papelIndicadores);
+        moduloPermissao.put("/indicador", String.join(",", papelIndicadores, papelSigefes));
     }
 
 
