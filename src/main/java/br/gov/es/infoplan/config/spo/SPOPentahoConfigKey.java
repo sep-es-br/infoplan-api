@@ -10,11 +10,13 @@ public class SPOPentahoConfigKey {
     public static final String NOME_PO = "nome_po";
     public static final String NOME = "nome";
     public static final String NOME_UO = "nome_uo";
+    public static final String NOM_UO = "nom_uo";
     public static final String COD_ACAO = "cod_acao";
     public static final String NOME_ACAO = "nom_acao";
     public static final String COD_FONTE = "cod_fonte";
     public static final String NOME_FONTE = "nome_fonte";
     public static final String SIGLA = "sigla";
+    public static final String MNE_UO = "mne_uo";
     public static final String VLR_PREVISTO = "vlr_previsto";
     public static final String VLR_CONTRATADO = "vlr_contratado";
     public static final String VLR_EMPENHADO = "vlr_empenhado";

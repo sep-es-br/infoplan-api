@@ -113,34 +113,45 @@ public class AutenticacaoService {
 //            throw new UsuarioSemPermissaoException();
 //        }
 
-        String siglaLotacao = obterSiglaPrioritaria(papelPrioritario);
-        if (siglaLotacao.isBlank()) {
+        String guidOrganizacao = obterGuidOrganizacaoPrioritaria(papelPrioritario);
+        if (guidOrganizacao.isBlank()) {
             List<String> siglas = obterSiglasIndicadores(userInfo.role());
             if (siglas.size() > 1) {
                 throw new UsuarioSemPermissaoException();
             }
-            siglaLotacao = siglas.stream().findFirst().orElse("");
+            guidOrganizacao = siglas.stream()
+                    .findFirst()
+                    .map(this::obterGuidOrganizacaoPorSigla)
+                    .orElse("");
         }
 
-        String token = tokenService.gerarToken(userInfo, siglaLotacao);
+        String token = tokenService.gerarToken(userInfo, guidOrganizacao);
 
-        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), siglaLotacao);
+        return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), guidOrganizacao);
     }
 
-    private String obterSiglaPrioritaria(ACAgentePublicoPapelDto papelPrioritario) {
+    private String obterGuidOrganizacaoPrioritaria(ACAgentePublicoPapelDto papelPrioritario) {
         try {
             return Optional.ofNullable(papelPrioritario)
                 .filter(papel -> papel.LotacaoGuid() != null && !papel.LotacaoGuid().isBlank())
                 .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
                 .map(unidade -> unidade.guidOrganizacao())
                 .filter(guid -> !guid.isBlank())
-                .map(guid -> organogramaService.listarUnidadeInfoPorOrganizacao(guid))
-                .map(org -> org.sigla())
                 .map(String::trim)
                 .orElse("");
         } catch (FeignException.NotFound e) {
             return "";
         }
+    }
+
+    private String obterGuidOrganizacaoPorSigla(String sigla) {
+        return organogramaService.listarOrganizacoesFilhasGOVES().stream()
+                .filter(org -> org.sigla() != null && org.sigla().equalsIgnoreCase(sigla))
+                .map(org -> org.guid())
+                .filter(guid -> guid != null && !guid.isBlank())
+                .map(String::trim)
+                .findFirst()
+                .orElse("");
     }
 
     public boolean possuiPapelOrgaoIndicadores(Collection<String> roles) {

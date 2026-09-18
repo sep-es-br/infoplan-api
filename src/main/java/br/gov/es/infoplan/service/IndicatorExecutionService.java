@@ -50,13 +50,13 @@ public class IndicatorExecutionService {
 
     public List<BudgetaryUnitResponseDTO> searchBudgetaryUnit(FilterBugataryUnitDTO request, UsuarioDto usuario) {
         return apiUtils.executePentahoQuery(
-                INDICATOR_EXECUTION_UO_BY_YEAR,
+                PAINEL_INDICADOR_EXECUTION_UO_GUID,
                 pmoPath,
-                params(blindarRequest(request, usuario)),
+                paramsUoPorGuid(request, determinarGuidOrganizacao(usuario)),
                 rs -> new BudgetaryUnitResponseDTO(
                         rs.get(COD_UO).asText(),
-                        rs.get(NOME_UO).asText(),
-                        rs.get(SIGLA).asText()
+                        rs.get(NOM_UO).asText(),
+                        rs.get(MNE_UO).asText()
                 )
         );
     }
@@ -254,12 +254,22 @@ public class IndicatorExecutionService {
             return TODOS_OS_ORGAOS;
         }
 
-        String orgaoDoPapel = extrairOrgaoDoPapel(usuario.role());
-        if (!orgaoDoPapel.isEmpty()) {
-            return orgaoDoPapel;
+        return normalizar(usuario.guidOrganizacao());
+    }
+
+    private String determinarGuidOrganizacao(UsuarioDto usuario) {
+        if (usuario == null) {
+            return ORGAO_NAO_INFORMADO;
         }
 
-        return normalizar(usuario.sigla());
+        String guidOrganizacao = usuario.guidOrganizacao() == null
+                ? ORGAO_NAO_INFORMADO
+                : usuario.guidOrganizacao().trim();
+        if (!guidOrganizacao.isEmpty()) {
+            return guidOrganizacao;
+        }
+
+        return possuiAcessoTotal(usuario.role()) ? TODOS_OS_ORGAOS : ORGAO_NAO_INFORMADO;
     }
 
     private boolean possuiAcessoTotal(Collection<String> papeis) {
@@ -274,32 +284,12 @@ public class IndicatorExecutionService {
                         || papel.equals(normalizar(papelProperties.indicadores())));
     }
 
-    private String extrairOrgaoDoPapel(Collection<String> papeis) {
-        String prefixo = normalizar(papelProperties.indicadoresOrgaoPrefixo());
-        if (papeis == null || papeis.isEmpty() || prefixo.isEmpty()) {
-            return ORGAO_NAO_INFORMADO;
-        }
-
-        return papeis.stream()
-                .filter(Objects::nonNull)
-                .map(this::normalizar)
-                .filter(papel -> papel.startsWith(prefixo))
-                .map(papel -> papel.substring(prefixo.length()))
-                .filter(orgao -> !orgao.isEmpty())
-                .findFirst()
-                .orElse(ORGAO_NAO_INFORMADO);
-    }
-
     private String normalizar(String valor) {
         return valor == null
                 ? ORGAO_NAO_INFORMADO
                 : valor.trim().toUpperCase(Locale.ROOT);
     }
 
-
-    private FilterBugataryUnitDTO blindarRequest(FilterBugataryUnitDTO request, UsuarioDto usuario) {
-        return new FilterBugataryUnitDTO(request.year(), determinarOrgaoDefinitivo(usuario));
-    }
 
     private FilterActionDTO blindarRequest(FilterActionDTO request, UsuarioDto usuario) {
         return new FilterActionDTO(request.year(), request.codUo(), determinarOrgaoDefinitivo(usuario));
@@ -370,12 +360,12 @@ public class IndicatorExecutionService {
         return maiorAnoInformado < LocalDate.now().getYear();
     }
 
-    private Map<String, Object> params(FilterBugataryUnitDTO request) {
+    private Map<String, Object> paramsUoPorGuid(FilterBugataryUnitDTO request, String guidOrganizacao) {
         Map<String, Object> params = new HashMap<>();
         if (request.year() != null && !request.year().isEmpty()) {
             params.put(PARAMP_ANO_M, request.year());
         }
-        params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_ORG_GUID, guidOrganizacao);
         return params;
     }
 
