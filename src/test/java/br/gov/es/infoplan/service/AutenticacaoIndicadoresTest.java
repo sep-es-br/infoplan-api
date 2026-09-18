@@ -32,6 +32,7 @@ class AutenticacaoIndicadoresTest {
                 mock(AcessoCidadaoAutorizacaoService.class), null));
         ReflectionTestUtils.setField(service, "organogramaService", organograma);
         ReflectionTestUtils.setField(service, "indicadoresOrgaoPrefixo", "PAINEL_EXEC_ORC_IND_");
+        ReflectionTestUtils.setField(service, "papelIndicadores", "PAINEL_INDICADORES");
         configurarUsuario(Set.of("PAINEL_EXEC_ORC_IND_DPES"));
         when(client.buscarPapeisAgentePublicoPorSub(any(), eq("sub"))).thenReturn(List.of());
         when(organograma.listarOrganizacoesFilhasGOVES()).thenReturn(List.of(
@@ -65,6 +66,32 @@ class AutenticacaoIndicadoresTest {
         when(organograma.listarUnidadeInfoPorLotacaoGuid("lotacao"))
                 .thenReturn(new OrganogramaUnidadeInfoDto(null, null, null, "guid-sesa"));
         assertEquals("guid-sesa", service.autenticar("access").guidOrganizacao());
+    }
+
+    @Test
+    void usaGuidDePapelNaoPrioritarioQuandoNaoHaSiglaDeIndicadores() {
+        configurarUsuario(Set.of("PAINEL_INDICADORES"));
+        when(client.buscarPapeisAgentePublicoPorSub(any(), eq("sub"))).thenReturn(List.of(
+                new ACAgentePublicoPapelDto(null, null, null, "lotacao", null, null, false)));
+        when(organograma.listarUnidadeInfoPorLotacaoGuid("lotacao"))
+                .thenReturn(new OrganogramaUnidadeInfoDto(null, null, null, "guid-organizacao"));
+
+        assertEquals("guid-organizacao", service.autenticar("access").guidOrganizacao());
+    }
+
+    @Test
+    void rejeitaOrganizacoesAmbiguasNosPapeisNaoPrioritarios() {
+        configurarUsuario(Set.of("PAINEL_INDICADORES"));
+        when(client.buscarPapeisAgentePublicoPorSub(any(), eq("sub"))).thenReturn(List.of(
+                new ACAgentePublicoPapelDto(null, null, null, "lotacao-1", null, null, false),
+                new ACAgentePublicoPapelDto(null, null, null, "lotacao-2", null, null, false)));
+        when(organograma.listarUnidadeInfoPorLotacaoGuid("lotacao-1"))
+                .thenReturn(new OrganogramaUnidadeInfoDto(null, null, null, "guid-1"));
+        when(organograma.listarUnidadeInfoPorLotacaoGuid("lotacao-2"))
+                .thenReturn(new OrganogramaUnidadeInfoDto(null, null, null, "guid-2"));
+
+        assertThrows(UsuarioSemPermissaoException.class, () -> service.autenticar("access"));
+        verifyNoInteractions(tokens);
     }
 
     @Test

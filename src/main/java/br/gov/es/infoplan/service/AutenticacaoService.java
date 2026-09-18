@@ -113,7 +113,7 @@ public class AutenticacaoService {
 //            throw new UsuarioSemPermissaoException();
 //        }
 
-        String guidOrganizacao = obterGuidOrganizacaoPrioritaria(papelPrioritario);
+        String guidOrganizacao = obterGuidOrganizacaoDoPapel(papelPrioritario);
         if (guidOrganizacao.isBlank()) {
             List<String> siglas = obterSiglasIndicadores(userInfo.role());
             if (siglas.size() > 1) {
@@ -124,17 +124,19 @@ public class AutenticacaoService {
                     .map(this::obterGuidOrganizacaoPorSigla)
                     .orElse("");
         }
-
+        if (guidOrganizacao.isBlank()) {
+            guidOrganizacao = obterGuidOrganizacaoDosPapeis(papeis);
+        }
         String token = tokenService.gerarToken(userInfo, guidOrganizacao);
 
         return new UsuarioDto(token, userInfo.apelido(), getEmailUserInfo(userInfo), userInfo.role(), guidOrganizacao);
     }
 
-    private String obterGuidOrganizacaoPrioritaria(ACAgentePublicoPapelDto papelPrioritario) {
+    private String obterGuidOrganizacaoDoPapel(ACAgentePublicoPapelDto papel) {
         try {
-            return Optional.ofNullable(papelPrioritario)
-                .filter(papel -> papel.LotacaoGuid() != null && !papel.LotacaoGuid().isBlank())
-                .map(papel -> organogramaService.listarUnidadeInfoPorLotacaoGuid(papel.LotacaoGuid()))
+            return Optional.ofNullable(papel)
+                .filter(p -> p.LotacaoGuid() != null && !p.LotacaoGuid().isBlank())
+                .map(p -> organogramaService.listarUnidadeInfoPorLotacaoGuid(p.LotacaoGuid()))
                 .map(unidade -> unidade.guidOrganizacao())
                 .filter(guid -> !guid.isBlank())
                 .map(String::trim)
@@ -142,6 +144,26 @@ public class AutenticacaoService {
         } catch (FeignException.NotFound e) {
             return "";
         }
+    }
+
+    private String obterGuidOrganizacaoDosPapeis(List<ACAgentePublicoPapelDto> papeis) {
+        if (papeis == null || papeis.isEmpty()) {
+            return "";
+        }
+
+        List<String> guids = papeis.stream()
+                .filter(Objects::nonNull)
+                .filter(papel -> !Boolean.TRUE.equals(papel.Prioritario()))
+                .map(this::obterGuidOrganizacaoDoPapel)
+                .filter(guid -> !guid.isBlank())
+                .distinct()
+                .toList();
+
+        if (guids.size() > 1) {
+            throw new UsuarioSemPermissaoException();
+        }
+
+        return guids.stream().findFirst().orElse("");
     }
 
     private String obterGuidOrganizacaoPorSigla(String sigla) {

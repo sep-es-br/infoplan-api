@@ -52,7 +52,7 @@ public class IndicatorExecutionService {
         return apiUtils.executePentahoQuery(
                 PAINEL_INDICADOR_EXECUTION_UO_GUID,
                 pmoPath,
-                paramsUoPorGuid(request, determinarGuidOrganizacao(usuario)),
+                paramsUoPorGuid(request, determinarOrgaoDefinitivo(usuario)),
                 rs -> new BudgetaryUnitResponseDTO(
                         rs.get(COD_UO).asText(),
                         rs.get(NOM_UO).asText(),
@@ -86,10 +86,14 @@ public class IndicatorExecutionService {
     }
 
     public WithoutReversationResponseDTO getCardAvailableWithoutReversation(FilterGeneralRequestDTO request, UsuarioDto usuario) {
+        FilterGeneralRequestDTO requestBlindado = blindarRequest(
+                request,
+                determinarOrgaoDefinitivo(usuario)
+        );
         return getFirstOrNull(apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_CARD_SEM_RESERVA,
                 pmoPath,
-                params(blindarRequest(request, usuario)),
+                params(requestBlindado),
                 rs -> new WithoutReversationResponseDTO(
                         obterBigDecimalSeguro(rs.get(DISPONIVEL_SEM_RESERVA).asDouble(2))
                 )
@@ -180,10 +184,14 @@ public class IndicatorExecutionService {
     }
 
     public DashAvailabilityUoResponseDTO getDashAvailabilityToUo(FilterGeneralRequestDTO request, UsuarioDto usuario) {
+        FilterGeneralRequestDTO requestBlindado = blindarRequest(
+                request,
+                determinarOrgaoDefinitivo(usuario)
+        );
         return getFirstOrNull(apiUtils.executePentahoQuery(
                 INDICATOR_EXECUTION_DASH_AVAILABILITY_TO_UO,
                 pmoPath,
-                params(blindarRequest(request, usuario)),
+                params(requestBlindado),
                 rs -> new DashAvailabilityUoResponseDTO(
                         obterBigDecimalSeguro(rs.get(DISPONIVEL).asDouble(2)),
                         obterBigDecimalSeguro(rs.get(DISPONIVEL_SEM_RESERVA).asDouble(2)),
@@ -257,21 +265,6 @@ public class IndicatorExecutionService {
         return normalizar(usuario.guidOrganizacao());
     }
 
-    private String determinarGuidOrganizacao(UsuarioDto usuario) {
-        if (usuario == null) {
-            return ORGAO_NAO_INFORMADO;
-        }
-
-        String guidOrganizacao = usuario.guidOrganizacao() == null
-                ? ORGAO_NAO_INFORMADO
-                : usuario.guidOrganizacao().trim();
-        if (!guidOrganizacao.isEmpty()) {
-            return guidOrganizacao;
-        }
-
-        return possuiAcessoTotal(usuario.role()) ? TODOS_OS_ORGAOS : ORGAO_NAO_INFORMADO;
-    }
-
     private boolean possuiAcessoTotal(Collection<String> papeis) {
         if (papeis == null || papeis.isEmpty()) {
             return false;
@@ -280,8 +273,7 @@ public class IndicatorExecutionService {
         return papeis.stream()
                 .filter(Objects::nonNull)
                 .map(this::normalizar)
-                .anyMatch(papel -> papel.equals(normalizar(papelProperties.sigefes()))
-                        || papel.equals(normalizar(papelProperties.indicadores())));
+                .anyMatch(papel -> papel.equals(normalizar(papelProperties.sigefes())));
     }
 
     private String normalizar(String valor) {
@@ -304,10 +296,14 @@ public class IndicatorExecutionService {
     }
 
     private FilterGeneralRequestDTO blindarRequest(FilterGeneralRequestDTO request, UsuarioDto usuario) {
+        return blindarRequest(request, determinarOrgaoDefinitivo(usuario));
+    }
+
+    private FilterGeneralRequestDTO blindarRequest(FilterGeneralRequestDTO request, String guidOrganizacao) {
         return new FilterGeneralRequestDTO(
                 request.year(), request.codUo(), request.codAction(), request.month(),
                 request.typeSource(), request.codGnd(), request.codSource(), request.codAmendment(),
-                determinarOrgaoDefinitivo(usuario), request.codPo()
+                guidOrganizacao, request.codPo()
         );
     }
 
@@ -376,7 +372,7 @@ public class IndicatorExecutionService {
             params.put(PARAMP_ANO_M, request.year());
         }
         params.put(PARAMP_ACAO, request.codAction());
-        params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_ORG_GUID, request.guidOrganizacao());
         params.put(PARAMP_COD_UO, request.codUo());
         return params;
     }
@@ -387,7 +383,7 @@ public class IndicatorExecutionService {
             params.put(PARAMP_ANO_M, request.year());
         }
         params.put(PARAMP_COD_UO, request.codUo());
-        params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_ORG_GUID, request.guidOrganizacao());
         return params;
     }
 
@@ -398,7 +394,7 @@ public class IndicatorExecutionService {
         }
         params.put(PARAMP_COD_UO, request.codUo());
         params.put(PARAMP_COD_ACAO, request.codAction());
-        params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_ORG_GUID, request.guidOrganizacao());
         return params;
     }
 
@@ -414,8 +410,9 @@ public class IndicatorExecutionService {
         params.put(PARAMP_TIPO_FONTE, request.typeSource());
         params.put(PARAMP_COD_GND, request.codGnd());
         params.put(PARAMP_MES, request.month());
-        params.put(PARAMP_ORGAO, request.orgao());
+        params.put(PARAMP_ORG_GUID, request.guidOrganizacao());
         params.put(PARAMP_COD_PO, request.codPo());
         return params;
     }
+
 }
