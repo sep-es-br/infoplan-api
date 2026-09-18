@@ -4,7 +4,7 @@ import br.gov.es.infoplan.client.AcessoCidadaoWebClient;
 import br.gov.es.infoplan.dto.ACUserInfoDto;
 import br.gov.es.infoplan.dto.acessocidadaoapi.ACAgentePublicoPapelDto;
 import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaUnidadeInfoDto;
-import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaOrganizacaoInfo;
+import br.gov.es.infoplan.dto.organogramawebapi.OrganogramaOrganizacaoInfoEssencialDto;
 import br.gov.es.infoplan.exception.UsuarioSemPermissaoException;
 import feign.FeignException;
 import feign.Request;
@@ -34,6 +34,10 @@ class AutenticacaoIndicadoresTest {
         ReflectionTestUtils.setField(service, "indicadoresOrgaoPrefixo", "PAINEL_EXEC_ORC_IND_");
         configurarUsuario(Set.of("PAINEL_EXEC_ORC_IND_DPES"));
         when(client.buscarPapeisAgentePublicoPorSub(any(), eq("sub"))).thenReturn(List.of());
+        when(organograma.listarOrganizacoesFilhasGOVES()).thenReturn(List.of(
+                new OrganogramaOrganizacaoInfoEssencialDto("guid-dpes", null, "DPES", null, null),
+                new OrganogramaOrganizacaoInfoEssencialDto("guid-sesa", null, "SESA", null, null)
+        ));
     }
 
     private void configurarUsuario(Set<String> roles) {
@@ -48,28 +52,25 @@ class AutenticacaoIndicadoresTest {
     }
 
     @Test
-    void extraiSiglaSemPrioritarioEPreservaPapeis() {
+    void resolveGuidPelaSiglaDoPapelSemPrioritarioEPreservaPapeis() {
         var result = service.autenticar("access");
-        assertEquals("DPES", result.sigla());
+        assertEquals("guid-dpes", result.guidOrganizacao());
         assertEquals(user.role(), result.role());
-        verify(tokens).gerarToken(user, "DPES");
-        verifyNoInteractions(organograma);
+        verify(tokens).gerarToken(user, "guid-dpes");
     }
 
     @Test
-    void preservaSiglaDoPrioritario() {
+    void preservaGuidOrganizacaoDoPrioritario() {
         configurarPrioritario();
         when(organograma.listarUnidadeInfoPorLotacaoGuid("lotacao"))
-                .thenReturn(new OrganogramaUnidadeInfoDto(null, null, null, "org"));
-        when(organograma.listarUnidadeInfoPorOrganizacao("org"))
-                .thenReturn(new OrganogramaOrganizacaoInfo(null, null, "SESA", null));
-        assertEquals("SESA", service.autenticar("access").sigla());
+                .thenReturn(new OrganogramaUnidadeInfoDto(null, null, null, "guid-sesa"));
+        assertEquals("guid-sesa", service.autenticar("access").guidOrganizacao());
     }
 
     @Test
     void usaPapelQuandoOrganogramaNaoRetornaUnidade() {
         configurarPrioritario();
-        assertEquals("DPES", service.autenticar("access").sigla());
+        assertEquals("guid-dpes", service.autenticar("access").guidOrganizacao());
     }
 
     @Test
@@ -77,7 +78,7 @@ class AutenticacaoIndicadoresTest {
         configurarPrioritario();
         when(organograma.listarUnidadeInfoPorLotacaoGuid("lotacao"))
                 .thenThrow(new FeignException.NotFound("Nao encontrado", requestOrganograma(), null, Map.of()));
-        assertEquals("DPES", service.autenticar("access").sigla());
+        assertEquals("guid-dpes", service.autenticar("access").guidOrganizacao());
     }
 
     @Test
@@ -99,7 +100,7 @@ class AutenticacaoIndicadoresTest {
     @Test
     void naoExtraiSiglaDePapelConvencional() {
         configurarUsuario(Set.of("PAINEL_INDICADORES"));
-        assertEquals("", service.autenticar("access").sigla());
+        assertEquals("", service.autenticar("access").guidOrganizacao());
     }
 
     private Request requestOrganograma() {

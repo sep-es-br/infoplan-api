@@ -1,5 +1,6 @@
 package br.gov.es.infoplan.config.security;
 
+import br.gov.es.infoplan.dto.UsuarioDto;
 import br.gov.es.infoplan.service.AutenticacaoService;
 import br.gov.es.infoplan.service.TokenService;
 import jakarta.servlet.FilterChain;
@@ -47,7 +48,9 @@ class SecurityFilterIndicadoresTest {
         ReflectionTestUtils.setField(filter, "papelGeral", "GESTOR_GLOBAL");
         when(tokens.validarToken("token")).thenReturn("usuario");
         when(tokens.getRoleFromToken("token")).thenReturn(List.of(role));
-        when(tokens.getSiglaFromToken("token")).thenReturn("-".equals(sigla) ? null : sigla);
+        when(tokens.getGuidOrganizacaoFromToken("token")).thenReturn("-".equals(sigla) ? null : sigla);
+        when(tokens.getNameFromToken("token")).thenReturn("Usuário Teste");
+        when(tokens.getEmailFromToken("token")).thenReturn("usuario@teste.com");
         MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
         request.addHeader("Authorization", "Bearer token");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -58,6 +61,9 @@ class SecurityFilterIndicadoresTest {
         assertEquals(status, response.getStatus());
         if (status == 200) {
             verify(chain).doFilter(request, response);
+            UsuarioDto principal = (UsuarioDto) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            assertEquals("Usuário Teste", principal.name());
+            assertEquals("usuario@teste.com", principal.email());
         } else {
             verifyNoInteractions(chain);
         }

@@ -22,7 +22,7 @@ public class TokenService {
     @Value("${token.secret}")
     private String secret;
 
-    public String gerarToken(ACUserInfoDto userInfo, String siglaLotacaoCalculada ) {
+    public String gerarToken(ACUserInfoDto userInfo, String guidOrganizacao) {
         try {
             Algorithm algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
@@ -31,7 +31,7 @@ public class TokenService {
                     .withClaim("name", userInfo.apelido())
                     .withClaim("email", userInfo.email())
                     .withClaim("roles", userInfo.role() != null ? new ArrayList<>(userInfo.role()) : Collections.emptyList())
-                    .withClaim("sigla", siglaLotacaoCalculada)
+                    .withClaim("guidOrganizacao", guidOrganizacao)
                     .withExpiresAt(getDataExpiracao())
                     .sign(algoritmo);
         } catch (JWTCreationException exception) {
@@ -48,9 +48,23 @@ public class TokenService {
                 .getSubject();
     }
 
-    public String getSiglaFromToken(String token) {
+    public String getGuidOrganizacaoFromToken(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
-        var claim = decodedJWT.getClaim("sigla");
+        var claim = decodedJWT.getClaim("guidOrganizacao");
+
+        return claim.isNull() ? null : claim.asString();
+    }
+
+    public String getNameFromToken(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        var claim = decodedJWT.getClaim("name");
+
+        return claim.isNull() ? null : claim.asString();
+    }
+
+    public String getEmailFromToken(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        var claim = decodedJWT.getClaim("email");
 
         return claim.isNull() ? null : claim.asString();
     }

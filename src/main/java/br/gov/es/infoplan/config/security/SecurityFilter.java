@@ -56,14 +56,16 @@ public class SecurityFilter extends OncePerRequestFilter {
         String token = recuperarToken(request);
         if (token != null) {
             try {
-                String subject = tokenService.validarToken(token);
+                tokenService.validarToken(token);
                 List<String> roles = tokenService.getRoleFromToken(token);
-                String siglaLotacao = tokenService.getSiglaFromToken(token);
+                String guidOrganizacao = tokenService.getGuidOrganizacaoFromToken(token);
+                String name = tokenService.getNameFromToken(token);
+                String email = tokenService.getEmailFromToken(token);
 
                 if (!checarPermissao(papelGeral, roles)) {
                     for (Map.Entry<String, String> entry : this.authSrv.moduloPermissao.entrySet()) {
                         if (request.getRequestURI().contains(entry.getKey()) &&
-                                !checarPermissaoModulo(entry, roles, siglaLotacao)) {
+                                !checarPermissaoModulo(entry, roles, guidOrganizacao)) {
                             enviarMensagemErro(List.of("Este usuario não tem acesso a este módulo (" + entry.getKey()
                                     + "). Acesso negado. "), response, HttpStatus.UNAUTHORIZED);
                             return;
@@ -73,10 +75,10 @@ public class SecurityFilter extends OncePerRequestFilter {
 
                 UsuarioDto usuarioPrincipal = new UsuarioDto(
                         token,
-                        subject,
-                        null,
+                        name,
+                        email,
                         Set.copyOf(roles),
-                        siglaLotacao
+                        guidOrganizacao
                 );
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -157,17 +159,17 @@ public class SecurityFilter extends OncePerRequestFilter {
         return false;
     }
 
-    private boolean possuiSigla(String sigla) {
-        return sigla != null && !sigla.isBlank();
+    private boolean possuiGuidOrganizacao(String guidOrganizacao) {
+        return guidOrganizacao != null && !guidOrganizacao.isBlank();
     }
 
-    private boolean checarPermissaoModulo(Map.Entry<String, String> modulo, List<String> roles, String sigla) {
+    private boolean checarPermissaoModulo(Map.Entry<String, String> modulo, List<String> roles, String guidOrganizacao) {
         if (checarPermissao(modulo.getValue(), roles)) {
             return true;
         }
 
         return "/indicador".equals(modulo.getKey())
-                && (possuiSigla(sigla) || authSrv.possuiPapelOrgaoIndicadores(roles));
+                && (possuiGuidOrganizacao(guidOrganizacao) || authSrv.possuiPapelOrgaoIndicadores(roles));
     }
 
     private String recuperarToken(HttpServletRequest request) {
